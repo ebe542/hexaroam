@@ -1,0 +1,22 @@
+# Rust
+target/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Generated outputs and local experiments
+artifacts/
+datasets/
+runs/
+
+# Operating system files
+.DS_Store
+Thumbs.db
