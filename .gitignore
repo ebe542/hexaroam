@@ -1,22 +1,43 @@
-# Rust
+# Rust build artifacts
 target/
 
-# Python
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python bytecode and interpreter caches
 __pycache__/
 *.py[cod]
-.venv/
-.pytest_cache/
 
-# Local configuration and credentials
-.env
-.env.*
-!.env.example
+# Test, lint, and coverage artifacts
+.pytest_cache/
+.pytest-*/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
 
 # Generated outputs and local experiments
 artifacts/
 datasets/
 runs/
+local-data/
 
-# Operating system files
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Editor-specific workspace settings
+.idea/
+.vscode/
+
+# Operating-system metadata
 .DS_Store
 Thumbs.db
+Desktop.ini
