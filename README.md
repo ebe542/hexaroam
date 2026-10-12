@@ -4,7 +4,7 @@ A modular six-legged robot built to explore — a learning project in Rust, robo
 
 ## Status
 
-Architecture and repository scaffold. No firmware or autonomous functionality is implemented yet.
+The first Rust firmware builds for Raspberry Pi Pico (RP2040) and blinks its onboard LED. USB transfer and physical execution have been confirmed by the project owner on Windows. Servo control and autonomous functionality are not implemented yet.
 
 ## Goals
 
@@ -40,11 +40,11 @@ Official Pico and RP2040 PDFs, versions, licenses, and checksums are listed in [
 
 ## Development
 
-Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The selected board is the existing Raspberry Pi Pico with RP2040, using the Rust target `thumbv6m-none-eabi`. Rust and rust-analyzer are installed on the Windows development host; embedded target installation and firmware setup are pending confirmation. The communication bus and later Linux host environment remain open.
+Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The selected board is the existing Raspberry Pi Pico with RP2040, using the Rust target `thumbv6m-none-eabi`. Rust, rust-analyzer, and the embedded target are installed on the Windows development host. The initial blink firmware has been built and run on the Pico. The communication bus and later Linux host environment remain open.
 
 Follow the [development setup guide](docs/development-setup.md) for Windows with Git Bash or Ubuntu. It separates confirmed setup results from pending verification.
 
-No build or test commands are available at this stage. Each implemented component will document its setup and verification.
+See the [firmware guide](firmware/README.md) for build, UF2 conversion, USB transfer, and the manual verification record. Ubuntu setup is documented but has not been verified for this project.
 
 ## Licensing
 

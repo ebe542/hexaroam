@@ -1,6 +1,6 @@
 # Development setup
 
-This guide covers Windows with Git Bash and Ubuntu with Bash. The selected board is Raspberry Pi Pico with RP2040. It documents the development environment; firmware dependencies, linker configuration, flashing, and debugging will be selected separately.
+This guide covers Windows with Git Bash and Ubuntu with Bash. The selected board is Raspberry Pi Pico with RP2040. It documents the development environment. The initial Pico dependencies, linker configuration, and USB transfer workflow are documented in the [firmware guide](../firmware/README.md); debugging remains a later step.
 
 ## Verification status
 
@@ -8,8 +8,10 @@ As of 2026-10-12:
 
 - The project owner confirmed Rust and Cargo are available on Windows, with stable MSVC active, rustfmt and Clippy installed, and rust-analyzer installed in VS Code.
 - The owner confirmed that Rust formatting settings were added.
-- Installing the Pico target has been proposed but not yet confirmed.
-- A successful Windows host build has not been reported; MSVC linker readiness is not established by version commands alone.
+- The owner confirmed installation of `thumbv6m-none-eabi` alongside the Windows host target.
+- The owner reported successful firmware checks, a linked build, UF2 conversion, and physical LED blinking on the Pico.
+- elf2uf2-rs 2.2.0 was installed and used for conversion.
+- Host-side build scripts and installation of the UF2 converter succeeded. No separate Windows application test has been performed.
 - Ubuntu instructions have not been executed for this project.
 
 Reported Windows versions (an observation, not a project version requirement):
@@ -131,7 +133,18 @@ The surrounding braces illustrate a settings object. When merging, keep only one
 
 The existing TOML formatter may be retained for future Cargo.toml files. Workspace settings are currently ignored by Git and must be configured locally on each machine.
 
-Code analysis for the firmware will become available once a Cargo package and its target configuration exist.
+The firmware Cargo package is nested under `firmware/pico`. When opening the repository root in VS Code, merge these top-level settings into the local workspace settings:
+
+```json
+{
+  "rust-analyzer.linkedProjects": ["firmware/pico/Cargo.toml"],
+  "rust-analyzer.cargo.allTargets": false
+}
+```
+
+The explicit manifest path resolves workspace discovery. Disabling all-target checks avoids checking test targets for this bare-metal binary. After saving, run "rust-analyzer: Restart server" from the Command Palette. Alternatively, open `firmware/pico` directly; the linkedProjects path above is intended for opening the repository root.
+
+The repository `rustfmt.toml` sets `max_width = 80`, `fn_call_width = 40`, and `chain_width = 40`. These settings also apply to formatting on save.
 
 ## Raspberry Pi Pico target
 
@@ -146,13 +159,12 @@ Expect `thumbv6m-none-eabi` plus the host target. The host target remains instal
 
 The embedded target supplies the Rust target libraries; it does not create firmware, install a board support package, or configure flashing. Bare-metal firmware will use `no_std`, with the runtime, memory layout, and hardware access discussed before implementation. See [rustup cross-compilation](https://rust-lang.github.io/rustup/cross-compilation.html).
 
-No C/C++ Pico SDK is required for the planned Rust HAL approach. The exact Rust dependencies and firmware build workflow remain to be selected.
+No C/C++ Pico SDK is required for the Rust HAL approach. See the [firmware guide](../firmware/README.md) and `firmware/pico/Cargo.lock` for the implemented workflow and resolved dependency versions.
 
 ## Next steps
 
-1. Confirm the embedded target installation.
-2. Agree on firmware files, dependencies, and USB programming tools.
-3. Implement and build a board-LED blink program.
-4. Verify execution on the Pico, then proceed to one servo.
+1. Review and commit the completed blink firmware and its documentation.
+2. Select a servo and document its electrical requirements.
+3. Agree on wiring and signal parameters before implementing servo control.
 
 The project owner performs implementation, builds, tests, and commits. Setup command output and hardware results should be reported separately from documentation review.

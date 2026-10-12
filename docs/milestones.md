@@ -19,6 +19,12 @@ Stages may overlap. Expansion is conditional on actual output needs.
 
 Use the existing Raspberry Pi Pico (RP2040). Select a servo, document pinout and power wiring, complete the Rust embedded setup, and first verify compilation and USB programming with a blinking board LED. Then implement one bounded servo output. Test without a loaded leg and record the observed timing and behavior.
 
+## Progress
+
+2026-10-12: The owner confirmed the embedded Rust target, successful `cargo check` and `cargo build`, UF2 conversion, USB transfer, and a blinking onboard LED on the physical Pico under Windows. See the [firmware guide](../firmware/README.md) for reproduction steps and verification limits.
+
+This completes the setup and blink prerequisite, not the first servo milestone. Servo selection, power wiring, and bounded servo control remain pending.
+
 ## Open decisions
 
 - Required GPIO allocation for the selected Raspberry Pi Pico.

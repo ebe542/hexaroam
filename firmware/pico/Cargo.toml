@@ -1,0 +1,12 @@
+[package]
+name = "hexaroam-pico"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+panic-halt = "1.0"
+rp-pico = "0.9"
