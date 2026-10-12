@@ -23,6 +23,7 @@ Architecture and repository scaffold. No firmware or autonomous functionality is
 | hardware/mechanics/ | CAD, print files, and assembly |
 | hardware/electronics/ | Wiring, power distribution, and board connections |
 | hardware/bom/ | Bills of materials |
+| hardware/references/ | Versioned official datasheets and reference documents |
 | firmware/ | Rust firmware for Pico controllers |
 | software/ | Motion, sensors, navigation, and behavior |
 | simulation/ | Robot models and simulation experiments |
@@ -35,9 +36,11 @@ Start with [architecture](docs/architecture.md) and [milestones](docs/milestones
 
 The initial mechanical reference is [ggldnl/Hexapod-Hardware](https://github.com/ggldnl/Hexapod-Hardware), published under CERN-OHL-W-2.0. Upstream CAD and code are not bundled in this scaffold. Record provenance and applicable licenses when importing files; see [hardware attribution](hardware/ATTRIBUTION.md).
 
+Official Pico and RP2040 PDFs, versions, licenses, and checksums are listed in [hardware references](hardware/references/README.md).
+
 ## Development
 
-Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The exact Pico variant, toolchain, communication bus, and host environment are not selected yet.
+Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The selected board is the existing Raspberry Pi Pico with RP2040, using the Rust target `thumbv6m-none-eabi`. Rust and rust-analyzer are installed on the Windows development host; embedded target installation and firmware setup are pending confirmation. The communication bus and later Linux host environment remain open.
 
 No build or test commands are available at this stage. Each implemented component will document its setup and verification.
 

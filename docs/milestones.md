@@ -17,11 +17,11 @@ Stages may overlap. Expansion is conditional on actual output needs.
 
 ## First milestone
 
-Select a Pico variant and servo, document pinout and power wiring, establish the Rust toolchain, and implement one bounded output. Test without a loaded leg and record the observed timing and behavior.
+Use the existing Raspberry Pi Pico (RP2040). Select a servo, document pinout and power wiring, complete the Rust embedded setup, and first verify compilation and USB programming with a blinking board LED. Then implement one bounded servo output. Test without a loaded leg and record the observed timing and behavior.
 
 ## Open decisions
 
-- Exact Pico variant and required GPIO allocation.
+- Required GPIO allocation for the selected Raspberry Pi Pico.
 - Servo model and electrical requirements.
 - One-controller capacity and signal-generation approach.
 - Expansion transport and synchronization requirements.
