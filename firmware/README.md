@@ -1,6 +1,6 @@
 # Firmware
 
-Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Servo control is not implemented yet.
+Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates a fixed PIO servo pulse on GP0 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
@@ -17,7 +17,8 @@ The onboard LED on GPIO25 alternates between on and off with a requested delay o
 | pico/.cargo/config.toml | Embedded target and linker flags |
 | pico/memory.x | Flash, bootloader, and RAM layout |
 | pico/build.rs | Makes the memory layout available to the linker |
-| pico/src/main.rs | Clock initialization, GPIO configuration, and blink loop |
+| pico/src/main.rs | Board initialization, driver construction, and blink loop |
+| pico/src/drivers/servo_pio.rs | Fixed PIO pulse generation and hardware resource ownership |
 | ../rustfmt.toml | Repository-wide Rust formatting rules |
 
 ### Build
@@ -61,7 +62,13 @@ elf2uf2-rs \
 
 On Windows, use File Explorer to copy the file. On Ubuntu, use the file manager to copy it to the mounted RPI-RP2 volume; the Ubuntu workflow has not yet been verified in this project.
 
-No debug probe or automatic Cargo runner is configured.
+The configured Cargo runner is `elf2uf2-rs`. From `firmware/pico`, run:
+
+```bash
+cargo run --locked
+```
+
+Cargo builds successfully before invoking the converter with the ELF path. The resulting UF2 is placed beside the ELF file. This command converts only; copying to RPI-RP2 remains manual. `cargo build` alone does not run the converter. A failed build can leave an older UF2 file present; transfer only after a successful build and conversion. No debug probe is configured.
 
 ### Verification record
 
@@ -72,3 +79,26 @@ This confirms the basic build and hardware execution path. Exact signal timing, 
 ### Version control
 
 Commit source files, linker configuration, and Cargo.lock. Generated ELF and UF2 files remain under the ignored `target/` directory.
+
+## Fixed PIO pulse driver
+
+The driver uses PIO0 state machine 0 and GP0 (physical Pico pin 1). It owns the running state machine, TX FIFO handle, and configured pin; the PIO manager remains in main. This single-output implementation is a learning step, not a finalized multi-channel design.
+
+The state machine runs at 1 MHz with an integer divider derived from the system clock. The nominal period is 20,000 us and high time is 1,500 us. GPIO is set low before the output direction is enabled and both initial counts are queued before starting execution.
+
+Each phase takes count + 3 cycles: one SET, one MOV, and count + 1 executions of JMP X--. The initial counts are therefore 1497 and 18497. The program reads them once; runtime pulse updates, calibration, and output-disable controls are not implemented.
+
+The dependencies remain compatible with rp-pico 0.9: rp2040-hal 0.10.2 and pio/pio-proc 0.2. Resolved versions are recorded in Cargo.lock.
+
+### Bench observation: 2026-10-13
+
+The owner reported a successful build, physical execution, a blinking onboard LED, and a visible periodic pulse, without an attached servo.
+
+| Quantity | Nominal | Approximate reading |
+| --- | --- | --- |
+| Period | 20 ms | 19.8 ms |
+| High time | 1.5 ms | 1.4 ms |
+
+Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. Measurement uncertainty was not quantified. No measured amplitude was reported. The readings confirm basic signal generation; they do not establish the actual timing error or servo compatibility. Counter values were not adjusted based on these readings.
+
+For reproducing the signal check, connect the probe to GP0 through the planned 180-ohm series resistor and its ground clip to Pico GND (for example physical pin 3). Keep the servo disconnected. The exact wiring and power arrangement of the reported observation were not recorded.

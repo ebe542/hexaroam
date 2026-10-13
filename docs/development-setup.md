@@ -11,6 +11,8 @@ As of 2026-10-12:
 - The owner confirmed installation of `thumbv6m-none-eabi` alongside the Windows host target.
 - The owner reported successful firmware checks, a linked build, UF2 conversion, and physical LED blinking on the Pico.
 - elf2uf2-rs 2.2.0 was installed and used for conversion.
+- On 2026-10-13, the owner confirmed execution of the fixed PIO pulse firmware and an analog oscilloscope observation. See the firmware guide for readings and limitations.
+- Cargo now has `runner = "elf2uf2-rs"`; `cargo run --locked` builds and converts to UF2 without automatically flashing the board.
 - Host-side build scripts and installation of the UF2 converter succeeded. No separate Windows application test has been performed.
 - Ubuntu instructions have not been executed for this project.
 
@@ -163,7 +165,7 @@ No C/C++ Pico SDK is required for the Rust HAL approach. See the [firmware guide
 
 ## Next steps
 
-1. Review and commit the completed blink firmware and its documentation.
+1. Review and commit the fixed PIO pulse driver and its documentation.
 2. Select a servo and document its electrical requirements.
 3. Agree on wiring and signal parameters before implementing servo control.
 

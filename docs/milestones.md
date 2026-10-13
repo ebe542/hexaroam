@@ -23,7 +23,9 @@ Use the existing Raspberry Pi Pico (RP2040). Select a servo, document pinout and
 
 2026-10-12: The owner confirmed the embedded Rust target, successful `cargo check` and `cargo build`, UF2 conversion, USB transfer, and a blinking onboard LED on the physical Pico under Windows. See the [firmware guide](../firmware/README.md) for reproduction steps and verification limits.
 
-This completes the setup and blink prerequisite, not the first servo milestone. Servo selection, power wiring, and bounded servo control remain pending.
+2026-10-13: The owner confirmed that the PIO firmware runs, the LED continues blinking, and a periodic pulse is visible at the output. Analog oscilloscope readings were approximately 19.8 ms period and 1.4 ms high time versus nominal 20 ms and 1.5 ms. Measurement uncertainty was not quantified; these observations establish signal generation, not exact timing accuracy. No servo was attached.
+
+This completes the setup, blink, and fixed-signal prerequisites, not the first servo milestone. Servo selection, power wiring, and bounded servo control remain pending.
 
 ## Open decisions
 
