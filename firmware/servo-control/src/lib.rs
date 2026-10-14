@@ -5,3 +5,7 @@
 mod angle;
 
 pub use angle::{Angle, AngleError};
+
+mod calibration;
+
+pub use calibration::{Calibration, CalibrationError};
