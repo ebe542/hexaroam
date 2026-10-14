@@ -376,11 +376,16 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "embedded-hal 1.0.0",
+ "hexaroam-servo-signal",
  "panic-halt",
  "pio",
  "pio-proc",
  "rp-pico",
 ]
+
+[[package]]
+name = "hexaroam-servo-signal"
+version = "0.1.0"
 
 [[package]]
 name = "indexmap"

@@ -25,7 +25,9 @@ Use the existing Raspberry Pi Pico (RP2040). Select a servo, document pinout and
 
 2026-10-13: The owner confirmed that the PIO firmware runs, the LED continues blinking, and a periodic pulse is visible at the output. Analog oscilloscope readings were approximately 19.8 ms period and 1.4 ms high time versus nominal 20 ms and 1.5 ms. Measurement uncertainty was not quantified; these observations establish signal generation, not exact timing accuracy. No servo was attached.
 
-This completes the setup, blink, and fixed-signal prerequisites, not the first servo milestone. Servo selection, power wiring, and bounded servo control remain pending.
+2026-10-14: The owner reported six successful host unit tests for the extracted no_std signal library and a successful Pico build. The integrated firmware ran on the Pico with apparently unchanged alternating 1000/1500/2000-us pulses. Limits are configured by the application, and the private PIO adapter handles encoding and FIFO access. Precise timing and initialization error paths remain unverified.
+
+This completes the setup, blink, and adjustable-signal prerequisites, not the first servo milestone. Actual servo operation, power wiring, and calibration remain pending.
 
 ## Open decisions
 

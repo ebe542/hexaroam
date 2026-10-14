@@ -1,6 +1,6 @@
 # Firmware
 
-Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates a fixed PIO servo pulse on GP0 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
+Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates adjustable PIO servo pulses on GP0 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
@@ -18,7 +18,9 @@ The onboard LED on GPIO25 alternates between on and off with a requested delay o
 | pico/memory.x | Flash, bootloader, and RAM layout |
 | pico/build.rs | Makes the memory layout available to the linker |
 | pico/src/main.rs | Board initialization, driver construction, and blink loop |
-| pico/src/drivers/servo_pio.rs | Fixed PIO pulse generation and hardware resource ownership |
+| pico/src/drivers/servo_pio.rs | PIO output, encoding, and private transport adapter |
+| servo-signal/src/lib.rs | Hardware-independent limits and submission logic |
+| servo-signal/src/tests.rs | Host unit tests using a test transport |
 | ../rustfmt.toml | Repository-wide Rust formatting rules |
 
 ### Build
@@ -80,25 +82,52 @@ This confirms the basic build and hardware execution path. Exact signal timing, 
 
 Commit source files, linker configuration, and Cargo.lock. Generated ELF and UF2 files remain under the ignored `target/` directory.
 
-## Fixed PIO pulse driver
+## PIO pulse driver and shared signal logic
 
-The driver uses PIO0 state machine 0 and GP0 (physical Pico pin 1). It owns the running state machine, TX FIFO handle, and configured pin; the PIO manager remains in main. This single-output implementation is a learning step, not a finalized multi-channel design.
+The driver uses PIO0 state machine 0 and GP0 (physical Pico pin 1). ServoPio owns the running state machine, a private PioTransport adapter, the configured limits, and the pin. The PIO manager remains in main. This single-output implementation is a learning step, not a finalized multi-channel design.
 
-The state machine runs at 1 MHz with an integer divider derived from the system clock. The nominal period is 20,000 us and high time is 1,500 us. GPIO is set low before the output direction is enabled and both initial counts are queued before starting execution.
+### Responsibilities
 
-Each phase takes count + 3 cycles: one SET, one MOV, and count + 1 executions of JMP X--. The initial counts are therefore 1497 and 18497. The program reads them once; runtime pulse updates, calibration, and output-disable controls are not implemented.
+- `servo-signal` is a hardware-independent `no_std` library. PulseLimits validates inclusive application limits; submit_pulse validates requests and enforces a single pending update through PulseTransport.
+- The private PioTransport implements the transport with the actual TX FIFO and converts microseconds to the PIO data word.
+- ServoPio contains the PIO program, timing calculations, initialization, and hardware resource ownership.
+- main selects the current experiment limits of 1000–2000 us and the initial pulse of 1500 us. These are test settings, not calibrated MZ996 limits.
 
-The dependencies remain compatible with rp-pico 0.9: rp2040-hal 0.10.2 and pio/pio-proc 0.2. Resolved versions are recorded in Cargo.lock.
+The Pico package depends on the shared library through `path = "../servo-signal"`. See the [shared library guide](servo-signal/README.md) for API contracts and host test commands.
 
-### Bench observation: 2026-10-13
+### Update semantics
 
-The owner reported a successful build, physical execution, a blinking onboard LED, and a visible periodic pulse, without an attached servo.
+A valid request is accepted only when the TX FIFO is empty. Exactly one complete 32-bit word is written. A pending request yields Busy without another write; requests outside the configured inclusive limits yield OutOfRange before the FIFO is accessed.
 
-| Quantity | Nominal | Approximate reading |
+Ok means queued, not already active. At each period boundary, PIO uses PULL NOBLOCK and MOV X, OSR to adopt a pending word or retain the previous word. X retains the full last command; Y is the countdown register. No interrupt or DMA is required.
+
+The policy requires a single writer through the private adapter. It prevents a backlog beyond one pending update, but does not overwrite that update. The application should retry its current desired target rather than queue rejected historical targets.
+
+### PIO data and timing
+
+The state machine runs at 1 MHz, using an integer divider derived from the system clock. The period is nominally 20,000 us. The low 16 bits contain the high-phase count and the high 16 bits contain the low-phase count; OUT shifts right.
+
+The program occupies eight instructions (16 bytes). Labels and wrap directives occupy no instruction slots. There is no extra cycle for wrapping.
+
+| Phase | Instructions accounted for | Cycles |
 | --- | --- | --- |
-| Period | 20 ms | 19.8 ms |
-| High time | 1.5 ms | 1.4 ms |
+| High | SET high; JMP Y-- loop | high count + 2 |
+| Low | SET low; OUT; JMP Y-- loop; next PULL, MOV, OUT | low count + 6 |
 
-Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. Measurement uncertainty was not quantified. No measured amplitude was reported. The readings confirm basic signal generation; they do not establish the actual timing error or servo compatibility. Counter values were not adjusted based on these readings.
+Therefore high count = pulse width - 2 and low count = 20,000 - pulse width - 6. At 1500 us, the counts are 1498 and 18494. Encoding remains private to the PIO driver and must be reviewed with any program change.
 
-For reproducing the signal check, connect the probe to GP0 through the planned 180-ohm series resistor and its ground clip to Pico GND (for example physical pin 3). Keep the servo disconnected. The exact wiring and power arrangement of the reported observation were not recorded.
+The representable pulse range is 2–19,994 us for this program. This is a technical encoding range, not a servo operating range. Before configuring the state machine, the constructor rejects unsupported application limits with UnsupportedPulseLimits and an initial pulse outside those limits with InitialPulseOutOfRange. Clock-divider checks and program installation can still panic; the constructor is not a fully fallible hardware initialization API.
+
+GPIO is set low before enabling output direction. A validated initial data word is queued before starting PIO. The application then requests 1000, 1500, and 2000 us cyclically, approximately once per second, while the LED keeps blinking. Its demonstration loop uses expect on submission errors. Calibration, output-disable controls, angle conversion, and multi-channel coordination are not implemented.
+
+The dependencies remain rp-pico 0.9, rp2040-hal 0.10.2, and pio/pio-proc 0.2, with resolved versions recorded in Cargo.lock.
+
+### Bench observations
+
+2026-10-13, initial fixed-pulse program: the owner observed approximately 19.8 ms period and 1.4 ms high time versus nominal 20 ms and 1.5 ms. That earlier program used separate startup counts and a different loop; its count corrections are not the current encoding.
+
+2026-10-14, shared-library integration: the owner reported six passing host unit tests, a successful Pico build, and physical execution with apparently unchanged behavior of the three alternating pulse widths. The three widths had already been visually distinguished before extraction.
+
+Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. No servo was attached. Measurement uncertainty was not quantified and no measured amplitude was reported. These observations confirm basic operation, not precise timing accuracy, absence of short update glitches, or servo compatibility. Unit tests do not verify hardware FIFO behavior or ASM cycle timing. Initial configuration errors, Clippy, Ubuntu execution, and formatter check results have not been specifically verified.
+
+For reproducing the signal check, connect the probe to GP0 through the planned 180-ohm series resistor and its ground clip to Pico GND (for example physical pin 3). Keep the servo disconnected. Exact wiring and power details of the reported observations were not recorded.

@@ -8,6 +8,7 @@ license = "MIT"
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1.0"
+hexaroam-servo-signal = { path = "../servo-signal" }
 panic-halt = "1.0"
 pio = "0.2"
 pio-proc = "0.2"

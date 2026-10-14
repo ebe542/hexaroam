@@ -163,9 +163,20 @@ The embedded target supplies the Rust target libraries; it does not create firmw
 
 No C/C++ Pico SDK is required for the Rust HAL approach. See the [firmware guide](../firmware/README.md) and `firmware/pico/Cargo.lock` for the implemented workflow and resolved dependency versions.
 
+## Shared signal library tests
+
+From the repository root:
+
+```bash
+cd firmware/servo-signal
+cargo test --lib
+```
+
+Run the sibling library tests from its own directory to use the host target, separately from the Pico configuration. The owner reported six passing tests on Windows on 2026-10-14, a successful embedded build, and apparently unchanged output on the Pico. Ubuntu execution remains unverified. See the [library guide](../firmware/servo-signal/README.md) for coverage and the [firmware guide](../firmware/README.md) for hardware limitations.
+
 ## Next steps
 
-1. Review and commit the fixed PIO pulse driver and its documentation.
+1. Review and commit the shared signal library, its six host tests, and the Pico integration.
 2. Select a servo and document its electrical requirements.
 3. Agree on wiring and signal parameters before implementing servo control.
 

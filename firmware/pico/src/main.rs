@@ -4,6 +4,7 @@ mod drivers;
 
 use drivers::servo_pio::ServoPio;
 use embedded_hal::digital::OutputPin;
+use hexaroam_servo_signal::PulseLimits;
 use panic_halt as _;
 use rp_pico::entry;
 use rp_pico::hal::sio::Sio;
@@ -62,14 +63,22 @@ fn main() -> ! {
         .into_function::<FunctionPio0>()
         .into_pull_type::<PullNone>();
 
-    let _servo = ServoPio::new(
+    let pulse_limits =
+        PulseLimits::new(1_000, 2_000).expect("Invalid test pulse limits");
+
+    let mut servo = ServoPio::new(
         &mut pio,
         sm0,
         servo_pin,
         clocks.system_clock.freq().to_Hz(),
-    );
+        pulse_limits,
+        1_500,
+    )
+    .expect("Failed to initialize servo output");
 
     let mut led = pins.led.into_push_pull_output();
+    let pulse_widths = [1_000_u32, 1_500, 2_000];
+    let mut pulse_index = 0;
 
     loop {
         led.set_high()
@@ -79,5 +88,11 @@ fn main() -> ! {
         led.set_low()
             .expect("Failed to turn LED off");
         delay.delay_ms(500_u32);
+
+        servo
+            .set_pulse_width_us(pulse_widths[pulse_index])
+            .expect("Failed to submit pulse update");
+
+        pulse_index = (pulse_index + 1) % pulse_widths.len();
     }
 }

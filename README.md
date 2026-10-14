@@ -4,7 +4,7 @@ A modular six-legged robot built to explore — a learning project in Rust, robo
 
 ## Status
 
-Rust firmware for Raspberry Pi Pico (RP2040) blinks the onboard LED and generates a fixed PIO servo pulse on GP0. The project owner confirmed physical execution and observed the signal with an analog oscilloscope. Exact timing accuracy, operation with an attached servo, and autonomous functionality remain unverified.
+Rust firmware for Raspberry Pi Pico (RP2040) blinks the onboard LED and generates adjustable PIO servo pulses on GP0. The project owner confirmed six host unit tests for shared signal logic, a successful embedded build, and physical output observed with an analog oscilloscope. Exact timing accuracy, operation with an attached servo, and autonomous functionality remain unverified.
 
 ## Goals
 
@@ -40,7 +40,7 @@ Official Pico and RP2040 PDFs, versions, licenses, and checksums are listed in [
 
 ## Development
 
-Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The selected board is the existing Raspberry Pi Pico with RP2040, using the Rust target `thumbv6m-none-eabi`. Rust, rust-analyzer, and the embedded target are installed on the Windows development host. The blink and fixed PIO pulse firmware has been built and run on the Pico. The communication bus and later Linux host environment remain open.
+Rust is planned for firmware, communication, kinematics, and motion control. Python is planned for AI training, analysis, and experiments. The selected board is the existing Raspberry Pi Pico with RP2040, using the Rust target `thumbv6m-none-eabi`. Rust, rust-analyzer, and the embedded target are installed on the Windows development host. The blink and adjustable PIO pulse firmware has been built and run on the Pico. The communication bus and later Linux host environment remain open.
 
 Follow the [development setup guide](docs/development-setup.md) for Windows with Git Bash or Ubuntu. It separates confirmed setup results from pending verification.
 
