@@ -27,15 +27,15 @@ git diff
 python tools/dev.py check
 ```
 
-The owner reported a successful expanded local check on Windows on 2026-10-14. This covers formatting of three packages, six signal tests, four Angle tests, and the existing Pico build. The control library is not yet integrated into the Pico firmware. Three unittest tests now cover aggregate success, an earlier failure followed by success, and failure in the final step. They mock command execution and do not invoke Cargo. The previous GitHub Actions workflow was reported green for Windows/Ubuntu tests and the Ubuntu firmware build; the new Angle tests await their first reported remote run.
+The owner reported a successful expanded local check on Windows on 2026-10-14. The latest local check covers formatting of three packages, 6 signal tests, 21 control tests, 3 Python tests, and the existing Pico build. The control library is not yet integrated into the Pico firmware. Three unittest tests now cover aggregate success, an earlier failure followed by success, and failure in the final step. They mock command execution and do not invoke Cargo. The previous GitHub Actions workflow was reported green for Windows/Ubuntu tests and the Ubuntu firmware build; the subsequent calibration/task-runner workflow was also reported green. The new Servo wrapper awaits its first reported remote run.
 
-The [GitHub Actions workflow](../.github/workflows/rust.yml) uses the test task for the Windows/Ubuntu matrix and the check task for Ubuntu validation. Both jobs provision Python 3.13 and Rust 1.99.0 before invoking the shared runner. The Ubuntu check job additionally installs rustfmt and the Pico target. The previous workflow run was reported successful; execution with the expanded Angle test task remains pending.
+The [GitHub Actions workflow](../.github/workflows/rust.yml) uses the test task for the Windows/Ubuntu matrix and the check task for Ubuntu validation. Both jobs provision Python 3.13 and Rust 1.99.0 before invoking the shared runner. The Ubuntu check job additionally installs rustfmt and the Pico target. The previous workflow run was reported successful; the new Servo wrapper revision awaits remote verification.
 
 See [development setup](../docs/development-setup.md) and [firmware instructions](../firmware/README.md) for installation, manual Cargo commands, and hardware verification limits.
 
 ## Summary verification
 
-The owner reported three passing task-runner tests. The current groups contain 3 Python tests, 6 signal tests, and 16 control tests (25 individual tests). These counts describe the current tests and are not hard-coded or summed by the runner. The check task has seven steps: Python tests, three formatting checks, two Rust test groups, and the Pico build. A fresh full check after adding the Python tests to TASKS and a remote workflow run for these changes have not yet been reported.
+The owner reported three passing task-runner tests. The current groups contain 3 Python tests, 6 signal tests, and 21 control tests (30 individual tests). These counts describe the current tests and are not hard-coded or summed by the runner. The check task has seven steps: Python tests, three formatting checks, two Rust test groups, and the Pico build. The owner reported a successful full local check with all current groups. The previous calibration/task-runner revision also passed CI; the new Servo wrapper revision has not yet been reported as run remotely.
 
 Run the Python tests directly with:
 

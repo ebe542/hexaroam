@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides the Angle value type and two-point angle-to-pulse calibration. It has no external dependencies and is not yet used by the Pico firmware.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, and calibrated Servo commands through a hardware-independent PulseOutput trait. It has no external dependencies and is not yet used by the Pico firmware.
 
 ## Angle representation
 
@@ -11,7 +11,7 @@ Angle stores a signed i32 number of centidegrees (hundredths of a degree). For e
 - `as_centidegrees()` returns the stored value.
 - Angles support equality and ordering, and implement Copy and Clone.
 
-Fields are private. This type imposes no joint travel limits; calibration will define those separately.
+Fields are private. Angle imposes no joint travel limits; Calibration defines those separately.
 
 ## Files
 
@@ -19,7 +19,11 @@ Fields are private. This type imposes no joint travel limits; calibration will d
 | --- | --- |
 | src/lib.rs | no_std declaration and public exports |
 | src/angle.rs | Angle and checked degree conversion |
-| src/angle/tests.rs | Unit tests included only for test builds |
+| src/angle/tests.rs | Angle unit tests |
+| src/calibration.rs | Calibration validation and integer interpolation |
+| src/test_calibration.rs | Calibration unit tests |
+| src/servo.rs | PulseOutput, Servo, and error forwarding |
+| src/test_servo.rs | Servo wrapper unit tests |
 
 ## Verification
 
@@ -42,7 +46,7 @@ Four Angle tests cover signed centidegree values including i32 extremes, convers
 
 On 2026-10-14 the owner reported all four Angle tests and the expanded local check passing on Windows: formatting of three packages, six signal tests, four angle tests, and the existing Pico build. The new library is not yet an embedded dependency, so that build does not verify its integration into Pico firmware.
 
-The owner reported a green GitHub Actions run for the Angle implementation. The current calibration changes await their first reported remote run.
+The owner reported green GitHub Actions runs for Angle and subsequently calibration/task-runner changes. Remote verification of the new Servo wrapper is pending.
 
 ## Two-point calibration
 
@@ -56,6 +60,20 @@ Twelve calibration tests cover construction, endpoints, midpoint, rejected out-o
 
 Implementation: src/calibration.rs. Unit tests: src/test_calibration.rs, included with an explicit path attribute.
 
+## Calibrated servo commands
+
+Servo<O> owns a Calibration and an output implementing PulseOutput. Construction stores these values without issuing an output command. set_angle converts the target through the calibration and calls the output exactly once with the resulting microseconds.
+
+ServoError::Calibration wraps conversion errors. Invalid angles do not call the output. ServoError::Output preserves the backend error, including Busy, without automatic retry or buffering. Ok confirms output acceptance only, not pulse activation or measured joint position.
+
+PulseOutput uses an associated Error type and contains no PIO-specific types. The shared servo-control package does not depend on the signal package or Pico HAL. Actual output-backend pulse limits remain independently enforced; the wrapper constructor does not validate calibration against backend limits.
+
+Five wrapper tests cover construction without output, a calibrated command, rejection of angles below and above the range without output, forwarding Busy without retry, and successive commands with their own pulse widths. The test output records calls and accepted values using core::cell::Cell.
+
+On 2026-10-14 the owner reported the full local check passing: 21 control tests, 6 signal tests, 3 Python tests, Rust formatting, and the existing Pico build. The 21 control tests comprise 4 Angle, 12 calibration, and 5 Servo tests. The previous calibration/task-runner revision had a green GitHub Actions run; the new Servo wrapper revision awaits its first reported remote run.
+
+The control library is not yet integrated into the Pico firmware, so the current Pico build does not establish embedded integration or physical angle control.
+
 ## Next step
 
-Integrate calibrated angle commands with the existing signal layer after agreeing on the interface. Verify the combined workflow locally and in GitHub Actions.
+Implement PulseOutput for the Pico output driver and connect a test calibration to angle commands in main. Review the integration before implementation and verify initially without an attached servo.

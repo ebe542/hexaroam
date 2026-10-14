@@ -134,4 +134,4 @@ For reproducing the signal check, connect the probe to GP0 through the planned 1
 
 ## Angle library
 
-The [servo-control library](servo-control/README.md) introduces an i32 centidegree Angle type with checked whole-degree conversion. The owner reported four passing unit tests and a successful expanded local check on 2026-10-14. The library is not yet integrated into the Pico firmware; calibration and angle-to-pulse conversion remain pending.
+The [servo-control library](servo-control/README.md) provides an i32 centidegree Angle type, two-point calibration, and Servo angle commands through PulseOutput. On 2026-10-14 the owner reported a successful full local check with 21 control tests, 6 signal tests, 3 Python tests, formatting, and the existing Pico build. The library is not yet integrated into the Pico firmware; physical angle control and actual servo calibration remain pending.

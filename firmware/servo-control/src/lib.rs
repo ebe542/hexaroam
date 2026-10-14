@@ -9,3 +9,7 @@ pub use angle::{Angle, AngleError};
 mod calibration;
 
 pub use calibration::{Calibration, CalibrationError};
+
+mod servo;
+
+pub use servo::{PulseOutput, Servo, ServoError};
