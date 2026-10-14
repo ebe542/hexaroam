@@ -7,19 +7,24 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SIGNAL_DIR = PROJECT_ROOT / "firmware" / "servo-signal"
 PICO_DIR = PROJECT_ROOT / "firmware" / "pico"
+CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
 
 TASKS = {
     "test": [
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
+        (CONTROL_DIR, ["cargo", "fmt"]),
         (PICO_DIR, ["cargo", "fmt"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
+        (CONTROL_DIR, ["cargo", "fmt", "--check"]),
         (PICO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PICO_DIR, ["cargo", "build", "--locked"]),
     ],
     "uf2": [

@@ -131,3 +131,7 @@ The dependencies remain rp-pico 0.9, rp2040-hal 0.10.2, and pio/pio-proc 0.2, wi
 Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. No servo was attached. Measurement uncertainty was not quantified and no measured amplitude was reported. These observations confirm basic operation, not precise timing accuracy, absence of short update glitches, or servo compatibility. Unit tests do not verify hardware FIFO behavior or ASM cycle timing. Initial configuration errors, Clippy, Ubuntu execution, and formatter check results have not been specifically verified.
 
 For reproducing the signal check, connect the probe to GP0 through the planned 180-ohm series resistor and its ground clip to Pico GND (for example physical pin 3). Keep the servo disconnected. Exact wiring and power details of the reported observations were not recorded.
+
+## Angle library
+
+The [servo-control library](servo-control/README.md) introduces an i32 centidegree Angle type with checked whole-degree conversion. The owner reported four passing unit tests and a successful expanded local check on 2026-10-14. The library is not yet integrated into the Pico firmware; calibration and angle-to-pulse conversion remain pending.
