@@ -4,6 +4,7 @@ mod drivers;
 
 use drivers::servo_pio::ServoPio;
 use embedded_hal::digital::OutputPin;
+use hexaroam_servo_control::{Angle, Calibration, Servo};
 use hexaroam_servo_signal::PulseLimits;
 use panic_halt as _;
 use rp_pico::entry;
@@ -66,7 +67,7 @@ fn main() -> ! {
     let pulse_limits =
         PulseLimits::new(1_000, 2_000).expect("Invalid test pulse limits");
 
-    let mut servo = ServoPio::new(
+    let pulse_output = ServoPio::new(
         &mut pio,
         sm0,
         servo_pin,
@@ -76,9 +77,25 @@ fn main() -> ! {
     )
     .expect("Failed to initialize servo output");
 
+    // Synthetic calibration for signal testing without a servo.
+    let calibration = Calibration::new(
+        Angle::from_centidegrees(-4_500),
+        1_000,
+        Angle::from_centidegrees(4_500),
+        2_000,
+    )
+    .expect("Invalid test calibration");
+
+    let mut servo = Servo::new(calibration, pulse_output);
+
     let mut led = pins.led.into_push_pull_output();
-    let pulse_widths = [1_000_u32, 1_500, 2_000];
-    let mut pulse_index = 0;
+    let target_angles = [
+        Angle::from_centidegrees(-4_500),
+        Angle::from_centidegrees(0),
+        Angle::from_centidegrees(4_500),
+    ];
+
+    let mut target_index = 0;
 
     loop {
         led.set_high()
@@ -90,9 +107,9 @@ fn main() -> ! {
         delay.delay_ms(500_u32);
 
         servo
-            .set_pulse_width_us(pulse_widths[pulse_index])
-            .expect("Failed to submit pulse update");
+            .set_angle(target_angles[target_index])
+            .expect("Failed to submit angle command");
 
-        pulse_index = (pulse_index + 1) % pulse_widths.len();
+        target_index = (target_index + 1) % target_angles.len();
     }
 }

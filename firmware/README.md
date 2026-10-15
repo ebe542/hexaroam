@@ -118,7 +118,7 @@ Therefore high count = pulse width - 2 and low count = 20,000 - pulse width - 6.
 
 The representable pulse range is 2–19,994 us for this program. This is a technical encoding range, not a servo operating range. Before configuring the state machine, the constructor rejects unsupported application limits with UnsupportedPulseLimits and an initial pulse outside those limits with InitialPulseOutOfRange. Clock-divider checks and program installation can still panic; the constructor is not a fully fallible hardware initialization API.
 
-GPIO is set low before enabling output direction. A validated initial data word is queued before starting PIO. The application then requests 1000, 1500, and 2000 us cyclically, approximately once per second, while the LED keeps blinking. Its demonstration loop uses expect on submission errors. Calibration, output-disable controls, angle conversion, and multi-channel coordination are not implemented.
+GPIO is set low before enabling output direction. A validated initial data word is queued before starting PIO. The application now requests -45, 0, and +45 degrees through Servo, using synthetic calibration points that map to 1000, 1500, and 2000 us. Commands cycle approximately once per second while the LED keeps blinking. Its demonstration loop uses expect on submission errors. Angle conversion and two-point calibration are implemented in servo-control. Physical servo calibration, output-disable controls, and multi-channel coordination are not implemented.
 
 The dependencies remain rp-pico 0.9, rp2040-hal 0.10.2, and pio/pio-proc 0.2, with resolved versions recorded in Cargo.lock.
 
@@ -134,4 +134,6 @@ For reproducing the signal check, connect the probe to GP0 through the planned 1
 
 ## Angle library
 
-The [servo-control library](servo-control/README.md) provides an i32 centidegree Angle type, two-point calibration, and Servo angle commands through PulseOutput. On 2026-10-14 the owner reported a successful full local check with 21 control tests, 6 signal tests, 3 Python tests, formatting, and the existing Pico build. The library is not yet integrated into the Pico firmware; physical angle control and actual servo calibration remain pending.
+The [servo-control library](servo-control/README.md) provides an i32 centidegree Angle type, two-point calibration, and Servo angle commands through PulseOutput. On 2026-10-14 the owner reported a successful full local check with 21 control tests, 6 signal tests, 3 Python tests, formatting, and the existing Pico build. The library is now integrated into the Pico firmware: ServoPio implements PulseOutput and main owns a Servo configured with synthetic -45-degree / 1000-us and +45-degree / 2000-us calibration points. ServoPio still starts with an initial 1500-us pulse before the wrapper is constructed. Constructing Servo itself emits no command.
+
+On 2026-10-14 the owner reported a successful full check, UF2 generation/upload, and firmware behavior as expected after integration. No servo was attached. This verifies the integrated command path without establishing physical joint angles, a measured servo calibration, or new precise timing measurements. The previous wrapper revision passed CI; a remote result for this integration is pending.

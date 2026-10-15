@@ -1,5 +1,6 @@
 //! PIO-based servo signal generation.
 
+use hexaroam_servo_control::PulseOutput;
 use hexaroam_servo_signal::{PulseLimits, PulseTransport, submit_pulse};
 use rp_pico::hal::{
     gpio::{FunctionPio0, Pin, PullNone, bank0::Gpio0},
@@ -147,5 +148,16 @@ impl ServoPio {
 
         pio.install(&program.program)
             .expect("Insufficient PIO instruction memory")
+    }
+}
+
+impl PulseOutput for ServoPio {
+    type Error = PulseError;
+
+    fn set_pulse_width_us(
+        &mut self,
+        pulse_width_us: u32,
+    ) -> Result<(), Self::Error> {
+        ServoPio::set_pulse_width_us(self, pulse_width_us)
     }
 }

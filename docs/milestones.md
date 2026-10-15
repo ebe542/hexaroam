@@ -27,7 +27,9 @@ Use the existing Raspberry Pi Pico (RP2040). Select a servo, document pinout and
 
 2026-10-14: The owner reported six successful host unit tests for the extracted no_std signal library and a successful Pico build. The integrated firmware ran on the Pico with apparently unchanged alternating 1000/1500/2000-us pulses. Limits are configured by the application, and the private PIO adapter handles encoding and FIFO access. Precise timing and initialization error paths remain unverified.
 
-This completes the setup, blink, and adjustable-signal prerequisites, not the first servo milestone. Actual servo operation, power wiring, and calibration remain pending.
+2026-10-14, angle integration: The owner reported a successful full local check (30 tests, formatting, and Pico build), successful UF2 upload, and expected firmware behavior without an attached servo. The application now commands synthetic -45/0/+45-degree targets through calibration, the signal layer, and PIO. Physical calibration and actual servo operation remain pending. CI for the preceding Servo wrapper was green; remote integration verification is pending.
+
+This completes the setup, blink, adjustable-signal, and synthetic angle-command prerequisites, not the first servo milestone. Actual servo operation, power wiring, and calibration remain pending.
 
 ## Open decisions
 

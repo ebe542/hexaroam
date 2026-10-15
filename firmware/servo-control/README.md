@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, and calibrated Servo commands through a hardware-independent PulseOutput trait. It has no external dependencies and is not yet used by the Pico firmware.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, and calibrated Servo commands through a hardware-independent PulseOutput trait. It has no external dependencies and is now used by the Pico firmware through its private PIO driver.
 
 ## Angle representation
 
@@ -44,9 +44,9 @@ Use python3 on Ubuntu if python is unavailable. The shared task runner formats/c
 
 Four Angle tests cover signed centidegree values including i32 extremes, conversion of negative/zero/positive whole degrees, representable whole-degree boundaries, and rejection beyond both boundaries.
 
-On 2026-10-14 the owner reported all four Angle tests and the expanded local check passing on Windows: formatting of three packages, six signal tests, four angle tests, and the existing Pico build. The new library is not yet an embedded dependency, so that build does not verify its integration into Pico firmware.
+On 2026-10-14 the owner reported all four Angle tests and the expanded local check passing on Windows: formatting of three packages, six signal tests, four angle tests, and the existing Pico build. At that earlier stage the library was not yet an embedded dependency; the later integration is recorded below.
 
-The owner reported green GitHub Actions runs for Angle and subsequently calibration/task-runner changes. Remote verification of the new Servo wrapper is pending.
+The owner reported green GitHub Actions runs for Angle and subsequently calibration/task-runner changes. The owner subsequently reported a green workflow for the Servo wrapper; the current Pico integration awaits its first reported remote run.
 
 ## Two-point calibration
 
@@ -56,7 +56,7 @@ pulse_width_us rejects targets outside the inclusive angle range. In-range value
 
 Angle differences use i64; nonnegative interpolation weights and the weighted sum use u64 to support the full i32 angle and u32 pulse ranges without overflow. Mathematical limits do not establish valid servo pulse ranges: actual calibration and output-backend constraints remain separate.
 
-Twelve calibration tests cover construction, endpoints, midpoint, rejected out-of-range angles, rounding, decreasing pulse widths, and extreme inputs. Together with the four Angle tests, the owner reported 16 passing control tests on Windows. Implementation followed incremental red/green tests. No physical servo calibration or Pico integration has been performed.
+Twelve calibration tests cover construction, endpoints, midpoint, rejected out-of-range angles, rounding, decreasing pulse widths, and extreme inputs. Together with the four Angle tests, the owner reported 16 passing control tests on Windows. Implementation followed incremental red/green tests. No physical servo calibration has been performed; Pico integration was subsequently verified with synthetic calibration data.
 
 Implementation: src/calibration.rs. Unit tests: src/test_calibration.rs, included with an explicit path attribute.
 
@@ -70,10 +70,10 @@ PulseOutput uses an associated Error type and contains no PIO-specific types. Th
 
 Five wrapper tests cover construction without output, a calibrated command, rejection of angles below and above the range without output, forwarding Busy without retry, and successive commands with their own pulse widths. The test output records calls and accepted values using core::cell::Cell.
 
-On 2026-10-14 the owner reported the full local check passing: 21 control tests, 6 signal tests, 3 Python tests, Rust formatting, and the existing Pico build. The 21 control tests comprise 4 Angle, 12 calibration, and 5 Servo tests. The previous calibration/task-runner revision had a green GitHub Actions run; the new Servo wrapper revision awaits its first reported remote run.
+On 2026-10-14 the owner reported the full local check passing: 21 control tests, 6 signal tests, 3 Python tests, Rust formatting, and the existing Pico build. The 21 control tests comprise 4 Angle, 12 calibration, and 5 Servo tests. The previous calibration/task-runner revision had a green GitHub Actions run; the Servo wrapper subsequently passed CI. The current Pico integration awaits its first reported remote run.
 
-The control library is not yet integrated into the Pico firmware, so the current Pico build does not establish embedded integration or physical angle control.
+The owner subsequently reported a successful full check and UF2 upload for Pico integration. ServoPio implements PulseOutput; main wraps it in Servo and uses synthetic calibration points of -45 degrees / 1000 us and +45 degrees / 2000 us. The application cycles through -45, 0, and +45 degrees approximately once per second. On 2026-10-14, the owner reported that the uploaded firmware runs as expected, without an attached servo. This confirms the integrated angle-to-signal path, not physical joint position or exact pulse timing.
 
 ## Next step
 
-Implement PulseOutput for the Pico output driver and connect a test calibration to angle commands in main. Review the integration before implementation and verify initially without an attached servo.
+Prepare and verify the electrical servo test setup before connecting a servo. Replace synthetic calibration with measured joint calibration only after hardware commissioning.
