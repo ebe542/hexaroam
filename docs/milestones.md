@@ -39,3 +39,9 @@ This completes the setup, blink, adjustable-signal, and synthetic angle-command 
 - Expansion transport and synchronization requirements.
 - Power budget, distribution, and battery arrangement.
 - Host environment and sensor selection.
+
+## Two-channel PIO verification
+
+2026-10-15: The owner reported a successful local check with 68 passing tests and physical execution with a blinking LED. PIO0 SM0 drives GP0 and SM1 drives GP1 using one shared eight-instruction program. The driver is generic over the PIO block, state machine index, and GPIO identifier; program installation is separate from channel initialization.
+
+Both outputs were reported to follow the agreed opposing 1000/1500/2000-us and 2000/1500/1000-us sequences. Rising edges were not synchronized, consistent with separate channel starts. No new numerical timing measurements were reported. Physical servo operation and coordinated channel start remain pending. Remote CI for this revision has not yet been reported.

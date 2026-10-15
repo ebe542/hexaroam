@@ -1,6 +1,6 @@
 # Firmware
 
-Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates adjustable PIO servo pulses on GP0 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
+Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates adjustable PIO servo pulses on GP0 and GP1 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
@@ -84,13 +84,15 @@ Commit source files, linker configuration, and Cargo.lock. Generated ELF and UF2
 
 ## PIO pulse driver and shared signal logic
 
-The driver uses PIO0 state machine 0 and GP0 (physical Pico pin 1). ServoPio owns the running state machine, a private PioTransport adapter, the configured limits, and the pin. The PIO manager remains in main. This single-output implementation is a learning step, not a finalized multi-channel design.
+The application uses PIO0 state machine 0 with GP0 (physical Pico pin 1) and state machine 1 with GP1 (physical pin 2). ServoPio is generic over the PIO block, state machine index, and pin identifier. The associated P::PinFunction ties the GPIO function to the selected PIO block at compile time. Each channel owns its running state machine, private PioTransport adapter, limits, and pin. The PIO manager remains in main. This two-channel implementation is a learning step, not a finalized 18-channel design.
+
+The module-level install_program function loads the eight-instruction program once. main creates a second handle with unsafe InstalledProgram::share before passing the handles to the two channel constructors. Sharing does not duplicate instructions in PIO memory. The safety condition is that the program must be uninstalled only once and only after all state machines using it have been uninitialized. This firmware never uninstalls it. Each constructor starts its channel separately; rising edges are not synchronized.
 
 ### Responsibilities
 
 - `servo-signal` is a hardware-independent `no_std` library. PulseLimits validates inclusive application limits; submit_pulse validates requests and enforces a single pending update through PulseTransport.
 - The private PioTransport implements the transport with the actual TX FIFO and converts microseconds to the PIO data word.
-- ServoPio contains the PIO program, timing calculations, initialization, and hardware resource ownership.
+- The servo_pio module contains the PIO program and timing calculations. ServoPio initializes a channel from an installed program handle and owns its hardware resources.
 - main selects the current experiment limits of 1000–2000 us and the initial pulse of 1500 us. These are test settings, not calibrated MZ996 limits.
 
 The Pico package depends on the shared library through `path = "../servo-signal"`. See the [shared library guide](servo-signal/README.md) for API contracts and host test commands.
@@ -116,21 +118,23 @@ The program occupies eight instructions (16 bytes). Labels and wrap directives o
 
 Therefore high count = pulse width - 2 and low count = 20,000 - pulse width - 6. At 1500 us, the counts are 1498 and 18494. Encoding remains private to the PIO driver and must be reviewed with any program change.
 
-The representable pulse range is 2–19,994 us for this program. This is a technical encoding range, not a servo operating range. Before configuring the state machine, the constructor rejects unsupported application limits with UnsupportedPulseLimits and an initial pulse outside those limits with InitialPulseOutOfRange. Clock-divider checks and program installation can still panic; the constructor is not a fully fallible hardware initialization API.
+The representable pulse range is 2–19,994 us for this program. This is a technical encoding range, not a servo operating range. Before configuring the state machine, the constructor rejects unsupported application limits with UnsupportedPulseLimits and an initial pulse outside those limits with InitialPulseOutOfRange. Clock-divider checks and the separate program installation can still panic; the constructor is not a fully fallible hardware initialization API.
 
-GPIO is set low before enabling output direction. A validated initial data word is queued before starting PIO. The application now requests -45, 0, and +45 degrees through Servo, using synthetic calibration points that map to 1000, 1500, and 2000 us. Commands cycle approximately once per second while the LED keeps blinking. Its demonstration loop uses expect on submission errors. Angle conversion and two-point calibration are implemented in servo-control. Physical servo calibration, output-disable controls, and multi-channel coordination are not implemented.
+GPIO is set low before enabling output direction. A validated initial data word is queued before starting PIO. Both channels initially output 1500 us for approximately one second. The application then requests -45, 0, and +45 degrees on GP0 and +45, 0, and -45 degrees on GP1 through separate Servo instances and synthetic calibrations. These map to 1000/1500/2000 us and 2000/1500/1000 us respectively. Commands cycle approximately once per second while the LED keeps blinking. Its demonstration loop uses expect on submission errors. Angle conversion and two-point calibration are implemented in servo-control. Physical servo calibration, output-disable controls, and multi-channel coordination are not implemented.
 
 The dependencies remain rp-pico 0.9, rp2040-hal 0.10.2, and pio/pio-proc 0.2, with resolved versions recorded in Cargo.lock.
 
 ### Bench observations
 
+2026-10-15, two-channel integration: the owner reported a successful local check with 68 passing tests, firmware execution with a blinking LED, and both pulse outputs following the agreed sequences. Rising edges were observed to be unsynchronized, as expected from separate state-machine starts. No new numerical timing or amplitude measurements were reported. Remote CI for this firmware revision has not yet been reported.
+
 2026-10-13, initial fixed-pulse program: the owner observed approximately 19.8 ms period and 1.4 ms high time versus nominal 20 ms and 1.5 ms. That earlier program used separate startup counts and a different loop; its count corrections are not the current encoding.
 
 2026-10-14, shared-library integration: the owner reported six passing host unit tests, a successful Pico build, and physical execution with apparently unchanged behavior of the three alternating pulse widths. The three widths had already been visually distinguished before extraction.
 
-Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. No servo was attached. Measurement uncertainty was not quantified and no measured amplitude was reported. These observations confirm basic operation, not precise timing accuracy, absence of short update glitches, or servo compatibility. Unit tests do not verify hardware FIFO behavior or ASM cycle timing. Initial configuration errors, Clippy, Ubuntu execution, and formatter check results have not been specifically verified.
+Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. No servo was attached. Measurement uncertainty was not quantified and no measured amplitude was reported. These observations confirm basic operation, not precise timing accuracy, absence of short update glitches, or servo compatibility. Unit tests do not verify hardware FIFO behavior or ASM cycle timing. Initial configuration error paths and Clippy have not been specifically verified. The two-channel local check includes Rust formatting checks and the Pico build; Ubuntu hardware execution remains unverified.
 
-For reproducing the signal check, connect the probe to GP0 through the planned 180-ohm series resistor and its ground clip to Pico GND (for example physical pin 3). Keep the servo disconnected. Exact wiring and power details of the reported observations were not recorded.
+For reproducing the signal check, connect the probes to GP0 and GP1 through the planned 180-ohm series resistors and their ground clips to Pico GND (for example physical pin 3). Keep the servo disconnected. Exact wiring and power details of the reported observations were not recorded.
 
 ## Angle library
 

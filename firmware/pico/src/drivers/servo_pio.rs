@@ -3,11 +3,11 @@
 use hexaroam_servo_control::PulseOutput;
 use hexaroam_servo_signal::{PulseLimits, PulseTransport, submit_pulse};
 use rp_pico::hal::{
-    gpio::{FunctionPio0, Pin, PullNone, bank0::Gpio0},
-    pac::PIO0,
+    gpio::{Pin, PinId, PullNone},
     pio::{
-        InstalledProgram, PIO, PIO0SM0, PIOBuilder, PinDir, PinState, Running,
-        ShiftDirection, StateMachine, Tx, UninitStateMachine,
+        InstalledProgram, PIO, PIOBuilder, PIOExt, PinDir, PinState, Running,
+        ShiftDirection, StateMachine, StateMachineIndex, Tx,
+        UninitStateMachine,
     },
 };
 
@@ -24,33 +24,33 @@ pub enum ServoInitError {
     InitialPulseOutOfRange,
 }
 
-struct PioTransport {
-    tx: Tx<PIO0SM0>,
+struct PioTransport<P: PIOExt, SM: StateMachineIndex> {
+    tx: Tx<(P, SM)>,
 }
 
-impl PulseTransport for PioTransport {
+impl<P: PIOExt, SM: StateMachineIndex> PulseTransport for PioTransport<P, SM> {
     fn is_empty(&self) -> bool {
         self.tx.is_empty()
     }
 
     fn write(&mut self, pulse_width_us: u32) -> bool {
         self.tx
-            .write(ServoPio::encode_pulse(pulse_width_us))
+            .write(encode_pulse(pulse_width_us))
     }
 }
 
-pub struct ServoPio {
-    _state_machine: StateMachine<PIO0SM0, Running>,
-    transport: PioTransport,
+pub struct ServoPio<P: PIOExt, SM: StateMachineIndex, I: PinId> {
+    _state_machine: StateMachine<(P, SM), Running>,
+    transport: PioTransport<P, SM>,
     limits: PulseLimits,
-    _pin: Pin<Gpio0, FunctionPio0, PullNone>,
+    _pin: Pin<I, P::PinFunction, PullNone>,
 }
 
-impl ServoPio {
+impl<P: PIOExt, SM: StateMachineIndex, I: PinId> ServoPio<P, SM, I> {
     pub fn new(
-        pio: &mut PIO<PIO0>,
-        sm: UninitStateMachine<PIO0SM0>,
-        pin: Pin<Gpio0, FunctionPio0, PullNone>,
+        program: InstalledProgram<P>,
+        sm: UninitStateMachine<(P, SM)>,
+        pin: Pin<I, P::PinFunction, PullNone>,
         system_clock_hz: u32,
         limits: PulseLimits,
         initial_pulse_us: u32,
@@ -77,17 +77,16 @@ impl ServoPio {
             "PIO clock divider is out of range",
         );
 
-        let program = Self::install_program(pio);
-
+        let pin_number = pin.id().num;
         let (mut state_machine, _rx, tx) =
             PIOBuilder::from_installed_program(program)
-                .set_pins(0, 1)
+                .set_pins(pin_number, 1)
                 .out_shift_direction(ShiftDirection::Right)
                 .clock_divisor_fixed_point(divider as u16, 0)
                 .build(sm);
 
-        state_machine.set_pins([(0, PinState::Low)]);
-        state_machine.set_pindirs([(0, PinDir::Output)]);
+        state_machine.set_pins([(pin_number, PinState::Low)]);
+        state_machine.set_pindirs([(pin_number, PinDir::Output)]);
 
         let mut transport = PioTransport { tx };
 
@@ -106,19 +105,6 @@ impl ServoPio {
         })
     }
 
-    fn encode_pulse(pulse_width_us: u32) -> u32 {
-        // At 1 MHz, each PIO instruction cycle takes 1 us.
-        // High: SET (1) + JMP loop (count + 1).
-        let high_count = pulse_width_us - 2;
-        // Low: SET (1) + OUT (1) + JMP loop (count + 1)
-        //      + PULL (1) + MOV (1) + OUT (1).
-        // The final three instructions run after wrapping,
-        // before the next rising edge.
-        let low_count = PERIOD_US - pulse_width_us - 6;
-
-        (low_count << 16) | high_count
-    }
-
     pub fn set_pulse_width_us(
         &mut self,
         pulse_width_us: u32,
@@ -129,29 +115,11 @@ impl ServoPio {
             pulse_width_us,
         )
     }
-
-    fn install_program(pio: &mut PIO<PIO0>) -> InstalledProgram<PIO0> {
-        let program = pio_proc::pio_asm!(
-            ".wrap_target",
-            "pull noblock",
-            "mov x, osr",
-            "out y, 16",
-            "set pins, 1",
-            "high:",
-            "jmp y-- high",
-            "set pins, 0",
-            "out y, 16",
-            "low:",
-            "jmp y-- low",
-            ".wrap",
-        );
-
-        pio.install(&program.program)
-            .expect("Insufficient PIO instruction memory")
-    }
 }
 
-impl PulseOutput for ServoPio {
+impl<P: PIOExt, SM: StateMachineIndex, I: PinId> PulseOutput
+    for ServoPio<P, SM, I>
+{
     type Error = PulseError;
 
     fn set_pulse_width_us(
@@ -160,4 +128,37 @@ impl PulseOutput for ServoPio {
     ) -> Result<(), Self::Error> {
         ServoPio::set_pulse_width_us(self, pulse_width_us)
     }
+}
+
+fn encode_pulse(pulse_width_us: u32) -> u32 {
+    // At 1 MHz, each PIO instruction cycle takes 1 us.
+    // High: SET (1) + JMP loop (count + 1).
+    let high_count = pulse_width_us - 2;
+    // Low: SET (1) + OUT (1) + JMP loop (count + 1)
+    //      + PULL (1) + MOV (1) + OUT (1).
+    // The final three instructions run after wrapping,
+    // before the next rising edge.
+    let low_count = PERIOD_US - pulse_width_us - 6;
+
+    (low_count << 16) | high_count
+}
+
+pub fn install_program<P: PIOExt>(pio: &mut PIO<P>) -> InstalledProgram<P> {
+    let program = pio_proc::pio_asm!(
+        ".wrap_target",
+        "pull noblock",
+        "mov x, osr",
+        "out y, 16",
+        "set pins, 1",
+        "high:",
+        "jmp y-- high",
+        "set pins, 0",
+        "out y, 16",
+        "low:",
+        "jmp y-- low",
+        ".wrap",
+    );
+
+    pio.install(&program.program)
+        .expect("Insufficient PIO instruction memory")
 }

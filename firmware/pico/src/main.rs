@@ -2,7 +2,7 @@
 #![no_main]
 mod drivers;
 
-use drivers::servo_pio::ServoPio;
+use drivers::servo_pio::{ServoPio, install_program};
 use embedded_hal::digital::OutputPin;
 use hexaroam_servo_control::{Angle, Calibration, Servo};
 use hexaroam_servo_signal::PulseLimits;
@@ -55,7 +55,7 @@ fn main() -> ! {
         &mut peripherals.RESETS,
     );
 
-    let (mut pio, sm0, _, _, _) = peripherals
+    let (mut pio, sm0, sm1, _, _) = peripherals
         .PIO0
         .split(&mut peripherals.RESETS);
 
@@ -64,11 +64,22 @@ fn main() -> ! {
         .into_function::<FunctionPio0>()
         .into_pull_type::<PullNone>();
 
+    let second_servo_pin = pins
+        .gpio1
+        .into_function::<FunctionPio0>()
+        .into_pull_type::<PullNone>();
+
     let pulse_limits =
         PulseLimits::new(1_000, 2_000).expect("Invalid test pulse limits");
 
+    let servo_program = install_program(&mut pio);
+
+    // SAFETY: The program remains installed for the entire firmware runtime.
+    // Neither handle is used to uninstall it.
+    let second_servo_program = unsafe { servo_program.share() };
+
     let pulse_output = ServoPio::new(
-        &mut pio,
+        servo_program,
         sm0,
         servo_pin,
         clocks.system_clock.freq().to_Hz(),
@@ -76,6 +87,17 @@ fn main() -> ! {
         1_500,
     )
     .expect("Failed to initialize servo output");
+
+    let second_pulse_output = ServoPio::new(
+        second_servo_program,
+        sm1,
+        second_servo_pin,
+        clocks.system_clock.freq().to_Hz(),
+        PulseLimits::new(1_000, 2_000)
+            .expect("Invalid second test pulse limits"),
+        1_500,
+    )
+    .expect("Failed to initialize second servo output");
 
     // Synthetic calibration for signal testing without a servo.
     let calibration = Calibration::new(
@@ -86,7 +108,17 @@ fn main() -> ! {
     )
     .expect("Invalid test calibration");
 
+    // Synthetic calibration for signal testing without a servo.
+    let second_calibration = Calibration::new(
+        Angle::from_centidegrees(-4_500),
+        1_000,
+        Angle::from_centidegrees(4_500),
+        2_000,
+    )
+    .expect("Invalid second test calibration");
+
     let mut servo = Servo::new(calibration, pulse_output);
+    let mut second_servo = Servo::new(second_calibration, second_pulse_output);
 
     let mut led = pins.led.into_push_pull_output();
     let target_angles = [
@@ -109,6 +141,12 @@ fn main() -> ! {
         servo
             .set_angle(target_angles[target_index])
             .expect("Failed to submit angle command");
+
+        let second_target_index = target_angles.len() - 1 - target_index;
+
+        second_servo
+            .set_angle(target_angles[second_target_index])
+            .expect("Failed to submit second angle command");
 
         target_index = (target_index + 1) % target_angles.len();
     }
