@@ -1,44 +1,48 @@
 # Development tools
 
-Run the shared task runner from the repository root using Python 3.9 or newer. It uses only the Python standard library; no virtual environment or pip packages are required for this script.
+Use Python 3.10 or newer; no external Python packages are needed. From the repository root:
 
 | Command | Task |
 | --- | --- |
-| `python tools/dev.py test` | Run task-runner tests and both Rust libraries' host unit tests |
+| `python tools/dev.py test` | Python runner/parser tests and both Rust libraries' host tests |
 | `python tools/dev.py fmt` | Format all three Rust packages; modifies source files |
-| `python tools/dev.py check` | Run task-runner tests, check Rust formatting, run both libraries' host tests, and build the Pico firmware |
-| `python tools/dev.py uf2` | Build and convert the Pico firmware using the configured Cargo runner |
+| `python tools/dev.py check` | Python tests, three Rust formatting checks, both Rust test groups, Pico build |
+| `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
-On Ubuntu, use python3 if python is unavailable. Rust/Cargo must be on PATH. The check task requires rustfmt and the thumbv6m-none-eabi target. The uf2 task additionally requires the installed elf2uf2-rs converter.
+On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check requires rustfmt and thumbv6m-none-eabi. uf2 additionally requires elf2uf2-rs.
 
-The runner resolves package directories relative to its own file and starts subprocesses without a shell. It runs all configured steps, prints their PASS/FAIL results together at the end, and returns 1 if any step fails or 0 if all pass. The summary counts check steps, not individual test cases. UF2 conversion still depends on a successful build inside cargo run. It does not install prerequisites or flash hardware.
+## Output and totals
 
-A typical local workflow is:
+The runner resolves directories from its own path and launches commands without a shell. It displays merged stdout/stderr line by line and captures the same text for summary parsing. Child Python output uses UTF-8 and unbuffered mode; child colors are enabled for interactive terminals and GitHub Actions. NO_COLOR explicitly disables colors; redirected non-CI output stays plain. Rust test-harness colors are explicitly enabled when appropriate. Captured text retains ANSI colors; only the parser input is stripped of ANSI control sequences.
+
+All independent task steps run even after failures. The final overview lists each step and its process status. A nonzero child exit code causes a nonzero overall exit code, regardless of later successes or parsed test counts. Missing/unlaunchable commands are reported as failed steps.
+
+Only Cargo test commands and Python unittest commands contribute test counts. Formatting, builds, and UF2 conversion do not. The total sums passed, failed, skipped/ignored, and filtered-out cases separately; filtered-out cases were not executed.
+
+Each test process must contain exactly one recognizable summary. Compilation errors, unsupported categories, and ambiguous/missing summaries produce "Test count: unknown". If any group is unknown, only a "Known subtotal" is shown, explicitly marked incomplete. An unknown count alone does not override a successful process exit code.
+
+The parser handles the currently used Rust libtest and Python unittest text formats. It does not use unstable Rust JSON output. New output formats require parser updates and tests. Benchmarks and unittest expected-failure categories are not supported. Counts are never hard-coded.
+
+The uf2 task uses cargo run: conversion remains dependent on a successful build inside Cargo. The runner itself does not install tools or flash hardware.
+
+## Tests
+
+```bash
+python -m unittest discover -s tools -p "test_*.py" -v
+```
+
+Python tests mock process execution, so they do not launch Cargo recursively. The runner's test/check tasks discover both test_dev.py and test_result_parser.py. Coverage includes command capture, failure handling, aggregate process status, test totals, unknown summaries, and parser fixtures.
+
+The owner previously reported the 15 parser tests passing and successful local/CI runs before this integration. The new runner integration and added tests have not been executed by the assistant; local and remote verification are pending.
+
+## Workflow
 
 ```bash
 python tools/dev.py check
 ```
 
-If formatting fails:
+If formatting fails, run fmt, review git diff, then rerun check. GitHub Actions calls the same test/check tasks on its configured Windows/Ubuntu runners. No workflow modification is needed for the new test discovery.
 
-```bash
-python tools/dev.py fmt
-git diff
-python tools/dev.py check
-```
+See [development setup](../docs/development-setup.md) and [firmware instructions](../firmware/README.md).
 
-The owner reported a successful expanded local check on Windows on 2026-10-14. The latest local check covers formatting of three packages, 6 signal tests, 21 control tests, 3 Python tests, and the existing Pico build. The control library is now integrated into the Pico firmware; the owner reported a successful full check, UF2 upload, and expected output behavior without an attached servo. Three unittest tests now cover aggregate success, an earlier failure followed by success, and failure in the final step. They mock command execution and do not invoke Cargo. The previous GitHub Actions workflow was reported green for Windows/Ubuntu tests and the Ubuntu firmware build; the subsequent calibration/task-runner workflow was also reported green. The Servo wrapper subsequently passed CI; the current Pico integration awaits its first reported remote run.
-
-The [GitHub Actions workflow](../.github/workflows/rust.yml) uses the test task for the Windows/Ubuntu matrix and the check task for Ubuntu validation. Both jobs provision Python 3.13 and Rust 1.99.0 before invoking the shared runner. The Ubuntu check job additionally installs rustfmt and the Pico target. The previous workflow run was reported successful; the Servo wrapper also passed CI. Remote verification of the current Pico integration is pending.
-
-See [development setup](../docs/development-setup.md) and [firmware instructions](../firmware/README.md) for installation, manual Cargo commands, and hardware verification limits.
-
-## Summary verification
-
-The owner reported three passing task-runner tests. The current groups contain 3 Python tests, 6 signal tests, and 21 control tests (30 individual tests). These counts describe the current tests and are not hard-coded or summed by the runner. The check task has seven steps: Python tests, three formatting checks, two Rust test groups, and the Pico build. The owner reported a successful full local check with all current groups. The previous calibration/task-runner revision also passed CI; the Servo wrapper subsequently passed CI. The current Pico integration has not yet been reported as run remotely.
-
-Run the Python tests directly with:
-
-```bash
-python -m unittest discover -s tools -p "test_dev.py" -v
-```
+The runner also colors its own step results and overall status: only PASS/PASSED is green and FAIL/FAILED is red; brackets, command text, counts, and headers stay plain. NO_COLOR and plain redirected output disable these colors. Numeric totals remain plain text.

@@ -184,4 +184,4 @@ The project owner performs implementation, builds, tests, and commits. Setup com
 
 ## Shared development commands
 
-Use Python 3.9 or newer to run `python tools/dev.py check` from the repository root. On Ubuntu the interpreter may be named python3. No additional Python packages are needed. This checks both Rust packages for formatting, runs the host unit tests, and builds the Pico firmware. The owner reported a successful Windows run on 2026-10-14. See the [task runner guide](../tools/README.md) for formatting and UF2 tasks. GitHub Actions execution remains pending.
+Use Python 3.10 or newer to run `python tools/dev.py check` from the repository root. On Ubuntu the interpreter may be named python3. No additional Python packages are needed. This checks both Rust packages for formatting, runs the host unit tests, and builds the Pico firmware. The owner reported a successful Windows run on 2026-10-14. See the [task runner guide](../tools/README.md) for formatting and UF2 tasks. GitHub Actions execution remains pending.
