@@ -9,7 +9,18 @@ from unittest.mock import patch
 import dev
 
 
-class TaskSummaryTests(unittest.TestCase):
+class RunnerTestCase(unittest.TestCase):
+    def setUp(self):
+        environment = dev.os.environ.copy()
+        for name in (
+            "GITHUB_ACTIONS", "NO_COLOR", "FORCE_COLOR",
+            "PYTHON_COLORS", "CARGO_TERM_COLOR",
+        ):
+            environment.pop(name, None)
+        self.enterContext(patch.dict(dev.os.environ, environment, clear=True))
+
+
+class TaskSummaryTests(RunnerTestCase):
     def test_failure_is_preserved_when_last_step_passes(self):
         tasks = {
             "test": [
@@ -105,7 +116,7 @@ class TaskSummaryTests(unittest.TestCase):
 
 
 
-class CommandExecutionTests(unittest.TestCase):
+class CommandExecutionTests(RunnerTestCase):
     def execute(self, text, return_code):
         with (
             patch.object(dev.subprocess, "Popen") as popen,
@@ -174,7 +185,7 @@ class CommandExecutionTests(unittest.TestCase):
         self.assertIn("denied", result.output)
 
 
-class TestTotalTests(unittest.TestCase):
+class TestTotalTests(RunnerTestCase):
     @staticmethod
     def rust_output(passed, failed=0, skipped=0, filtered=0):
         status = "FAILED" if failed else "ok"
@@ -305,7 +316,7 @@ class TestTotalTests(unittest.TestCase):
         self.assertIn("Total: 3 passed", output)
 
 
-class ColorOutputTests(unittest.TestCase):
+class ColorOutputTests(RunnerTestCase):
     def execute(self, environment):
         with (
             patch.dict(dev.os.environ, environment, clear=True),
@@ -362,6 +373,28 @@ class ColorOutputTests(unittest.TestCase):
         ):
             terminal.isatty.return_value = True
             self.assertEqual(dev.color_status("PASS", True), "PASS")
+
+    def test_github_actions_enables_colors_without_a_terminal(self):
+        with (
+            patch.dict(dev.os.environ, {"GITHUB_ACTIONS": "true"}, clear=True),
+            redirect_stdout(io.StringIO()),
+            patch.object(dev.subprocess, "Popen") as popen,
+        ):
+            process = popen.return_value.__enter__.return_value
+            process.stdout = io.StringIO("")
+            process.wait.return_value = 0
+            dev.run_command(["cargo", "test", "--lib"], Path("."))
+            self.assertEqual(
+                dev.color_status("PASS", True), "\x1b[32mPASS\x1b[0m"
+            )
+
+        environment = popen.call_args.kwargs["env"]
+        self.assertEqual(environment["CARGO_TERM_COLOR"], "always")
+        self.assertEqual(environment["PYTHON_COLORS"], "1")
+        self.assertEqual(
+            popen.call_args.args[0],
+            ["cargo", "test", "--lib", "--", "--color", "always"],
+        )
 
     def test_redirected_summary_is_plain(self):
         with (
