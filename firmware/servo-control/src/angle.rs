@@ -29,4 +29,5 @@ impl Angle {
 }
 
 #[cfg(test)]
+#[path = "test_angle.rs"]
 mod tests;
