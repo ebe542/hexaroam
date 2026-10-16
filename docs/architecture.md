@@ -37,3 +37,7 @@ Every built revision should identify its mechanical files, BOM, wiring, robot co
 ## Initial verification
 
 Develop parsing, limits, and motion calculations on the host where possible. Verify physical signal timing and behavior on real hardware. Simulation cannot establish electrical correctness.
+
+## Servo output working design
+
+See the [multi-channel servo output design](servo-output-design.md) for the proposed single-state-machine PIO/DMA backend, whole-plan updates, buffer ownership, and underflow recovery. This is a working design; current firmware still uses separate state machines for its two outputs.

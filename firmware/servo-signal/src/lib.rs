@@ -67,5 +67,11 @@ pub fn submit_pulse(
     Ok(())
 }
 
+mod signal_plan;
+
+pub use signal_plan::{
+    PulseTarget, SignalPlan, SignalPlanEntry, SignalPlanError,
+};
+
 #[cfg(test)]
 mod tests;
