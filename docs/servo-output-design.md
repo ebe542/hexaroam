@@ -1,6 +1,6 @@
 # Multi-channel servo output design
 
-Status: working design, 2026-10-16. Not implemented or hardware-verified. The committed Pico firmware still uses one state machine per output. This document proposes its replacement; it does not describe current firmware behavior.
+Status: working design, 2026-10-16. Partially implemented and host-tested; the new output path is not hardware-verified. The committed Pico firmware still uses one state machine per output. This document proposes its replacement; it does not describe current firmware behavior.
 
 ## Scope and command contract
 
@@ -65,7 +65,7 @@ At a proposed 25 MHz state-machine clock:
 counter = duration_us * 25 - 11
 ```
 
-A 1-us interval uses counter 14: 15 countdown cycles plus 10 preparation cycles equals 25 cycles. Require an exactly achievable clock divider and checked encoding arithmetic. These are analytical results; assembly acceptance, timing, and DMA throughput still require verification. Adding instructions changes the formula.
+A 1-us interval uses counter 14: 15 countdown cycles plus 10 preparation cycles equals 25 cycles. The 25 cycles/us come from the chosen 25 MHz PIO clock, not from the program length. The eleven fixed cycles are ten next-entry instructions plus the final countdown check. See the [instruction-by-instruction timing derivation](../firmware/servo-pio/README.md#timing-derivation) for the counting boundaries and clock-divider example. Require an exactly achievable clock divider and checked encoding arithmetic. The PIO assembly has been accepted by a Pico build. Physical timing and DMA throughput still require verification. Adding instructions changes the formula.
 
 For 18 channels, 19 entries require 152 bytes of transfer data per plan; two such payload buffers require 304 bytes, excluding metadata and any additional boundary markers.
 
@@ -106,3 +106,9 @@ The existing Angle and Calibration remain useful. ServoBank's per-channel sequen
 - [RP2040 datasheet, PIO chapter](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf): instruction behavior, FIFO semantics, and GPIO mapping.
 - [Pimoroni PWM cluster PIO](https://github.com/pimoroni/pimoroni-pico/blob/main/drivers/pwm/pwm_cluster.pio): reference for GPIO-mask/delay streaming.
 - [Pimoroni PWM cluster implementation](https://github.com/pimoroni/pimoroni-pico/blob/main/drivers/pwm/pwm_cluster.cpp): reference for transition generation and DMA feeding. The proposed checked PIO program above differs from that implementation.
+
+## Implementation progress
+
+SignalPlan generation in servo-signal passed 13 new host tests, with 93 tests in the full local check; the owner subsequently reported green CI for that revision. The checked PIO program is compiled but not installed or executed.
+
+The servo-pio library now encodes individual plan entries, checks configured RP2040 GPIO masks, and rejects zero or unrepresentable durations. The encoder and its error type are internal implementation details, not application-facing APIs. The future output driver will accept complete SignalPlan values and own the GPIO/clock configuration; callers do not perform ASM-specific encoding. The owner reported nine encoder tests passing and a full local check with 102 tests. Whole-plan encoding and DMA integration are not implemented. See the [encoder guide](../firmware/servo-pio/README.md).

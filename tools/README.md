@@ -4,9 +4,9 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 
 | Command | Task |
 | --- | --- |
-| `python tools/dev.py test` | Python runner/parser tests and both Rust libraries' host tests |
-| `python tools/dev.py fmt` | Format all three Rust packages; modifies source files |
-| `python tools/dev.py check` | Python tests, three Rust formatting checks, both Rust test groups, Pico build |
+| `python tools/dev.py test` | Python runner/parser tests and host tests for servo-signal, servo-control, and servo-pio |
+| `python tools/dev.py fmt` | Format all four Rust packages; modifies source files |
+| `python tools/dev.py check` | Python tests, four Rust formatting checks, three Rust test groups, Pico build |
 | `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
 On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check requires rustfmt and thumbv6m-none-eabi. uf2 additionally requires elf2uf2-rs.
@@ -46,3 +46,5 @@ If formatting fails, run fmt, review git diff, then rerun check. GitHub Actions 
 See [development setup](../docs/development-setup.md) and [firmware instructions](../firmware/README.md).
 
 The runner also colors its own step results and overall status: only PASS/PASSED is green and FAIL/FAILED is red; brackets, command text, counts, and headers stay plain. NO_COLOR and plain redirected output disable these colors. Numeric totals remain plain text.
+
+The servo-pio encoder package is included in test, fmt, and check. The owner reported 102 passing tests in the full local check after adding its nine encoding tests. CI uses the same task definitions; the workflow file requires no change for this package. The check task still includes a firmware build; the proposed task naming changes remain deferred.

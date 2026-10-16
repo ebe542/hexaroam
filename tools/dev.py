@@ -15,10 +15,18 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SIGNAL_DIR = PROJECT_ROOT / "firmware" / "servo-signal"
 PICO_DIR = PROJECT_ROOT / "firmware" / "pico"
 CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
+SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
 
 RUNNER_TEST_COMMAND = [
-    sys.executable, "-m", "unittest", "discover",
-    "-s", "tools", "-p", "test_*.py", "-v",
+    sys.executable,
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v",
 ]
 
 TASKS = {
@@ -26,20 +34,24 @@ TASKS = {
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
         (CONTROL_DIR, ["cargo", "fmt"]),
         (PICO_DIR, ["cargo", "fmt"]),
+        (SERVO_PIO_DIR, ["cargo", "fmt"]),
     ],
     "check": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
         (PICO_DIR, ["cargo", "fmt", "--check"]),
+        (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PICO_DIR, ["cargo", "build", "--locked"]),
+        (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "uf2": [
         (PICO_DIR, ["cargo", "run", "--locked"]),
@@ -59,12 +71,14 @@ def run_command(arguments: list[str], directory: Path) -> CommandResult:
     use_color = "NO_COLOR" not in environment and (
         sys.stdout.isatty() or environment.get("GITHUB_ACTIONS") == "true"
     )
-    environment.update({
-        "CARGO_TERM_COLOR": "always" if use_color else "never",
-        "PYTHON_COLORS": "1" if use_color else "0",
-        "PYTHONUNBUFFERED": "1",
-        "PYTHONIOENCODING": "utf-8",
-    })
+    environment.update(
+        {
+            "CARGO_TERM_COLOR": "always" if use_color else "never",
+            "PYTHON_COLORS": "1" if use_color else "0",
+            "PYTHONUNBUFFERED": "1",
+            "PYTHONIOENCODING": "utf-8",
+        }
+    )
     command = list(arguments)
     if use_color:
         environment["FORCE_COLOR"] = "1"
@@ -96,7 +110,9 @@ def run_command(arguments: list[str], directory: Path) -> CommandResult:
                 lines.append(line)
             return_code = process.wait()
     except FileNotFoundError:
-        message = f"Command or working directory not found: {arguments[0]} ({directory})"
+        message = (
+            f"Command or working directory not found: {arguments[0]} ({directory})"
+        )
         print(message, flush=True)
         return CommandResult(1, message + "\n")
     except OSError as error:
