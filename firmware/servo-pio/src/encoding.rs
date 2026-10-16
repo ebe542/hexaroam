@@ -1,4 +1,4 @@
-use hexaroam_servo_signal::SignalPlanEntry;
+use hexaroam_servo_signal::{SignalPlan, SignalPlanEntry};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum EncodingError {
@@ -6,6 +6,7 @@ pub(crate) enum EncodingError {
     UnconfiguredGpio,
     ZeroDuration,
     DurationOverflow,
+    InsufficientCapacity,
 }
 
 /// Encodes one entry for the checked 25-MHz PIO program.
@@ -50,6 +51,44 @@ pub(crate) fn encode_entry(
         u32::try_from(counter).map_err(|_| EncodingError::DurationOverflow)?;
 
     Ok([entry.gpio_mask | MASK_MARKER, counter])
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) struct EncodedSignalPlan<const WORD_CAPACITY: usize> {
+    words: [u32; WORD_CAPACITY],
+    len: usize,
+}
+
+impl<const WORD_CAPACITY: usize> EncodedSignalPlan<WORD_CAPACITY> {
+    pub(crate) fn new<const PLAN_CAPACITY: usize>(
+        plan: &SignalPlan<PLAN_CAPACITY>,
+        allowed_gpio_mask: u32,
+    ) -> Result<Self, EncodingError> {
+        let entries = plan.entries();
+
+        // Each entry requires two words. Division avoids multiplication overflow.
+        if entries.len() > WORD_CAPACITY / 2 {
+            return Err(EncodingError::InsufficientCapacity);
+        }
+
+        let mut encoded = Self {
+            words: [0; WORD_CAPACITY],
+            len: 0,
+        };
+
+        for &entry in entries {
+            let words = encode_entry(entry, allowed_gpio_mask)?;
+
+            encoded.words[encoded.len..encoded.len + 2].copy_from_slice(&words);
+            encoded.len += 2;
+        }
+
+        Ok(encoded)
+    }
+
+    pub(crate) fn words(&self) -> &[u32] {
+        &self.words[..self.len]
+    }
 }
 
 #[cfg(test)]

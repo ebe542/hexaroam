@@ -1,6 +1,6 @@
 # Servo PIO encoding
 
-`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It currently implements internal encoding of individual entries only. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The public whole-plan driver interface is not implemented yet. It has a local dependency on `servo-signal`, no HAL dependency, and runs unit tests on the host.
+`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It implements internal encoding of individual entries and complete SignalPlan values. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The public whole-plan driver interface is not implemented yet. It has a local dependency on `servo-signal`, no HAL dependency, and runs unit tests on the host.
 
 ## Internal entry encoding
 
@@ -17,6 +17,16 @@ counter = duration_us * 25 - 11
 The eleven cycles include preparation of the next entry and the final countdown instruction. Any change to the program or clock requires reviewing this encoding. A one-microsecond duration yields counter 14. Zero durations are rejected. Arithmetic uses u64 intermediates and checked conversion to u32. The largest representable whole-microsecond duration is 171,798,692 us; this is an encoding limit, not an allowed servo pulse width.
 
 Errors are `InvalidGpioMask`, `UnconfiguredGpio`, `ZeroDuration`, and `DurationOverflow`. No hardware is accessed and no FIFO writes occur.
+
+## Complete-plan encoding
+
+The internal `EncodedSignalPlan<WORD_CAPACITY>` owns a fixed-size array of contiguous u32 words and the number of valid words. Its constructor accepts a complete SignalPlan and the configured GPIO mask. Each entry is encoded in order as mask then counter using the existing entry encoder. `words()` exposes only the initialized payload, excluding spare capacity.
+
+Capacity counts words, not channels or logical entries. Each logical entry requires two words; a worst-case 18-channel plan therefore requires 38 words. Equal pulse end times reduce the actual requirement. The capacity check uses `entries.len() > WORD_CAPACITY / 2` to avoid multiplication overflow. Insufficient space returns `InsufficientCapacity`.
+
+Construction happens in a local buffer. Any entry error rejects the whole result, including an overflow in the final all-Low interval. No partially encoded plan is returned and no hardware is accessed.
+
+This type is not yet a DMA ownership mechanism. The future driver must place payloads in stable memory and prevent moving or modifying them during DMA reads. Encoding alone does not start output, reserve a buffer, or establish frame-boundary activation.
 
 ## Timing derivation
 
@@ -73,8 +83,8 @@ This calculation covers the normal path with valid words, no instruction delay f
 | File | Purpose |
 | --- | --- |
 | src/lib.rs | no_std declaration and private encoding module |
-| src/encoding.rs | Individual entry encoding and validation |
-| src/test_encoding.rs | Nine host unit tests |
+| src/encoding.rs | Internal entry and complete-plan encoding |
+| src/test_encoding.rs | Sixteen host unit tests |
 | Cargo.lock | Locked dependency resolution; commit this file |
 
 From the repository root:
@@ -92,12 +102,14 @@ cargo test --lib --locked
 
 On Ubuntu use `python3` if `python` is unavailable. Run Cargo from this package's directory to avoid the Pico firmware's embedded target configuration.
 
-The nine tests cover marked masks, all-Low encoding, the minimum duration, GPIO29, invalid configuration masks, unconfigured bits, zero duration, the maximum encodable duration, and overflow. The owner reported a successful full local check with 102 tests, Rust formatting checks for four packages, and the existing Pico build. This encoder revision has no reported remote CI result yet.
+The nine tests cover marked masks, all-Low encoding, the minimum duration, GPIO29, invalid configuration masks, unconfigured bits, zero duration, the maximum encodable duration, and overflow. The owner reported a successful full local check with 102 tests, Rust formatting checks for four packages, and the existing Pico build. The owner subsequently reported green CI for the entry encoder revision.
+
+Seven additional tests cover complete word ordering, hidden spare capacity, insufficient capacity, invalid configuration masks, unconfigured outputs, final-entry overflow, and capacity based on actual entries rather than channel count. The owner reported 16 encoder tests passing and a successful full local check with 109 tests. Remote CI for complete-plan encoding has not yet been reported.
 
 ## Integration status
 
 The checked PIO program remains in `../pico/src/drivers/servo_plan_program.rs`; its assembly was accepted by a Pico build. It is not installed or executed. The Pico application does not yet depend on this encoder library and still runs the existing two-channel driver.
 
-Applications will submit a complete SignalPlan through the output driver; they must not need marker bits, PIO instruction timing, or DMA word layout. The driver configuration will own the allowed GPIO mask and PIO clock settings. Whole-plan encoding, the public driver interface, DMA buffers, frame-boundary replacement, and hardware verification remain pending. The temporary dead_code allowance on the private module can be removed when the driver uses it. Host tests do not establish signal timing, underflow behavior, or electrical servo compatibility.
+Applications will submit a complete SignalPlan through the output driver; they must not need marker bits, PIO instruction timing, or DMA word layout. The driver configuration will own the allowed GPIO mask and PIO clock settings. The public driver interface, stable DMA buffers and their ownership, frame-boundary replacement, and hardware verification remain pending. The temporary dead_code allowance on the private module can be removed when the driver uses it. Host tests do not establish signal timing, underflow behavior, or electrical servo compatibility.
 
 See the [multi-channel output working design](../../docs/servo-output-design.md) for the PIO program, timing derivation, buffer ownership, and fault/restart requirements.
