@@ -44,4 +44,10 @@ This completes the setup, blink, adjustable-signal, and synthetic angle-command 
 
 2026-10-15: The owner reported a successful local check with 68 passing tests and physical execution with a blinking LED. PIO0 SM0 drives GP0 and SM1 drives GP1 using one shared eight-instruction program. The driver is generic over the PIO block, state machine index, and GPIO identifier; program installation is separate from channel initialization.
 
-Both outputs were reported to follow the agreed opposing 1000/1500/2000-us and 2000/1500/1000-us sequences. Rising edges were not synchronized, consistent with separate channel starts. No new numerical timing measurements were reported. Physical servo operation and coordinated channel start remain pending. Remote CI for this revision has not yet been reported.
+Both outputs were reported to follow the agreed opposing 1000/1500/2000-us and 2000/1500/1000-us sequences. Rising edges were not synchronized, consistent with separate channel starts. No new numerical timing measurements were reported. Physical servo operation and coordinated channel start remain pending. The owner subsequently reported a green GitHub Actions workflow for this two-channel revision.
+
+## Validated servo bank
+
+2026-10-16: The owner reported a successful full local check with 80 tests after adding two output-free angle validation tests and ten ServoBank tests. The bank validates all IDs and calibrated angle ranges before submitting any command. Validation failure produces no output calls. Submission errors stop further commands without retry or rollback; earlier accepted commands remain accepted.
+
+This library step does not change the Pico demonstration. ServoBank integration, synchronized PIO startup, and simultaneous activation of later target updates remain pending. Remote CI for this library revision has not yet been reported.

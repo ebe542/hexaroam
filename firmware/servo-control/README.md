@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, and calibrated Servo commands through a hardware-independent PulseOutput trait. It has no external dependencies and is now used by the Pico firmware through its private PIO driver.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting multiple targets. It has no external dependencies and is now used by the Pico firmware through its private PIO driver.
 
 ## Angle representation
 
@@ -23,7 +23,9 @@ Fields are private. Angle imposes no joint travel limits; Calibration defines th
 | src/calibration.rs | Calibration validation and integer interpolation |
 | src/test_calibration.rs | Calibration unit tests |
 | src/servo.rs | PulseOutput, Servo, and error forwarding |
-| src/test_servo.rs | Servo wrapper unit tests |
+| src/test_servo.rs | Servo wrapper and validation unit tests |
+| src/servo_bank.rs | Servo IDs, targets, batch validation, and submission |
+| src/test_servo_bank.rs | Servo bank unit tests |
 
 ## Verification
 
@@ -74,6 +76,22 @@ On 2026-10-14 the owner reported the full local check passing: 21 control tests,
 
 The owner subsequently reported a successful full check and UF2 upload for Pico integration. ServoPio implements PulseOutput; main wraps it in Servo and uses synthetic calibration points of -45 degrees / 1000 us and +45 degrees / 2000 us. The application cycles through -45, 0, and +45 degrees approximately once per second. On 2026-10-14, the owner reported that the uploaded firmware runs as expected, without an attached servo. This confirms the integrated angle-to-signal path, not physical joint position or exact pulse timing.
 
+## Servo bank
+
+`Servo::validate_angle()` checks a target using the existing calibration without calling the output. `ServoChannel` exposes this check and `set_angle()` through a common interface, allowing channels with different concrete output types to be managed together.
+
+`ServoBank<'a, E, N>` borrows a fixed-size array of mutable channel references. All channels share the output error type E; their concrete types may differ. The bank requires no heap allocation. `ServoId(0)` identifies the first configured channel, and subsequent IDs follow array order.
+
+`set_targets(&[ServoTarget])` is the only batch command API. A single target, equal angles for multiple channels, and different angles all use this method. An empty slice succeeds without output; omitted channels receive no command.
+
+The bank validates the entire request before submitting any command. Unknown IDs, duplicate IDs, or angles outside the selected channel's calibration reject the request without calling any output. Calibration errors include the affected servo ID. This guarantee covers bank-level ID and angle validation; backend-specific pulse limits remain independently enforced during submission.
+
+After successful validation, commands are submitted in the supplied order. The first command error stops submission and is returned with its servo ID. There is no retry or rollback: an earlier command may already have been accepted. Success means that all outputs accepted their commands; it does not guarantee simultaneous activation or measured joint positions. Existing PWM signals continue with their previous values when validation rejects a request.
+
+Two additional Servo tests cover valid boundary/center validation and rejected out-of-range angles without output. Ten bank tests cover construction, empty requests, a single selected channel, ID-based assignment, individual calibrations for equal angles, unknown and duplicate IDs, invalid angles after a valid target, and early/late output failures. The tests use real Servo instances with recorded mock outputs.
+
+On 2026-10-16, the owner reported all ten bank tests passing and a successful full local check with 80 tests, Rust formatting checks, and the Pico build. The control package now has 33 tests. The Pico application does not yet use ServoBank; synchronized PIO startup and bank integration are the next firmware step. Remote CI for this library revision has not yet been reported.
+
 ## Next step
 
-Prepare and verify the electrical servo test setup before connecting a servo. Replace synthetic calibration with measured joint calibration only after hardware commissioning.
+Integrate ServoBank into the Pico application and prepare both PIO channels before starting them synchronously. Prepare and verify the electrical servo test setup before connecting a servo. Replace synthetic calibration with measured joint calibration only after hardware commissioning.

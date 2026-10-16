@@ -158,3 +158,53 @@ fn successive_commands_submit_their_own_pulse_widths() {
         assert_eq!(last.get(), Some(expected));
     }
 }
+
+#[test]
+fn validation_accepts_boundaries_and_center_without_output() {
+    let last = Cell::new(None);
+    let calls = Cell::new(0);
+
+    let servo = Servo::new(
+        calibration(),
+        TestOutput {
+            last_pulse_us: &last,
+            calls: &calls,
+            error: None,
+        },
+    );
+
+    for target in [-4_500, 0, 4_500] {
+        assert_eq!(
+            servo.validate_angle(Angle::from_centidegrees(target)),
+            Ok(()),
+        );
+    }
+
+    assert_eq!(calls.get(), 0);
+    assert_eq!(last.get(), None);
+}
+
+#[test]
+fn validation_rejects_out_of_range_angles_without_output() {
+    let last = Cell::new(None);
+    let calls = Cell::new(0);
+
+    let servo = Servo::new(
+        calibration(),
+        TestOutput {
+            last_pulse_us: &last,
+            calls: &calls,
+            error: None,
+        },
+    );
+
+    for target in [-4_501, 4_501] {
+        assert_eq!(
+            servo.validate_angle(Angle::from_centidegrees(target)),
+            Err(CalibrationError::AngleOutOfRange),
+        );
+    }
+
+    assert_eq!(calls.get(), 0);
+    assert_eq!(last.get(), None);
+}

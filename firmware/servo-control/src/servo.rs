@@ -11,6 +11,20 @@ pub trait PulseOutput {
     ) -> Result<(), Self::Error>;
 }
 
+pub trait ServoChannel {
+    type Error;
+
+    fn validate_angle(
+        &self,
+        target_angle: Angle,
+    ) -> Result<(), CalibrationError>;
+
+    fn set_angle(
+        &mut self,
+        target_angle: Angle,
+    ) -> Result<(), ServoError<Self::Error>>;
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum ServoError<E> {
     Calibration(CalibrationError),
@@ -42,6 +56,33 @@ impl<O: PulseOutput> Servo<O> {
         self.output
             .set_pulse_width_us(pulse_width_us)
             .map_err(ServoError::Output)
+    }
+
+    pub fn validate_angle(
+        &self,
+        target_angle: Angle,
+    ) -> Result<(), CalibrationError> {
+        self.calibration
+            .pulse_width_us(target_angle)
+            .map(|_| ())
+    }
+}
+
+impl<O: PulseOutput> ServoChannel for Servo<O> {
+    type Error = O::Error;
+
+    fn validate_angle(
+        &self,
+        target_angle: Angle,
+    ) -> Result<(), CalibrationError> {
+        Servo::validate_angle(self, target_angle)
+    }
+
+    fn set_angle(
+        &mut self,
+        target_angle: Angle,
+    ) -> Result<(), ServoError<Self::Error>> {
+        Servo::set_angle(self, target_angle)
     }
 }
 
