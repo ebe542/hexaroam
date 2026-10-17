@@ -17,6 +17,7 @@ SIGNAL_DIR = PROJECT_ROOT / "firmware" / "servo-signal"
 PICO_DIR = PROJECT_ROOT / "firmware" / "pico"
 CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
 SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
+LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
 
 RUNNER_TEST_COMMAND = [
     sys.executable,
@@ -36,12 +37,14 @@ TASKS = {
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
         (CONTROL_DIR, ["cargo", "fmt"]),
         (PICO_DIR, ["cargo", "fmt"]),
         (SERVO_PIO_DIR, ["cargo", "fmt"]),
+        (LOGGING_DIR, ["cargo", "fmt"]),
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
@@ -53,6 +56,8 @@ TASKS = {
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PICO_DIR, ["cargo", "build", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (LOGGING_DIR, ["cargo", "fmt", "--check"]),
+        (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
@@ -63,6 +68,8 @@ TASKS = {
         (CONTROL_DIR, ["cargo", "check", "--locked"]),
         (PICO_DIR, ["cargo", "check", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "check", "--locked"]),
+        (LOGGING_DIR, ["cargo", "fmt", "--check"]),
+        (LOGGING_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
         (PICO_DIR, ["cargo", "build", "--locked"]),
@@ -71,8 +78,12 @@ TASKS = {
         (
             PICO_DIR,
             [
-                "cargo", "build", "--locked", "--examples",
-                "--features", "hardware-tests",
+                "cargo",
+                "build",
+                "--locked",
+                "--examples",
+                "--features",
+                "hardware-tests",
                 "--message-format=json-render-diagnostics",
             ],
         ),
@@ -224,11 +235,13 @@ def run_task(task: str) -> int:
                 artifacts = hardware_artifacts(result.output)
             except ValueError as error:
                 print(str(error), flush=True)
-                results.append((
-                    directory,
-                    ["hardware-artifact-discovery"],
-                    CommandResult(1, str(error)),
-                ))
+                results.append(
+                    (
+                        directory,
+                        ["hardware-artifact-discovery"],
+                        CommandResult(1, str(error)),
+                    )
+                )
                 continue
             for executable in artifacts:
                 conversion = [

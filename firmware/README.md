@@ -6,7 +6,7 @@ See [development setup](../docs/development-setup.md) for prerequisites and [har
 
 ## Pico LED blink firmware
 
-The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. Panic handling stops execution; it does not print a diagnostic or automatically reset the board.
+The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. The normal firmware uses panic-halt: panic handling stops CPU execution without printing a diagnostic or automatically resetting the board. A separate UART panic handler is currently exercised only by the uart_panic hardware test; see [logging](logging/README.md).
 
 ### Files
 
@@ -18,6 +18,10 @@ The onboard LED on GPIO25 alternates between on and off approximately every 500 
 | pico/memory.x | Flash, bootloader, and RAM layout |
 | pico/build.rs | Makes the memory layout available to the linker |
 | pico/src/main.rs | Board clock, GPIO, and timer initialization; starts the demo |
+| pico/src/uart_logging.rs | Nonblocking HAL UART backend for the shared logger |
+| pico/src/panic_uart.rs | Bounded direct UART1 panic output; selected only by uart_panic |
+| logging/src/lib.rs | Hardware-independent buffered logging |
+| logging/src/bounded_writer.rs | Direct formatted output with a shared attempt budget |
 | pico/src/servo_demo.rs | Fixed plan construction, static buffer allocation, DMA servicing, and LED updates |
 | servo-pio/src/output.rs | Prepared PIO output, fixed DMA transfer, and polling service |
 | servo-pio/src/program.rs | Checked multi-channel PIO assembly |
@@ -182,3 +186,9 @@ The library remains available, but the current fixed-plan DMA demo does not issu
 The [servo-control library](servo-control/README.md) provides an i32 centidegree Angle type, two-point calibration, and Servo angle commands through PulseOutput. On 2026-10-14 the owner reported a successful full local check with 21 control tests, 6 signal tests, 3 Python tests, formatting, and the existing Pico build. The library is now integrated into the Pico firmware: ServoPio implements PulseOutput and main owns a Servo configured with synthetic -45-degree / 1000-us and +45-degree / 2000-us calibration points. ServoPio still starts with an initial 1500-us pulse before the wrapper is constructed. Constructing Servo itself emits no command.
 
 On 2026-10-14 the owner reported a successful full check, UF2 generation/upload, and firmware behavior as expected after integration. No servo was attached. This verifies the integrated command path without establishing physical joint angles, a measured servo calibration, or new precise timing measurements. The previous wrapper revision passed CI; a remote result for this integration is pending.
+
+## UART logging and panic diagnostics
+
+The [logging guide](logging/README.md) describes nonblocking Info, Debug, and Error output, whole-message rejection when the buffer is full, and bounded direct panic output. The [hardware-test guide](pico/hardware_tests/README.md#uart-connection-and-terminal) documents UART1 on GP20, the Waveshare TTL adapter, HTerm settings, and separate uart_diagnostics and uart_panic programs.
+
+On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests in the full runner. Buffered output with LF-only line endings was received in HTerm. In uart_panic, the panic message appeared after approximately five seconds and the LED stayed on. These manual checks are additional to the unit tests. The normal servo demo still uses panic-halt and has no UART logging yet. Combined servo/DMA and UART operation, early panic without UART initialization, and a stalled UART have not been separately tested. CI for this revision has not yet been reported.

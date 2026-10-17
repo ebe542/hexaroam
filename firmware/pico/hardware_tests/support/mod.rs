@@ -8,6 +8,8 @@ use rp_pico::hal::{
     watchdog::Watchdog,
 };
 
+// Individual hardware tests use different subsets of these resources.
+#[allow(dead_code)]
 pub struct Board {
     pub pio: pac::PIO0,
     pub dma: pac::DMA,
@@ -15,6 +17,8 @@ pub struct Board {
     pub resets: pac::RESETS,
     pub system_clock_hz: u32,
     pub timer: Timer,
+    pub uart: pac::UART1,
+    pub peripheral_clock: rp_pico::hal::clocks::PeripheralClock,
 }
 
 pub fn initialize() -> Board {
@@ -57,5 +61,7 @@ pub fn initialize() -> Board {
         resets: peripherals.RESETS,
         system_clock_hz: clocks.system_clock.freq().to_Hz(),
         timer,
+        uart: peripherals.UART1,
+        peripheral_clock: clocks.peripheral_clock,
     }
 }

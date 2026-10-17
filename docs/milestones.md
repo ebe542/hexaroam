@@ -75,3 +75,11 @@ The new output path uses two exclusive static RAM buffers and one DMA channel, s
 2026-10-17: The owner reported all requested checks passing and expected operation of faulted_signal_output. The test confirms that a detected PIO underflow makes submit_plan return Faulted even with a pending replacement. Clearing the hardware IRQ flag does not clear the driver fault, and later servicing does not restart output. The host unit-test total remains 128; this is an additional manually evaluated hardware program.
 
 Controlled recovery, independent stale-flag startup testing, and exact fault latency remain pending. The preceding switching revision passed CI; CI for this fault-state revision is pending.
+
+## Buffered UART logging and bounded panic output
+
+2026-10-17: The owner reported 17 passing logging unit tests and 145 passing tests in the full runner. The no_std logging library queues complete LF-terminated lines, rejects whole new messages when full, and services a nonblocking backend with a byte budget. A separate formatted writer bounds the total number of direct write attempts.
+
+The owner confirmed Info, Debug, and Error output in HTerm from the UART1/GP20 hardware test. The separate uart_panic program emitted its message after approximately five seconds and left the LED permanently on. Its handler bypasses the runtime software queue and then holds the CPU in a permanent loop. The attempt budget is not a calibrated time limit.
+
+See the [logging guide](../firmware/logging/README.md) for contracts and the [hardware-test guide](../firmware/pico/hardware_tests/README.md#uart-connection-and-terminal) for reproduction. The regular servo firmware still uses panic-halt; UART integration with running servo DMA and controlled output recovery remain pending. CI for this revision has not yet been reported.
