@@ -69,3 +69,9 @@ The owner reported 121 passing unit tests and successful ELF/UF2 generation thro
 2026-10-17: The owner reported 128 passing unit tests, successful builds, and expected operation of the separate switching_signal_plans hardware test. GP0 and GP1 alternate their High durations while rising edges remain synchronous. The test also asserts Busy for an immediate second submission; no assertion halt was reported.
 
 The new output path uses two exclusive static RAM buffers and one DMA channel, selecting complete plans after DMA transfer completion while FIFO ordering preserves their sequence. The normal fixed-plan demo and underflow tests remain available. Exact update timing, short-glitch exclusion, active-plan acknowledgement, controlled recovery, hardware-fault submission handling, and 18-channel operation remain unverified. Remote CI for this revision has not yet been reported.
+
+## Persistent output fault
+
+2026-10-17: The owner reported all requested checks passing and expected operation of faulted_signal_output. The test confirms that a detected PIO underflow makes submit_plan return Faulted even with a pending replacement. Clearing the hardware IRQ flag does not clear the driver fault, and later servicing does not restart output. The host unit-test total remains 128; this is an additional manually evaluated hardware program.
+
+Controlled recovery, independent stale-flag startup testing, and exact fault latency remain pending. The preceding switching revision passed CI; CI for this fault-state revision is pending.

@@ -113,6 +113,12 @@ SwitchingOutput is a separate public driver that accepts complete replacement Si
 
 The switching_signal_plans hardware test alternates the GP0/GP1 pulse assignments and checks Busy on an immediate second submission. On 2026-10-17 the owner reported expected operation, synchronous rising edges, and alternating High durations. Full verification passed 128 unit tests. See the [driver guide](servo-pio/README.md#two-buffer-signal-plan-replacement) and [hardware-test guide](pico/hardware_tests/README.md). Exact period/update timing, fault recovery, and 18-channel verification remain open; CI for this revision is pending.
 
+## Persistent switching-output fault
+
+SwitchingOutput detects and latches the reserved PIO underflow flag through is_faulted, submit_plan, and service. Once detected, new submissions return Faulted before Busy or validation, and service does not rearm DMA. Clearing the hardware flag does not resume PIO or clear the driver state. Existing DMA resources remain bound; controlled recovery is not implemented.
+
+On 2026-10-17 the owner reported all checks passing and faulted_signal_output running as expected. It checks fault precedence with a ready plan, persistence after hardware-flag clearing, and continued Low outputs during subsequent servicing. See the [hardware-test guide](pico/hardware_tests/README.md#persistent-driver-fault-test). The unit-test total remains 128; remote CI for this revision is pending.
+
 ## Historical per-channel PIO driver
 
 The following sections describe the previous implementation retained in src/drivers. They are not the active DMA demo.

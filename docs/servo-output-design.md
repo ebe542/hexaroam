@@ -126,3 +126,9 @@ The demo uses PIO0 SM0, DMA channel 0, GP0 at 1000 us, GP1 at 2000 us, and a nom
 Submissions require the same period and complete configured output set as startup. An occupied ready slot returns Busy. Acceptance confirms preparation only; selection for DMA can precede actual GPIO activation. service and submit_plan currently share one execution context, not an interrupt-safe concurrent queue.
 
 The separate switching_signal_plans hardware test alternates 1-ms/2-ms and 2-ms/1-ms pulse assignments approximately once per second and asserts that an immediate second submission returns Busy. The owner reported expected execution, synchronous rising edges, and alternating High durations. This does not establish an exact period or exclude brief update glitches. Activation acknowledgement, controlled recovery, submission rejection after a hardware fault, worst-case timing bounds, and 18-channel operation remain open. CI for this revision is pending.
+
+## Latched driver fault result
+
+2026-10-17: SwitchingOutput now latches an observed underflow flag. Submissions return Faulted before Busy or plan validation, and service does not rearm or exchange buffers after detecting the fault. A stale set flag also rejects start; that startup branch has not yet been independently exercised by a hardware test. Existing in-flight DMA resources remain bound rather than being synchronously aborted or waited on.
+
+The owner reported all requested checks passing and faulted_signal_output running as expected. Its assertions cover a pending plan during underflow, Faulted precedence, persistence after clearing the hardware IRQ flag, and no automatic restart under later servicing. No new unit tests were added; the total remains 128. Exact fault latency and controlled recovery remain open, and CI for this revision is pending. The preceding two-buffer switching revision passed CI.

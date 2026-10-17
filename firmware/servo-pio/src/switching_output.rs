@@ -4,6 +4,7 @@ use hexaroam_servo_signal::SignalPlan;
 use rp2040_hal::{
     dma::{Channel, ChannelIndex, single_buffer},
     gpio::{DynPinId, Pin, PullNone},
+    pac,
     pio::{PIOExt, Running, StateMachine, StateMachineIndex, Tx},
 };
 
@@ -29,6 +30,7 @@ pub enum OutputSubmissionError {
     OutputMismatch,
     InvalidPlan,
     InsufficientCapacity,
+    Faulted,
 }
 
 fn submission_error(error: SubmissionError) -> OutputSubmissionError {
@@ -47,6 +49,19 @@ fn submission_error(error: SubmissionError) -> OutputSubmissionError {
     }
 }
 
+fn pio_fault_flag<P: PIOExt>() -> bool {
+    let registers = match P::id() {
+        0 => pac::PIO0::ptr(),
+        1 => pac::PIO1::ptr(),
+        _ => unreachable!("Unsupported PIO block"),
+    };
+
+    // SAFETY: Both addresses refer to RP2040 PIO register blocks.
+    // This only reads the IRQ flags, without clearing or modifying them.
+    // Flag 0 is reserved for this output driver's underflow indication.
+    unsafe { (*registers).irq().read().irq().bits() & 1 != 0 }
+}
+
 pub struct SwitchingOutput<
     P: PIOExt,
     SM: StateMachineIndex,
@@ -60,6 +75,7 @@ pub struct SwitchingOutput<
     pending: Option<PendingSignalPlan<'static, WORD_CAPACITY>>,
     period_us: u32,
     gpio_mask: u32,
+    faulted: bool,
 }
 
 impl<
@@ -77,6 +93,10 @@ impl<
         second_buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
         plan: &SignalPlan<PLAN_CAPACITY>,
     ) -> Result<Self, OutputStartError> {
+        if pio_fault_flag::<P>() {
+            return Err(OutputStartError::Faulted);
+        }
+
         let period_us = plan.period_us();
         let gpio_mask = prepared.gpio_mask;
 
@@ -124,7 +144,19 @@ impl<
             )),
             period_us,
             gpio_mask,
+            faulted: false,
         })
+    }
+
+    /// Reports and permanently latches a detected PIO underflow.
+    ///
+    /// Clearing the hardware IRQ flag does not clear this driver state.
+    pub fn is_faulted(&mut self) -> bool {
+        if pio_fault_flag::<P>() {
+            self.faulted = true;
+        }
+
+        self.faulted
     }
 
     /// Accepts a complete replacement plan for a later output period.
@@ -134,6 +166,9 @@ impl<
         &mut self,
         plan: &SignalPlan<PLAN_CAPACITY>,
     ) -> Result<(), OutputSubmissionError> {
+        if self.is_faulted() {
+            return Err(OutputSubmissionError::Faulted);
+        }
         self.pending
             .as_mut()
             .expect("Pending-plan slot must be present")
@@ -142,6 +177,9 @@ impl<
     }
 
     pub fn service(&mut self) {
+        if self.is_faulted() {
+            return;
+        }
         if !self
             .transfer
             .as_ref()

@@ -28,6 +28,7 @@ pub enum OutputInitError {
 pub enum OutputStartError {
     InvalidPlan,
     InsufficientCapacity,
+    Faulted,
 }
 
 enum InitialTransfer {

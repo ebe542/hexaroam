@@ -150,6 +150,18 @@ service polls completion and calls transfer.wait only after is_done. The returne
 
 Success from submit_plan means accepted for a future output period, not active at the GPIOs. Busy clears when the prepared plan is selected for DMA, not upon physical activation. No active-plan acknowledgement is available. Submission and service currently run in one execution context through exclusive mutable access; interrupt-based concurrent submission has not been implemented.
 
-The owner reported a successful full local verification with 128 tests and successful hardware-test builds. On 2026-10-17, switching_signal_plans ran as expected: synchronous rising edges and alternating High durations on GP0 and GP1. Its immediate second submission asserts Busy; the reported continuing execution is consistent with that assertion passing. Exact period measurements, brief update-glitch exclusion, worst-case latency, 18-channel output, controlled recovery, and rejection of submissions after a hardware fault remain open. CI for this revision has not yet been reported.
+The owner reported a successful full local verification with 128 tests and successful hardware-test builds. On 2026-10-17, switching_signal_plans ran as expected: synchronous rising edges and alternating High durations on GP0 and GP1. Its immediate second submission asserts Busy; the reported continuing execution is consistent with that assertion passing. Exact period measurements, brief update-glitch exclusion, worst-case latency, 18-channel output, and controlled recovery remain open. The owner subsequently reported green CI for this switching revision. Submission rejection after underflow is covered by the later fault-state step below.
 
 The normal application still uses the fixed-plan demo. Dynamic operation is currently exercised by the separate hardware-test program, not by ServoBank or an external protocol.
+
+## Persistent PIO fault state
+
+SwitchingOutput now reads reserved PIO IRQ flag 0 internally. is_faulted latches an observed flag in the driver; clearing the hardware flag later does not clear this state. The read-only PAC register access selects the PIO block by P::id and does not acknowledge the flag. Flag 0 must be exclusively reserved for this output within the block.
+
+start rejects an already-set flag with OutputStartError::Faulted before encoding or starting transfers. submit_plan checks the latched/hardware fault first and returns OutputSubmissionError::Faulted, ahead of Busy or plan validation, without modifying the pending plan. service checks the same state before taking the DMA transfer or swapping buffers and returns immediately on fault.
+
+A transfer already running at the time of detection is not aborted. Its source remains owned by the transfer in the driver; the fault path does not wait for a transfer that may be stalled behind halted PIO. No further transfer is rearmed after a fault is detected. This is a polling observation, not an atomic guarantee against a hardware fault occurring after a particular check.
+
+On 2026-10-17 the owner reported all requested checks passing and expected execution of faulted_signal_output. That hardware test verifies Faulted taking precedence over an occupied ready slot, persistence after hardware-flag acknowledgement, and continued Low output when servicing resumes. It does not exercise the stale-flag startup rejection separately. The existing unit-test total remains 128; this firmware test is manually evaluated, not counted as a host test. Remote CI for this revision is pending.
+
+Explicit recovery remains unimplemented. Deleting the hardware flag is not recovery: PIO remains in its halt loop and the driver remains faulted. Recovery must separately stop DMA safely, reset PIO/FIFO state, and prefill a complete valid plan before starting again.
