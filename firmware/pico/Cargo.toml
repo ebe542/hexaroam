@@ -4,6 +4,27 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 
+[[example]]
+bench = false
+name = "fixed_plan"
+path = "hardware_tests/fixed_plan.rs"
+required-features = ["hardware-tests"]
+test = false
+
+[[example]]
+bench = false
+name = "underflow_missing_entry"
+path = "hardware_tests/underflow_missing_entry.rs"
+required-features = ["hardware-tests"]
+test = false
+
+[[example]]
+bench = false
+name = "underflow_missing_counter"
+path = "hardware_tests/underflow_missing_counter.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
@@ -15,3 +36,6 @@ panic-halt = "1.0"
 pio = "0.2"
 pio-proc = "0.2"
 rp-pico = "0.9"
+
+[features]
+hardware-tests = ["hexaroam-servo-pio/hardware-tests"]

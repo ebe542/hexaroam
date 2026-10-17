@@ -7,6 +7,7 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 | `python tools/dev.py test` | Python runner/parser tests and host tests for servo-signal, servo-control, and servo-pio |
 | `python tools/dev.py fmt` | Format all four Rust packages; modifies source files |
 | `python tools/dev.py check` | Python tests, four Rust formatting checks, three Rust test groups, Pico build |
+| `python tools/dev.py hardware-build` | Build all registered Pico hardware-test programs and convert each ELF to UF2; no execution or upload |
 | `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
 On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check requires rustfmt and thumbv6m-none-eabi. uf2 additionally requires elf2uf2-rs.
@@ -48,3 +49,25 @@ See [development setup](../docs/development-setup.md) and [firmware instructions
 The runner also colors its own step results and overall status: only PASS/PASSED is green and FAIL/FAILED is red; brackets, command text, counts, and headers stay plain. NO_COLOR and plain redirected output disable these colors. Numeric totals remain plain text.
 
 The servo-pio encoder package is included in test, fmt, and check. The owner reported 102 passing tests in the full local check after adding its nine encoding tests. CI uses the same task definitions; the workflow file requires no change for this package. The check task still includes a firmware build; the proposed task naming changes remain deferred.
+
+## Hardware-test builds
+
+From the repository root:
+
+```bash
+python tools/dev.py hardware-build
+```
+
+This runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics` in firmware/pico. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
+
+The task produces ELF executables under firmware/pico/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target and elf2uf2-rs. It does not execute tests or add them to unit-test totals. Hardware tests are not included in the existing test/check tasks.
+
+To build and convert one selected hardware test to UF2, run from firmware/pico:
+
+```bash
+cargo run --locked --example underflow_missing_counter --features hardware-tests
+```
+
+The configured Cargo runner performs conversion only; transfer to the Pico and evaluation remain manual. hardware-build reads Cargo compiler-artifact messages and invokes elf2uf2-rs directly for each reported example executable, including unchanged/fresh artifacts. UF2 files are written beside their ELF files. A failed build skips all conversions; a conversion failure keeps the task failed even if later conversions succeed. No executable artifacts after a successful build are treated as an error. Existing UF2 files can remain after a failed run; use only results from a fully successful run.
+
+The owner reported a full local check with 121 passing unit tests and successful creation of the hardware-test UF2 files. Seven runner tests cover Cargo artifact discovery, cached artifacts, build-failure conversion suppression, per-artifact conversion, conversion failure propagation, missing artifacts, and diagnostic display. See the [manual hardware-test guide](../firmware/pico/hardware_tests/README.md) for setup and expected signals. Remote CI for this revision is pending.

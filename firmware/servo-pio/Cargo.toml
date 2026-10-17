@@ -11,3 +11,6 @@ pio-proc = "0.2"
 
 [target.'cfg(all(target_arch = "arm", target_os = "none"))'.dependencies]
 rp2040-hal = "0.10.2"
+
+[features]
+hardware-tests = []

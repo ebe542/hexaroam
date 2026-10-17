@@ -1,6 +1,7 @@
 """Run HexaRoam development tasks with live output and test totals."""
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -52,6 +53,16 @@ TASKS = {
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PICO_DIR, ["cargo", "build", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
+    ],
+    "hardware-build": [
+        (
+            PICO_DIR,
+            [
+                "cargo", "build", "--locked", "--examples",
+                "--features", "hardware-tests",
+                "--message-format=json-render-diagnostics",
+            ],
+        ),
     ],
     "uf2": [
         (PICO_DIR, ["cargo", "run", "--locked"]),
@@ -106,7 +117,10 @@ def run_command(arguments: list[str], directory: Path) -> CommandResult:
         ) as process:
             assert process.stdout is not None
             for line in process.stdout:
-                print(line, end="", flush=True)
+                if "--message-format=json-render-diagnostics" in arguments:
+                    print_cargo_message(line)
+                else:
+                    print(line, end="", flush=True)
                 lines.append(line)
             return_code = process.wait()
     except FileNotFoundError:
@@ -121,6 +135,44 @@ def run_command(arguments: list[str], directory: Path) -> CommandResult:
         return CommandResult(1, message + "\n")
 
     return CommandResult(return_code, "".join(lines))
+
+
+def print_cargo_message(line: str) -> None:
+    try:
+        message = json.loads(line)
+    except json.JSONDecodeError:
+        print(line, end="", flush=True)
+        return
+    if not isinstance(message, dict):
+        return
+    if message.get("reason") == "compiler-message":
+        rendered = message.get("message", {}).get("rendered")
+        if rendered:
+            print(rendered, end="", flush=True)
+
+
+def hardware_artifacts(output: str) -> list[Path]:
+    artifacts = []
+    for line in output.splitlines():
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(message, dict):
+            continue
+        if message.get("reason") != "compiler-artifact":
+            continue
+        if "example" not in message.get("target", {}).get("kind", []):
+            continue
+        executable = message.get("executable")
+        if not isinstance(executable, str) or not executable:
+            continue
+        path = Path(executable)
+        if path not in artifacts:
+            artifacts.append(path)
+    if not artifacts:
+        raise ValueError("Cargo reported no hardware-test executables")
+    return artifacts
 
 
 def test_kind(arguments: list[str]) -> Optional[str]:
@@ -153,6 +205,26 @@ def run_task(task: str) -> int:
     for directory, arguments in TASKS[task]:
         result = run_command(arguments, directory)
         results.append((directory, arguments, result))
+
+        if task == "hardware-build" and result.return_code == 0:
+            try:
+                artifacts = hardware_artifacts(result.output)
+            except ValueError as error:
+                print(str(error), flush=True)
+                results.append((
+                    directory,
+                    ["hardware-artifact-discovery"],
+                    CommandResult(1, str(error)),
+                ))
+                continue
+            for executable in artifacts:
+                conversion = [
+                    "elf2uf2-rs",
+                    str(executable),
+                    str(executable.with_suffix(".uf2")),
+                ]
+                converted = run_command(conversion, directory)
+                results.append((directory, conversion, converted))
 
     print("\nSummary", flush=True)
     failures = 0

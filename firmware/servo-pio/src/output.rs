@@ -30,6 +30,12 @@ pub enum OutputStartError {
     InsufficientCapacity,
 }
 
+enum InitialTransfer {
+    Complete,
+    #[cfg(feature = "hardware-tests")]
+    MissingFinalCounter,
+}
+
 pub struct PreparedOutput<P: PIOExt, SM: StateMachineIndex, const N: usize> {
     state_machine: StateMachine<(P, SM), Stopped>,
     tx: Tx<(P, SM)>,
@@ -109,7 +115,7 @@ impl<P: PIOExt, SM: StateMachineIndex, const N: usize>
         })
     }
 
-    pub fn start_fixed<
+    fn start_fixed_inner<
         CH: ChannelIndex,
         const WORD_CAPACITY: usize,
         const PLAN_CAPACITY: usize,
@@ -118,6 +124,7 @@ impl<P: PIOExt, SM: StateMachineIndex, const N: usize>
         channel: Channel<CH>,
         buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
         plan: &SignalPlan<PLAN_CAPACITY>,
+        initial_transfer: InitialTransfer,
     ) -> Result<FixedOutput<P, SM, CH, N>, OutputStartError> {
         buffer
             .load(plan, self.gpio_mask)
@@ -143,8 +150,14 @@ impl<P: PIOExt, SM: StateMachineIndex, const N: usize>
             );
         }
 
+        let initial_words = match initial_transfer {
+            InitialTransfer::Complete => &words[2..],
+            #[cfg(feature = "hardware-tests")]
+            InitialTransfer::MissingFinalCounter => &words[2..words.len() - 1],
+        };
+
         let transfer =
-            single_buffer::Config::new(channel, &words[2..], self.tx).start();
+            single_buffer::Config::new(channel, initial_words, self.tx).start();
 
         let state_machine = self.state_machine.start();
 
@@ -154,6 +167,44 @@ impl<P: PIOExt, SM: StateMachineIndex, const N: usize>
             words,
             transfer: Some(transfer),
         })
+    }
+
+    pub fn start_fixed<
+        CH: ChannelIndex,
+        const WORD_CAPACITY: usize,
+        const PLAN_CAPACITY: usize,
+    >(
+        self,
+        channel: Channel<CH>,
+        buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<FixedOutput<P, SM, CH, N>, OutputStartError> {
+        self.start_fixed_inner(
+            channel,
+            buffer,
+            plan,
+            InitialTransfer::Complete,
+        )
+    }
+
+    /// Hardware test only: omit the final counter of the first transfer.
+    #[cfg(feature = "hardware-tests")]
+    pub fn start_with_missing_final_counter<
+        CH: ChannelIndex,
+        const WORD_CAPACITY: usize,
+        const PLAN_CAPACITY: usize,
+    >(
+        self,
+        channel: Channel<CH>,
+        buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<FixedOutput<P, SM, CH, N>, OutputStartError> {
+        self.start_fixed_inner(
+            channel,
+            buffer,
+            plan,
+            InitialTransfer::MissingFinalCounter,
+        )
     }
 }
 

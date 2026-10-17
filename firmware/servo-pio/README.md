@@ -125,3 +125,11 @@ The PIO underflow branch sets outputs Low, raises flag 0, and loops. Fault repor
 Dynamic plan submission, two-buffer ownership, explicit activation confirmation, and a general DMA rearm latency bound remain pending. The fixed experiment permanently freezes one payload; it does not implement the planned writable/ready buffer cycle. Host tests do not establish physical signal timing or electrical servo compatibility.
 
 See the [multi-channel output working design](../../docs/servo-output-design.md) for the PIO program, timing derivation, buffer ownership, and fault/restart requirements.
+
+## Reproducible underflow tests
+
+The [Pico hardware-test programs](../pico/hardware_tests/README.md) now separately exercise a missing next entry and a missing final counter. The owner reported the missing-entry test behaving as described and the missing-counter test entering fault mode immediately without visible startup edges. These are manual hardware observations; exact fault latency was not measured.
+
+The hardware-tests feature gates start_with_missing_final_counter and its initial-transfer truncation mode. Both normal and test starts share the same initialization path. Without the feature, the truncation mode and test start method are not compiled. The ordinary fixed-plan demo remains unchanged.
+
+The full local check now includes 121 host unit tests; hardware-test builds and UF2 generation were separately reported successful. Fault recovery and dynamic plan changes are still pending. Remote CI for this revision has not yet been reported.

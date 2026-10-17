@@ -57,3 +57,9 @@ This library step does not change the Pico demonstration. ServoBank integration,
 2026-10-17: The owner reported a full local check with 114 passing tests and successful execution of the fixed-plan DMA demo. One PIO0 state machine and DMA channel 0 drive GP0 and GP1. The observed High durations were approximately 1 ms and 2 ms, with synchronous rising edges. A static encoded plan repeats through polling-based DMA servicing; LED updates are nonblocking.
 
 The nominal period is 20 ms, but no new period measurement was reported. Deliberate underflow, recovery, dynamic plan switching, 18-channel verification, and attached-servo operation remain pending. Remote CI for this integration has not yet been reported.
+
+## Separate hardware-test programs
+
+2026-10-17: The owner reported that the separately built missing-entry test behaved as described. In the missing-counter test, no startup edges were visible and the program entered fault mode immediately, consistent with its intended short startup sequence. Exact fault latency was not measured. The fixed-plan demo remains independent of these test programs.
+
+The owner reported 121 passing unit tests and successful ELF/UF2 generation through the hardware-build task. Hardware test programs are manually evaluated and excluded from unit-test counts. Controlled fault recovery and dynamic plan exchange remain pending; remote CI for this revision has not yet been reported.

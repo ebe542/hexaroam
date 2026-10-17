@@ -101,6 +101,12 @@ On 2026-10-17, the owner reported firmware execution and approximately 1 ms and 
 
 See the [PIO driver guide](servo-pio/README.md) for encoding and timing details. To reproduce the signal check, probe GP0 and GP1 against Pico GND, with servos disconnected.
 
+## Separate hardware tests
+
+The [hardware-test guide](pico/hardware_tests/README.md) describes independently selectable firmware for continuous fixed output and both underflow cases. Build all ELF and UF2 files with python tools/dev.py hardware-build from the repository root. Upload and evaluation remain manual. Tests are stored under hardware_tests and registered as Cargo example targets; the normal application does not need editing to select a fault experiment.
+
+The owner reported a successful missing-entry experiment and immediate fault behavior in the missing-counter experiment, with no visible startup edges. The local check passed 121 unit tests and all hardware-test UF2 files were created. Exact period/fault timing and controlled recovery remain unverified. CI for this revision is pending.
+
 ## Historical per-channel PIO driver
 
 The following sections describe the previous implementation retained in src/drivers. They are not the active DMA demo.

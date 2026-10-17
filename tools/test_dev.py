@@ -430,5 +430,100 @@ class ColorOutputTests(RunnerTestCase):
         self.assertIn("Overall: \x1b[31mFAILED\x1b[0m -", output)
         self.assertNotIn("\x1b[31m[FAIL]", output)
 
+class HardwareBuildTests(RunnerTestCase):
+    @staticmethod
+    def artifact(path, kind="example", fresh=False):
+        return dev.json.dumps({
+            "reason": "compiler-artifact",
+            "target": {"kind": [kind]},
+            "executable": path,
+            "fresh": fresh,
+        }) + "\n"
+
+    def test_artifacts_include_fresh_examples_and_ignore_libraries(self):
+        output = (
+            "Compiling firmware\n"
+            + self.artifact("out/first", fresh=True)
+            + self.artifact("out/library", kind="lib")
+            + self.artifact(None)
+            + self.artifact("out/first")
+            + self.artifact("out/second")
+        )
+        self.assertEqual(
+            dev.hardware_artifacts(output),
+            [Path("out/first"), Path("out/second")],
+        )
+
+    def test_missing_executables_are_an_error(self):
+        with self.assertRaises(ValueError):
+            dev.hardware_artifacts("Finished build\n")
+
+    def run_hardware(self, results):
+        with (
+            patch.object(dev, "TASKS", {
+                "hardware-build": [(Path("pico"), ["cargo", "build"])],
+            }),
+            patch.object(dev, "run_command", side_effect=results) as command,
+            redirect_stdout(io.StringIO()) as output,
+        ):
+            code = dev.run_task("hardware-build")
+        return code, command, output.getvalue()
+
+    def test_failed_build_does_not_convert_old_artifacts(self):
+        code, command, _ = self.run_hardware([
+            dev.CommandResult(1, self.artifact("out/old")),
+        ])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(command.call_count, 1)
+
+    def test_successful_build_converts_every_reported_example(self):
+        code, command, _ = self.run_hardware([
+            dev.CommandResult(0, self.artifact("out/first")
+                              + self.artifact("out/second")),
+            dev.CommandResult(0, "converted"),
+            dev.CommandResult(0, "converted"),
+        ])
+        self.assertEqual(code, 0)
+        self.assertEqual(command.call_count, 3)
+        self.assertEqual(command.call_args_list[1].args, (
+            ["elf2uf2-rs", str(Path("out/first")),
+             str(Path("out/first.uf2"))], Path("pico"),
+        ))
+        self.assertEqual(command.call_args_list[2].args, (
+            ["elf2uf2-rs", str(Path("out/second")),
+             str(Path("out/second.uf2"))], Path("pico"),
+        ))
+
+    def test_conversion_failure_is_preserved_after_later_success(self):
+        code, command, output = self.run_hardware([
+            dev.CommandResult(0, self.artifact("out/first")
+                              + self.artifact("out/second")),
+            dev.CommandResult(1, "conversion failed"),
+            dev.CommandResult(0, "converted"),
+        ])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(command.call_count, 3)
+        self.assertIn("1 of 3 checks failed", output)
+
+    def test_success_without_artifacts_is_rejected(self):
+        code, command, _ = self.run_hardware([
+            dev.CommandResult(0, "Finished build\n"),
+        ])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(command.call_count, 1)
+
+    def test_cargo_json_displays_diagnostics_and_plain_output(self):
+        diagnostic = dev.json.dumps({
+            "reason": "compiler-message",
+            "message": {"rendered": "warning: example\n"},
+        })
+        with redirect_stdout(io.StringIO()) as output:
+            dev.print_cargo_message(diagnostic)
+            dev.print_cargo_message(self.artifact("out/first"))
+            dev.print_cargo_message("Finished build\n")
+        self.assertEqual(output.getvalue(),
+                         "warning: example\nFinished build\n")
+
+
 if __name__ == "__main__":
     unittest.main()
