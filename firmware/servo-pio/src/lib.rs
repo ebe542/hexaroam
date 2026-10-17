@@ -25,3 +25,18 @@ pub use buffer::OutputBuffer;
 pub use output::{
     FixedOutput, OutputInitError, OutputStartError, PreparedOutput,
 };
+
+// Temporary until the output driver uses pending-plan submission.
+#[allow(dead_code)]
+mod pending_signal_plan;
+
+// Temporary until the switching output driver uses this source.
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[allow(dead_code)]
+mod signal_plan_dma_source;
+
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+mod switching_output;
+
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+pub use switching_output::{OutputSubmissionError, SwitchingOutput};

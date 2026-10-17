@@ -1,6 +1,6 @@
 # Servo PIO encoding
 
-`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It implements internal encoding of individual entries and complete SignalPlan values. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The hardware-only public interface prepares GPIO outputs and repeatedly emits a fixed SignalPlan through DMA. It depends on servo-signal and assembles its PIO program on the host. RP2040 HAL code is enabled only for ARM bare-metal builds, so pure encoding and buffer tests still run on the host.
+`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It implements internal encoding of individual entries and complete SignalPlan values. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The hardware-only public interfaces support both repeated fixed plans and replacement of complete SignalPlan values using two buffers. It depends on servo-signal and assembles its PIO program on the host. RP2040 HAL code is enabled only for ARM bare-metal builds, so pure encoding and buffer tests still run on the host.
 
 ## Internal entry encoding
 
@@ -89,6 +89,10 @@ This calculation covers the normal path with valid words, no instruction delay f
 | src/output.rs | Hardware-only prepared output and fixed DMA servicing |
 | src/buffer.rs | Public opaque storage with internal loading |
 | src/test_buffer.rs | Five host buffer tests |
+| src/pending_signal_plan.rs | Validation and preparation of a replacement plan |
+| src/test_pending_signal_plan.rs | Seven host submission tests |
+| src/signal_plan_dma_source.rs | Exclusive static buffer ownership for DMA reads |
+| src/switching_output.rs | Two-buffer plan submission and DMA handover |
 | Cargo.lock | Locked dependency resolution; commit this file |
 
 From the repository root:
@@ -122,7 +126,7 @@ Five buffer tests cover empty storage, a complete payload, shorter replacements 
 
 The PIO underflow branch sets outputs Low, raises flag 0, and loops. Fault reporting and controlled recovery are not implemented in the current demo. The program must not be resumed merely by clearing the flag. Low does not establish a safe mechanical posture.
 
-Dynamic plan submission, two-buffer ownership, explicit activation confirmation, and a general DMA rearm latency bound remain pending. The fixed experiment permanently freezes one payload; it does not implement the planned writable/ready buffer cycle. Host tests do not establish physical signal timing or electrical servo compatibility.
+The fixed-output path permanently freezes its payload. A separate SwitchingOutput now provides dynamic submission and two-buffer ownership as described below. Explicit activation confirmation and a general DMA rearm latency bound remain pending. The fixed experiment permanently freezes one payload; it does not implement the planned writable/ready buffer cycle. Host tests do not establish physical signal timing or electrical servo compatibility.
 
 See the [multi-channel output working design](../../docs/servo-output-design.md) for the PIO program, timing derivation, buffer ownership, and fault/restart requirements.
 
@@ -132,4 +136,20 @@ The [Pico hardware-test programs](../pico/hardware_tests/README.md) now separate
 
 The hardware-tests feature gates start_with_missing_final_counter and its initial-transfer truncation mode. Both normal and test starts share the same initialization path. Without the feature, the truncation mode and test start method are not compiled. The ordinary fixed-plan demo remains unchanged.
 
-The full local check now includes 121 host unit tests; hardware-test builds and UF2 generation were separately reported successful. Fault recovery and dynamic plan changes are still pending. Remote CI for this revision has not yet been reported.
+The full local check now includes 121 host unit tests; hardware-test builds and UF2 generation were separately reported successful. Fault recovery is still pending. Dynamic plan changes are covered by the separate switching-output path below. Remote CI for this revision has not yet been reported.
+
+## Two-buffer signal-plan replacement
+
+SwitchingOutput::start takes a PreparedOutput, one DMA channel, two distinct static OutputBuffer values, and a complete initial SignalPlan. The initial plan must use every configured output. Its period and GPIO mask become the contract for later submissions. FixedOutput and its existing hardware tests remain available unchanged.
+
+submit_plan accepts a complete replacement plan. PendingSignalPlan first rejects an occupied ready slot with Busy, then checks period and output-mask equality, and finally encodes the plan into the spare buffer. Only successful encoding marks it ready. Failures leave the previous buffer contents and readiness unchanged. The seven host tests cover initial state, successful preparation, Busy preservation, period mismatch, output mismatch, capacity failure, and complete multi-output preparation.
+
+SignalPlanDmaSource holds an exclusive static reference and a validated nonempty word range. Its hardware-only unsafe ReadTarget implementation exposes the stable payload address and length to the HAL. It provides no mutation while owned by a DMA transfer. The initial range skips the prefetched entry; repetitions and replacements transfer the complete plan.
+
+service polls completion and calls transfer.wait only after is_done. The returned source releases exclusive access to the completed RAM buffer. If a replacement is ready, the spare becomes the next DMA source and the completed buffer becomes writable. Otherwise the completed buffer is retransmitted. FIFO words are already copied and do not depend on subsequent changes to their old RAM buffer. Entire plans are submitted in order; the PIO program and its cycle formula are unchanged.
+
+Success from submit_plan means accepted for a future output period, not active at the GPIOs. Busy clears when the prepared plan is selected for DMA, not upon physical activation. No active-plan acknowledgement is available. Submission and service currently run in one execution context through exclusive mutable access; interrupt-based concurrent submission has not been implemented.
+
+The owner reported a successful full local verification with 128 tests and successful hardware-test builds. On 2026-10-17, switching_signal_plans ran as expected: synchronous rising edges and alternating High durations on GP0 and GP1. Its immediate second submission asserts Busy; the reported continuing execution is consistent with that assertion passing. Exact period measurements, brief update-glitch exclusion, worst-case latency, 18-channel output, controlled recovery, and rejection of submissions after a hardware fault remain open. CI for this revision has not yet been reported.
+
+The normal application still uses the fixed-plan demo. Dynamic operation is currently exercised by the separate hardware-test program, not by ServoBank or an external protocol.

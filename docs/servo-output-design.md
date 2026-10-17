@@ -1,6 +1,6 @@
 # Multi-channel servo output design
 
-Status: working design, 2026-10-16. Partially implemented and host-tested; the new output path is not hardware-verified. The current fixed-plan demo uses one state machine and DMA for two outputs. The two-buffer update protocol below remains a design, not implemented behavior.
+Status: working design, 2026-10-16. Partially implemented and host-tested; the new output path is not hardware-verified. The current fixed-plan demo uses one state machine and DMA for two outputs. The separate switching driver now implements polling-based two-buffer replacement; concurrent interrupt-based ownership changes and explicit activation feedback remain design work.
 
 ## Scope and command contract
 
@@ -94,7 +94,7 @@ Remaining verification and generalization:
 - Verify the PIO assembly, wrap locations, shift configuration, GPIO ownership, and cycle calculation.
 - Test plan generation for N channels, duplicate times, arbitrary valid pin assignments, exact period sum, and invalid inputs.
 - Specify the supported pulse range and calculate the DMA rearm deadline.
-- Define interrupt-safe buffer transitions and exact acceptance semantics.
+- Extend the current single-context buffer handover to interrupt-driven operation if needed; preserve the distinction between acceptance and actual activation.
 - Choose how to identify actual period/plan activation; any added PIO instructions require a revised timing calculation.
 - Verify missing first and second words force Low and latch a fault without CPU assistance.
 - Verify startup, unchanged-plan repetition, complete-plan replacement, and explicit recovery on the oscilloscope.
@@ -111,10 +111,18 @@ The existing Angle and Calibration remain useful. ServoBank's per-channel sequen
 
 SignalPlan generation in servo-signal passed 13 new host tests, with 93 tests in the full local check; the owner subsequently reported green CI for that revision. At that stage the checked PIO program was compiled but not installed or executed; the later hardware result is recorded below.
 
-The servo-pio library now encodes individual plan entries, checks configured RP2040 GPIO masks, and rejects zero or unrepresentable durations. The encoder and its error type are internal implementation details, not application-facing APIs. The future output driver will accept complete SignalPlan values and own the GPIO/clock configuration; callers do not perform ASM-specific encoding. The owner reported nine encoder tests passing and a full local check with 102 tests. The owner subsequently reported green CI for the entry encoder revision. Complete-plan encoding is now implemented internally through EncodedSignalPlan: it preserves word order, checks capacity, and returns a payload only after all entries have encoded successfully. Seven additional tests passed, bringing the encoder package to 16 tests and the full local check to 109. The payload still needs stable memory and exclusive ownership for actual DMA reads. The owner subsequently reported green CI for complete-plan encoding. Initial fixed-plan DMA integration is recorded below; dynamic switching remains pending. See the [encoder guide](../firmware/servo-pio/README.md).
+The servo-pio library now encodes individual plan entries, checks configured RP2040 GPIO masks, and rejects zero or unrepresentable durations. The encoder and its error type are internal implementation details, not application-facing APIs. The future output driver will accept complete SignalPlan values and own the GPIO/clock configuration; callers do not perform ASM-specific encoding. The owner reported nine encoder tests passing and a full local check with 102 tests. The owner subsequently reported green CI for the entry encoder revision. Complete-plan encoding is now implemented internally through EncodedSignalPlan: it preserves word order, checks capacity, and returns a payload only after all entries have encoded successfully. Seven additional tests passed, bringing the encoder package to 16 tests and the full local check to 109. The payload still needs stable memory and exclusive ownership for actual DMA reads. The owner subsequently reported green CI for complete-plan encoding. Fixed-plan DMA integration and the later two-buffer switching result are recorded below. See the [encoder guide](../firmware/servo-pio/README.md).
 
 ## Fixed-plan hardware result
 
 2026-10-17: The owner reported a full local check with 114 tests and successful firmware execution. The assembly now resides in servo-pio/src/program.rs. The hardware-only driver prepares all selected GPIOs on one state machine; OutputBuffer provides static storage for a complete encoded plan. The initial entry is written to the FIFO before DMA and PIO start. FixedOutput::service polls completion and rearms the fixed plan. No DMA completion interrupt or dynamic buffer exchange is implemented yet.
 
 The demo uses PIO0 SM0, DMA channel 0, GP0 at 1000 us, GP1 at 2000 us, and a nominal 20000-us period. The owner observed approximately 1 ms and 2 ms High durations and synchronous rising edges. The period was not newly reported as measured. Underflow fault injection, explicit recovery, general timing bounds, 18-channel output, and physical servos remain unverified. CI for this integration is pending.
+
+## Two-buffer switching result
+
+2026-10-17: PendingSignalPlan passed seven host tests, and the owner reported 128 passing tests in full verification. SignalPlanDmaSource now lends stable encoded storage exclusively to each DMA transfer. SwitchingOutput recovers that ownership after completion, selects a ready replacement or repeats the previous plan, and returns a replaced source buffer to the writable slot. One DMA channel remains sufficient; the PIO program is unchanged.
+
+Submissions require the same period and complete configured output set as startup. An occupied ready slot returns Busy. Acceptance confirms preparation only; selection for DMA can precede actual GPIO activation. service and submit_plan currently share one execution context, not an interrupt-safe concurrent queue.
+
+The separate switching_signal_plans hardware test alternates 1-ms/2-ms and 2-ms/1-ms pulse assignments approximately once per second and asserts that an immediate second submission returns Busy. The owner reported expected execution, synchronous rising edges, and alternating High durations. This does not establish an exact period or exclude brief update glitches. Activation acknowledgement, controlled recovery, submission rejection after a hardware fault, worst-case timing bounds, and 18-channel operation remain open. CI for this revision is pending.

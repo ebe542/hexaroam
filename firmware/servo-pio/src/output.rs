@@ -37,10 +37,10 @@ enum InitialTransfer {
 }
 
 pub struct PreparedOutput<P: PIOExt, SM: StateMachineIndex, const N: usize> {
-    state_machine: StateMachine<(P, SM), Stopped>,
-    tx: Tx<(P, SM)>,
-    pins: [Pin<DynPinId, P::PinFunction, PullNone>; N],
-    gpio_mask: u32,
+    pub(crate) state_machine: StateMachine<(P, SM), Stopped>,
+    pub(crate) tx: Tx<(P, SM)>,
+    pub(crate) pins: [Pin<DynPinId, P::PinFunction, PullNone>; N],
+    pub(crate) gpio_mask: u32,
 }
 
 impl<P: PIOExt, SM: StateMachineIndex, const N: usize>

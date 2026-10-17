@@ -25,6 +25,13 @@ path = "hardware_tests/underflow_missing_counter.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "switching_signal_plans"
+path = "hardware_tests/switching_signal_plans.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"

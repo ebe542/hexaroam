@@ -63,3 +63,9 @@ The nominal period is 20 ms, but no new period measurement was reported. Deliber
 2026-10-17: The owner reported that the separately built missing-entry test behaved as described. In the missing-counter test, no startup edges were visible and the program entered fault mode immediately, consistent with its intended short startup sequence. Exact fault latency was not measured. The fixed-plan demo remains independent of these test programs.
 
 The owner reported 121 passing unit tests and successful ELF/UF2 generation through the hardware-build task. Hardware test programs are manually evaluated and excluded from unit-test counts. Controlled fault recovery and dynamic plan exchange remain pending; remote CI for this revision has not yet been reported.
+
+## Complete signal-plan replacement
+
+2026-10-17: The owner reported 128 passing unit tests, successful builds, and expected operation of the separate switching_signal_plans hardware test. GP0 and GP1 alternate their High durations while rising edges remain synchronous. The test also asserts Busy for an immediate second submission; no assertion halt was reported.
+
+The new output path uses two exclusive static RAM buffers and one DMA channel, selecting complete plans after DMA transfer completion while FIFO ordering preserves their sequence. The normal fixed-plan demo and underflow tests remain available. Exact update timing, short-glitch exclusion, active-plan acknowledgement, controlled recovery, hardware-fault submission handling, and 18-channel operation remain unverified. Remote CI for this revision has not yet been reported.

@@ -107,6 +107,12 @@ The [hardware-test guide](pico/hardware_tests/README.md) describes independently
 
 The owner reported a successful missing-entry experiment and immediate fault behavior in the missing-counter experiment, with no visible startup edges. The local check passed 121 unit tests and all hardware-test UF2 files were created. Exact period/fault timing and controlled recovery remain unverified. CI for this revision is pending.
 
+## Two-buffer switching experiment
+
+SwitchingOutput is a separate public driver that accepts complete replacement SignalPlan values with the startup period and output set. It uses one DMA channel and two exclusive static buffers. A prepared plan is selected after the current transfer completes; FIFO ordering keeps complete plans consecutive. submit_plan confirms acceptance only, not GPIO activation. The normal servo_demo remains fixed-plan.
+
+The switching_signal_plans hardware test alternates the GP0/GP1 pulse assignments and checks Busy on an immediate second submission. On 2026-10-17 the owner reported expected operation, synchronous rising edges, and alternating High durations. Full verification passed 128 unit tests. See the [driver guide](servo-pio/README.md#two-buffer-signal-plan-replacement) and [hardware-test guide](pico/hardware_tests/README.md). Exact period/update timing, fault recovery, and 18-channel verification remain open; CI for this revision is pending.
+
 ## Historical per-channel PIO driver
 
 The following sections describe the previous implementation retained in src/drivers. They are not the active DMA demo.
