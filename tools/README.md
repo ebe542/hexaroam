@@ -6,11 +6,13 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 | --- | --- |
 | `python tools/dev.py test` | Python runner/parser tests and host tests for servo-signal, servo-control, and servo-pio |
 | `python tools/dev.py fmt` | Format all four Rust packages; modifies source files |
-| `python tools/dev.py check` | Python tests, four Rust formatting checks, three Rust test groups, Pico build |
+| `python tools/dev.py check` | Check formatting and run cargo check for all four Rust packages; no unit tests or linked firmware image |
+| `python tools/dev.py build` | Build the Pico ELF firmware; no UF2 conversion |
+| `python tools/dev.py verify` | Full verification: Python tests, four Rust formatting checks, three Rust test groups, and Pico build |
 | `python tools/dev.py hardware-build` | Build all registered Pico hardware-test programs and convert each ELF to UF2; no execution or upload |
 | `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
-On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check requires rustfmt and thumbv6m-none-eabi. uf2 additionally requires elf2uf2-rs.
+On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check and verify require rustfmt and thumbv6m-none-eabi. build requires the embedded target. uf2 additionally requires elf2uf2-rs.
 
 ## Output and totals
 
@@ -32,23 +34,23 @@ The uf2 task uses cargo run: conversion remains dependent on a successful build 
 python -m unittest discover -s tools -p "test_*.py" -v
 ```
 
-Python tests mock process execution, so they do not launch Cargo recursively. The runner's test/check tasks discover both test_dev.py and test_result_parser.py. Coverage includes command capture, failure handling, aggregate process status, test totals, unknown summaries, and parser fixtures.
+Python tests mock process execution, so they do not launch Cargo recursively. The runner's test/verify tasks discover both test_dev.py and test_result_parser.py. Coverage includes command capture, failure handling, aggregate process status, test totals, unknown summaries, and parser fixtures.
 
 The owner previously reported the 15 parser tests passing and successful local/CI runs before this integration. The new runner integration and added tests have not been executed by the assistant; local and remote verification are pending.
 
 ## Workflow
 
 ```bash
-python tools/dev.py check
+python tools/dev.py verify
 ```
 
-If formatting fails, run fmt, review git diff, then rerun check. GitHub Actions calls the same test/check tasks on its configured Windows/Ubuntu runners. No workflow modification is needed for the new test discovery.
+If formatting fails, run fmt, review git diff, then rerun verify. GitHub Actions calls the same test/verify tasks on its configured Windows/Ubuntu runners. No workflow modification is needed for the new test discovery.
 
 See [development setup](../docs/development-setup.md) and [firmware instructions](../firmware/README.md).
 
 The runner also colors its own step results and overall status: only PASS/PASSED is green and FAIL/FAILED is red; brackets, command text, counts, and headers stay plain. NO_COLOR and plain redirected output disable these colors. Numeric totals remain plain text.
 
-The servo-pio encoder package is included in test, fmt, and check. The owner reported 102 passing tests in the full local check after adding its nine encoding tests. CI uses the same task definitions; the workflow file requires no change for this package. The check task still includes a firmware build; the proposed task naming changes remain deferred.
+The servo-pio encoder package is included in test, fmt, check, and verify. The owner reported 102 passing tests in the full local check after adding its nine encoding tests. CI uses the same task definitions; the workflow file requires no change for this package. The previous full check task is now named verify. check only checks Rust formatting and compilation; it does not run tests or link the Pico firmware. Cargo may still compile dependencies and execute build scripts as required by cargo check.
 
 ## Hardware-test builds
 
@@ -60,7 +62,7 @@ python tools/dev.py hardware-build
 
 This runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics` in firmware/pico. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
 
-The task produces ELF executables under firmware/pico/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target and elf2uf2-rs. It does not execute tests or add them to unit-test totals. Hardware tests are not included in the existing test/check tasks.
+The task produces ELF executables under firmware/pico/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target and elf2uf2-rs. It does not execute tests or add them to unit-test totals. Hardware-test programs are not built or executed by test, check, or verify; hardware-build remains explicit.
 
 To build and convert one selected hardware test to UF2, run from firmware/pico:
 

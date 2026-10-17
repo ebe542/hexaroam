@@ -94,7 +94,7 @@ This calculation covers the normal path with valid words, no instruction delay f
 From the repository root:
 
 ```bash
-python tools/dev.py check
+python tools/dev.py verify
 ```
 
 For this package only:

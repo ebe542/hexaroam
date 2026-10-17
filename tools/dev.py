@@ -43,7 +43,7 @@ TASKS = {
         (PICO_DIR, ["cargo", "fmt"]),
         (SERVO_PIO_DIR, ["cargo", "fmt"]),
     ],
-    "check": [
+    "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
@@ -53,6 +53,19 @@ TASKS = {
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PICO_DIR, ["cargo", "build", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
+    ],
+    "check": [
+        (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
+        (CONTROL_DIR, ["cargo", "fmt", "--check"]),
+        (PICO_DIR, ["cargo", "fmt", "--check"]),
+        (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
+        (SIGNAL_DIR, ["cargo", "check", "--locked"]),
+        (CONTROL_DIR, ["cargo", "check", "--locked"]),
+        (PICO_DIR, ["cargo", "check", "--locked"]),
+        (SERVO_PIO_DIR, ["cargo", "check", "--locked"]),
+    ],
+    "build": [
+        (PICO_DIR, ["cargo", "build", "--locked"]),
     ],
     "hardware-build": [
         (

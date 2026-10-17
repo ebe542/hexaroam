@@ -32,7 +32,7 @@ Fields are private. Angle imposes no joint travel limits; Calibration defines th
 From the repository root:
 
 ```bash
-python tools/dev.py check
+python tools/dev.py verify
 ```
 
 To run only this package's tests:

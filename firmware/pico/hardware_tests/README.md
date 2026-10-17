@@ -1,6 +1,6 @@
 # Pico hardware tests
 
-These are separately selected firmware programs, evaluated manually on a Raspberry Pi Pico with RP2040 and an oscilloscope. They are not host unit tests and are not executed by cargo test or the normal development check. Cargo registers them as example targets with explicit paths in Cargo.toml.
+These are separately selected firmware programs, evaluated manually on a Raspberry Pi Pico with RP2040 and an oscilloscope. They are not host unit tests and are not executed by cargo test or the normal development check or verify task. Cargo registers them as example targets with explicit paths in Cargo.toml.
 
 ## Setup
 

@@ -65,4 +65,4 @@ jobs:
           rustup target add thumbv6m-none-eabi
 
       - name: Check formatting, tests, and firmware build
-        run: python tools/dev.py check
+        run: python tools/dev.py verify
