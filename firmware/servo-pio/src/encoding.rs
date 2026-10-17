@@ -29,7 +29,7 @@ pub(crate) fn encode_entry(
     // cycles, followed by 10 instructions through the next OUT PINS.
     // Hardware wrap adds no cycles: total = counter + 1 + 10.
     // Therefore counter = duration_us * 25 - 11.
-    // Must match pico/src/drivers/servo_plan_program.rs and its clock.
+    // Must match program.rs and its configured PIO clock.
     const ENTRY_OVERHEAD_CYCLES: u64 = 11;
 
     if allowed_gpio_mask == 0 || allowed_gpio_mask & !SUPPORTED_GPIO_MASK != 0 {

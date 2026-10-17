@@ -1,12 +1,12 @@
 # Firmware
 
-Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates adjustable PIO servo pulses on GP0 and GP1 of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
+Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates fixed servo pulses on GP0 and GP1 through one PIO state machine and DMA of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
 ## Pico LED blink firmware
 
-The onboard LED on GPIO25 alternates between on and off with a requested delay of 500 ms per phase. GPIO and clocks are initialized through the Pico board support package. SysTick supplies the blocking delay. Panic handling stops execution; it does not print a diagnostic or automatically reset the board.
+The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. Panic handling stops execution; it does not print a diagnostic or automatically reset the board.
 
 ### Files
 
@@ -17,8 +17,13 @@ The onboard LED on GPIO25 alternates between on and off with a requested delay o
 | pico/.cargo/config.toml | Embedded target and linker flags |
 | pico/memory.x | Flash, bootloader, and RAM layout |
 | pico/build.rs | Makes the memory layout available to the linker |
-| pico/src/main.rs | Board initialization, driver construction, and blink loop |
-| pico/src/drivers/servo_pio.rs | PIO output, encoding, and private transport adapter |
+| pico/src/main.rs | Board clock, GPIO, and timer initialization; starts the demo |
+| pico/src/servo_demo.rs | Fixed plan construction, static buffer allocation, DMA servicing, and LED updates |
+| servo-pio/src/output.rs | Prepared PIO output, fixed DMA transfer, and polling service |
+| servo-pio/src/program.rs | Checked multi-channel PIO assembly |
+| servo-pio/src/encoding.rs | Internal mask/counter encoding |
+| servo-pio/src/buffer.rs | Complete encoded-plan storage |
+| pico/src/drivers/servo_pio.rs | Historical per-channel driver; no longer compiled by main.rs |
 | servo-signal/src/lib.rs | Hardware-independent limits and submission logic |
 | servo-signal/src/tests.rs | Host unit tests using a test transport |
 | ../rustfmt.toml | Repository-wide Rust formatting rules |
@@ -82,7 +87,23 @@ This confirms the basic build and hardware execution path. Exact signal timing, 
 
 Commit source files, linker configuration, and Cargo.lock. Generated ELF and UF2 files remain under the ignored `target/` directory.
 
-## PIO pulse driver and shared signal logic
+## Current fixed-plan PIO/DMA demo
+
+`servo_demo::run()` uses PIO0 SM0 and DMA channel 0 for both GP0 (physical pin 1) and GP1 (physical pin 2). The configured plan has a 20,000-us period, a 1000-us High pulse on GP0, and a 2000-us High pulse on GP1. Both rising edges share one GPIO-mask update. This demo uses pulse widths directly; the angle library and ServoBank are not in its active command path.
+
+PreparedOutput validates GPIO assignments and the integer divider for a 25 MHz PIO clock, installs the program, and sets the selected pins Low before enabling their output directions. start_fixed encodes the entire plan into a statically allocated OutputBuffer<6>. It writes the first complete entry into the FIFO, starts DMA for the remaining words, and then starts PIO. A static read-only slice keeps the encoded payload valid for all subsequent transfers. It cannot be updated in this fixed-plan experiment.
+
+FixedOutput::service() polls DMA completion. Once complete, it retrieves the channel and TX handle and starts another transfer of the full plan. FIFO ordering keeps plans consecutive. There is no DMA completion interrupt yet. Call service frequently; blocking delays would risk underflow. The long final Low interval of the test plan provides rearm time, but a general worst-case latency guarantee has not yet been established.
+
+The PIO program checks both words before applying each GPIO state. A missing word forces outputs Low, sets PIO IRQ flag 0, and enters a persistent loop. The demo does not yet expose fault status or implement controlled recovery. Dynamic plan updates, double-buffer switching, and application-level angle integration remain pending.
+
+On 2026-10-17, the owner reported firmware execution and approximately 1 ms and 2 ms High durations with synchronous rising edges on the analog oscilloscope. The preceding full local check passed 114 tests, formatting checks, and the Pico build. A new period measurement, deliberate underflow tests, recovery, 18-channel timing, and attached-servo operation were not reported. Remote CI for this DMA integration is pending.
+
+See the [PIO driver guide](servo-pio/README.md) for encoding and timing details. To reproduce the signal check, probe GP0 and GP1 against Pico GND, with servos disconnected.
+
+## Historical per-channel PIO driver
+
+The following sections describe the previous implementation retained in src/drivers. They are not the active DMA demo.
 
 The application uses PIO0 state machine 0 with GP0 (physical Pico pin 1) and state machine 1 with GP1 (physical pin 2). ServoPio is generic over the PIO block, state machine index, and pin identifier. The associated P::PinFunction ties the GPIO function to the selected PIO block at compile time. Each channel owns its running state machine, private PioTransport adapter, limits, and pin. The PIO manager remains in main. This two-channel implementation is a learning step, not a finalized 18-channel design.
 
@@ -136,7 +157,9 @@ Instrument: Leader 1041, 40 MHz, two-channel analog oscilloscope. No servo was a
 
 For reproducing the signal check, connect the probes to GP0 and GP1 through the planned 180-ohm series resistors and their ground clips to Pico GND (for example physical pin 3). Keep the servo disconnected. Exact wiring and power details of the reported observations were not recorded.
 
-## Angle library
+## Angle library and historical integration
+
+The library remains available, but the current fixed-plan DMA demo does not issue angle commands. The integration history below describes earlier firmware.
 
 The [servo-control library](servo-control/README.md) provides an i32 centidegree Angle type, two-point calibration, and Servo angle commands through PulseOutput. On 2026-10-14 the owner reported a successful full local check with 21 control tests, 6 signal tests, 3 Python tests, formatting, and the existing Pico build. The library is now integrated into the Pico firmware: ServoPio implements PulseOutput and main owns a Servo configured with synthetic -45-degree / 1000-us and +45-degree / 2000-us calibration points. ServoPio still starts with an initial 1500-us pulse before the wrapper is constructed. Constructing Servo itself emits no command.
 

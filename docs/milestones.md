@@ -51,3 +51,9 @@ Both outputs were reported to follow the agreed opposing 1000/1500/2000-us and 2
 2026-10-16: The owner reported a successful full local check with 80 tests after adding two output-free angle validation tests and ten ServoBank tests. The bank validates all IDs and calibrated angle ranges before submitting any command. Validation failure produces no output calls. Submission errors stop further commands without retry or rollback; earlier accepted commands remain accepted.
 
 This library step does not change the Pico demonstration. ServoBank integration, synchronized PIO startup, and simultaneous activation of later target updates remain pending. Remote CI for this library revision has not yet been reported.
+
+## Fixed-plan PIO/DMA output
+
+2026-10-17: The owner reported a full local check with 114 passing tests and successful execution of the fixed-plan DMA demo. One PIO0 state machine and DMA channel 0 drive GP0 and GP1. The observed High durations were approximately 1 ms and 2 ms, with synchronous rising edges. A static encoded plan repeats through polling-based DMA servicing; LED updates are nonblocking.
+
+The nominal period is 20 ms, but no new period measurement was reported. Deliberate underflow, recovery, dynamic plan switching, 18-channel verification, and attached-servo operation remain pending. Remote CI for this integration has not yet been reported.

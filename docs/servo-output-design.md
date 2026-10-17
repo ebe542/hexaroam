@@ -1,6 +1,6 @@
 # Multi-channel servo output design
 
-Status: working design, 2026-10-16. Partially implemented and host-tested; the new output path is not hardware-verified. The committed Pico firmware still uses one state machine per output. This document proposes its replacement; it does not describe current firmware behavior.
+Status: working design, 2026-10-16. Partially implemented and host-tested; the new output path is not hardware-verified. The current fixed-plan demo uses one state machine and DMA for two outputs. The two-buffer update protocol below remains a design, not implemented behavior.
 
 ## Scope and command contract
 
@@ -89,7 +89,7 @@ Explicit reactivation disables the state machine, stops DMA and waits for comple
 
 ## Verification and remaining decisions
 
-Before replacing the current driver:
+Remaining verification and generalization:
 
 - Verify the PIO assembly, wrap locations, shift configuration, GPIO ownership, and cycle calculation.
 - Test plan generation for N channels, duplicate times, arbitrary valid pin assignments, exact period sum, and invalid inputs.
@@ -109,6 +109,12 @@ The existing Angle and Calibration remain useful. ServoBank's per-channel sequen
 
 ## Implementation progress
 
-SignalPlan generation in servo-signal passed 13 new host tests, with 93 tests in the full local check; the owner subsequently reported green CI for that revision. The checked PIO program is compiled but not installed or executed.
+SignalPlan generation in servo-signal passed 13 new host tests, with 93 tests in the full local check; the owner subsequently reported green CI for that revision. At that stage the checked PIO program was compiled but not installed or executed; the later hardware result is recorded below.
 
-The servo-pio library now encodes individual plan entries, checks configured RP2040 GPIO masks, and rejects zero or unrepresentable durations. The encoder and its error type are internal implementation details, not application-facing APIs. The future output driver will accept complete SignalPlan values and own the GPIO/clock configuration; callers do not perform ASM-specific encoding. The owner reported nine encoder tests passing and a full local check with 102 tests. The owner subsequently reported green CI for the entry encoder revision. Complete-plan encoding is now implemented internally through EncodedSignalPlan: it preserves word order, checks capacity, and returns a payload only after all entries have encoded successfully. Seven additional tests passed, bringing the encoder package to 16 tests and the full local check to 109. The payload still needs stable memory and exclusive ownership for actual DMA reads. DMA integration and physical output verification remain pending; remote CI for complete-plan encoding has not yet been reported. See the [encoder guide](../firmware/servo-pio/README.md).
+The servo-pio library now encodes individual plan entries, checks configured RP2040 GPIO masks, and rejects zero or unrepresentable durations. The encoder and its error type are internal implementation details, not application-facing APIs. The future output driver will accept complete SignalPlan values and own the GPIO/clock configuration; callers do not perform ASM-specific encoding. The owner reported nine encoder tests passing and a full local check with 102 tests. The owner subsequently reported green CI for the entry encoder revision. Complete-plan encoding is now implemented internally through EncodedSignalPlan: it preserves word order, checks capacity, and returns a payload only after all entries have encoded successfully. Seven additional tests passed, bringing the encoder package to 16 tests and the full local check to 109. The payload still needs stable memory and exclusive ownership for actual DMA reads. The owner subsequently reported green CI for complete-plan encoding. Initial fixed-plan DMA integration is recorded below; dynamic switching remains pending. See the [encoder guide](../firmware/servo-pio/README.md).
+
+## Fixed-plan hardware result
+
+2026-10-17: The owner reported a full local check with 114 tests and successful firmware execution. The assembly now resides in servo-pio/src/program.rs. The hardware-only driver prepares all selected GPIOs on one state machine; OutputBuffer provides static storage for a complete encoded plan. The initial entry is written to the FIFO before DMA and PIO start. FixedOutput::service polls completion and rearms the fixed plan. No DMA completion interrupt or dynamic buffer exchange is implemented yet.
+
+The demo uses PIO0 SM0, DMA channel 0, GP0 at 1000 us, GP1 at 2000 us, and a nominal 20000-us period. The owner observed approximately 1 ms and 2 ms High durations and synchronous rising edges. The period was not newly reported as measured. Underflow fault injection, explicit recovery, general timing bounds, 18-channel output, and physical servos remain unverified. CI for this integration is pending.

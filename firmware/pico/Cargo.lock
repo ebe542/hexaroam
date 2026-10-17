@@ -377,6 +377,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal 1.0.0",
  "hexaroam-servo-control",
+ "hexaroam-servo-pio",
  "hexaroam-servo-signal",
  "panic-halt",
  "pio",
@@ -387,6 +388,16 @@ dependencies = [
 [[package]]
 name = "hexaroam-servo-control"
 version = "0.1.0"
+
+[[package]]
+name = "hexaroam-servo-pio"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-signal",
+ "pio",
+ "pio-proc",
+ "rp2040-hal",
+]
 
 [[package]]
 name = "hexaroam-servo-signal"

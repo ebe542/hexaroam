@@ -6,3 +6,8 @@ license = "MIT"
 
 [dependencies]
 hexaroam-servo-signal = { path = "../servo-signal" }
+pio = "0.2"
+pio-proc = "0.2"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))'.dependencies]
+rp2040-hal = "0.10.2"

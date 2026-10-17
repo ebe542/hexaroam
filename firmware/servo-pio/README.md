@@ -1,6 +1,6 @@
 # Servo PIO encoding
 
-`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It implements internal encoding of individual entries and complete SignalPlan values. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The public whole-plan driver interface is not implemented yet. It has a local dependency on `servo-signal`, no HAL dependency, and runs unit tests on the host.
+`hexaroam-servo-pio` is a `no_std` library for the RP2040-specific representation of servo signal plans. It implements internal encoding of individual entries and complete SignalPlan values. The encoding module is private; encode_entry and EncodingError are crate-visible and are not exported to applications. The hardware-only public interface prepares GPIO outputs and repeatedly emits a fixed SignalPlan through DMA. It depends on servo-signal and assembles its PIO program on the host. RP2040 HAL code is enabled only for ARM bare-metal builds, so pure encoding and buffer tests still run on the host.
 
 ## Internal entry encoding
 
@@ -26,11 +26,11 @@ Capacity counts words, not channels or logical entries. Each logical entry requi
 
 Construction happens in a local buffer. Any entry error rejects the whole result, including an overflow in the final all-Low interval. No partially encoded plan is returned and no hardware is accessed.
 
-This type is not yet a DMA ownership mechanism. The future driver must place payloads in stable memory and prevent moving or modifying them during DMA reads. Encoding alone does not start output, reserve a buffer, or establish frame-boundary activation.
+This encoded value alone is not a DMA ownership mechanism. OutputBuffer stores it; the fixed-output driver receives static storage and freezes its payload as a static read-only slice before DMA starts. Encoding alone does not start output or establish frame-boundary activation.
 
 ## Timing derivation
 
-The two constants have different origins: 25 is the selected number of PIO clock cycles per microsecond; 11 comes from the instruction sequence in [servo_plan_program.rs](../pico/src/drivers/servo_plan_program.rs).
+The two constants have different origins: 25 is the selected number of PIO clock cycles per microsecond; 11 comes from the instruction sequence in [program.rs](src/program.rs).
 
 ### Why 25 cycles per microsecond?
 
@@ -41,7 +41,7 @@ A proposed state-machine clock of 25 MHz means:
 one PIO cycle = 40 ns
 ```
 
-This is a design choice, not an instruction count. It permits whole-microsecond durations while leaving enough cycles for both data checks and GPIO output, even for adjacent events only 1 us apart. With a 125 MHz system clock, for example, an integer divider of 5 produces 25 MHz. The future driver must check/configure the actual divider; the current firmware has not yet installed this program or configured its clock. The encoder assumes exactly 25 MHz and does not configure it.
+This is a design choice, not an instruction count. It permits whole-microsecond durations while leaving enough cycles for both data checks and GPIO output, even for adjacent events only 1 us apart. With a 125 MHz system clock, for example, an integer divider of 5 produces 25 MHz. PreparedOutput checks that the system clock supports an integer divider and configures it; the current demo installs the program at this frequency. The encoder assumes exactly 25 MHz and does not configure it.
 
 ### Why eleven overhead cycles?
 
@@ -76,7 +76,7 @@ Thus eleven is ten next-entry instructions plus the final countdown check. It is
 
 For 1 us, C=14: the loop takes 15 cycles and next-entry preparation takes 10, totaling 25 cycles. For 1000 us, C=24,989: 24,990 loop cycles plus 10 preparation cycles equals 25,000 cycles, or 1000 us.
 
-This calculation covers the normal path with valid words, no instruction delay fields, and autopull disabled. Underflow branches to the separate Low/fault path; it does not preserve the normal interval. The first output after startup also has a preparation latency and is not itself a complete inter-output interval. Physical timing remains to be measured.
+This calculation covers the normal path with valid words, no instruction delay fields, and autopull disabled. Underflow branches to the separate Low/fault path; it does not preserve the normal interval. The first output after startup also has a preparation latency and is not itself a complete inter-output interval. Initial approximate pulse widths and synchronous rising edges have been observed; precise timing and a new period measurement remain unverified.
 
 ## Files and verification
 
@@ -84,7 +84,11 @@ This calculation covers the normal path with valid words, no instruction delay f
 | --- | --- |
 | src/lib.rs | no_std declaration and private encoding module |
 | src/encoding.rs | Internal entry and complete-plan encoding |
-| src/test_encoding.rs | Sixteen host unit tests |
+| src/test_encoding.rs | Sixteen host encoding tests |
+| src/program.rs | Multi-channel PIO assembly |
+| src/output.rs | Hardware-only prepared output and fixed DMA servicing |
+| src/buffer.rs | Public opaque storage with internal loading |
+| src/test_buffer.rs | Five host buffer tests |
 | Cargo.lock | Locked dependency resolution; commit this file |
 
 From the repository root:
@@ -104,12 +108,20 @@ On Ubuntu use `python3` if `python` is unavailable. Run Cargo from this package'
 
 The nine tests cover marked masks, all-Low encoding, the minimum duration, GPIO29, invalid configuration masks, unconfigured bits, zero duration, the maximum encodable duration, and overflow. The owner reported a successful full local check with 102 tests, Rust formatting checks for four packages, and the existing Pico build. The owner subsequently reported green CI for the entry encoder revision.
 
-Seven additional tests cover complete word ordering, hidden spare capacity, insufficient capacity, invalid configuration masks, unconfigured outputs, final-entry overflow, and capacity based on actual entries rather than channel count. The owner reported 16 encoder tests passing and a successful full local check with 109 tests. Remote CI for complete-plan encoding has not yet been reported.
+Seven additional tests cover complete word ordering, hidden spare capacity, insufficient capacity, invalid configuration masks, unconfigured outputs, final-entry overflow, and capacity based on actual entries rather than channel count. The owner reported 16 encoder tests passing and a successful full local check with 109 tests. The owner subsequently reported green CI for complete-plan encoding.
 
-## Integration status
+## Fixed-plan hardware integration
 
-The checked PIO program remains in `../pico/src/drivers/servo_plan_program.rs`; its assembly was accepted by a Pico build. It is not installed or executed. The Pico application does not yet depend on this encoder library and still runs the existing two-channel driver.
+The Pico demo now depends on this library. It allocates OutputBuffer<6> once using cortex_m::singleton!, constructs a three-entry SignalPlan, and prepares PIO0 SM0 with GP0 and GP1. One DMA channel supplies both outputs. No per-servo state-machine synchronization is needed.
 
-Applications will submit a complete SignalPlan through the output driver; they must not need marker bits, PIO instruction timing, or DMA word layout. The driver configuration will own the allowed GPIO mask and PIO clock settings. The public driver interface, stable DMA buffers and their ownership, frame-boundary replacement, and hardware verification remain pending. The temporary dead_code allowance on the private module can be removed when the driver uses it. Host tests do not establish signal timing, underflow behavior, or electrical servo compatibility.
+Public hardware types are PreparedOutput, FixedOutput, OutputInitError, and OutputStartError. PreparedOutput::new owns the configured pins and a stopped state machine. start_fixed validates/encodes the plan in static buffer storage, prefills one complete FIFO entry, starts DMA for the remaining words, and starts PIO. Encoding details remain private. Start failures are reported as InvalidPlan or InsufficientCapacity without exposing ASM-specific errors.
+
+FixedOutput owns the running state machine, pins, current DMA transfer, and a static read-only payload reference. service polls transfer completion and rearms the same channel with the full plan. The application must call it regularly. The demo uses timestamp-based LED updates rather than blocking delays. DMA completion is not an indication of GPIO activation; FIFO data may still be pending.
+
+Five buffer tests cover empty storage, a complete payload, shorter replacements hiding old words, and preservation of previous data on encoding or capacity errors. The owner reported 114 tests passing in the full local check. On 2026-10-17, the owner observed approximately 1 ms High on GP0 and 2 ms High on GP1 with synchronous rising edges. A new measured period, exact timing, deliberate underflow behavior, recovery, and 18-channel operation remain unverified. Remote CI for this DMA integration has not yet been reported.
+
+The PIO underflow branch sets outputs Low, raises flag 0, and loops. Fault reporting and controlled recovery are not implemented in the current demo. The program must not be resumed merely by clearing the flag. Low does not establish a safe mechanical posture.
+
+Dynamic plan submission, two-buffer ownership, explicit activation confirmation, and a general DMA rearm latency bound remain pending. The fixed experiment permanently freezes one payload; it does not implement the planned writable/ready buffer cycle. Host tests do not establish physical signal timing or electrical servo compatibility.
 
 See the [multi-channel output working design](../../docs/servo-output-design.md) for the PIO program, timing derivation, buffer ownership, and fault/restart requirements.

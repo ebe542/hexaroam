@@ -4,7 +4,7 @@
 
 // Temporary until the DMA-backed driver uses this function.
 #[allow(dead_code)]
-pub fn program() -> pio::Program<32> {
+pub(crate) fn program() -> pio::Program<32> {
     pio_proc::pio_asm!(
         ".wrap_target",
         "set x, 0",

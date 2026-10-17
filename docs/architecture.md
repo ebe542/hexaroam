@@ -40,4 +40,4 @@ Develop parsing, limits, and motion calculations on the host where possible. Ver
 
 ## Servo output working design
 
-See the [multi-channel servo output design](servo-output-design.md) for the proposed single-state-machine PIO/DMA backend, whole-plan updates, buffer ownership, and underflow recovery. This is a working design; current firmware still uses separate state machines for its two outputs.
+See the [multi-channel servo output design](servo-output-design.md) for the single-state-machine PIO/DMA backend, whole-plan updates, buffer ownership, and underflow recovery. The current fixed-plan demo drives two outputs through one state machine and DMA. Dynamic buffer exchange and controlled recovery remain a working design.

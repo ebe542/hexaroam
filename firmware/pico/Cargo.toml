@@ -9,6 +9,7 @@ cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1.0"
 hexaroam-servo-control = { path = "../servo-control" }
+hexaroam-servo-pio = { path = "../servo-pio" }
 hexaroam-servo-signal = { path = "../servo-signal" }
 panic-halt = "1.0"
 pio = "0.2"
