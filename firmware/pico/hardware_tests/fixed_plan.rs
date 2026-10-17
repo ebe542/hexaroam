@@ -15,8 +15,13 @@ mod support;
 #[path = "../src/servo_demo.rs"]
 mod servo_demo;
 
-use panic_halt as _;
 use rp_pico::entry;
+
+#[path = "../src/panic_uart.rs"]
+mod panic_uart;
+
+#[path = "../src/uart_logging.rs"]
+mod uart_logging;
 
 #[entry]
 fn main() -> ! {
@@ -29,5 +34,7 @@ fn main() -> ! {
         &mut board.resets,
         board.system_clock_hz,
         board.timer,
+        board.uart,
+        board.peripheral_clock,
     )
 }

@@ -1,14 +1,18 @@
 //! Fixed two-channel signal test using one PIO state machine and DMA.
 
+use crate::uart_logging::UartLogOutput;
 use embedded_hal::digital::OutputPin;
+use hexaroam_logging::{LogLevel, Logger};
 use hexaroam_servo_pio::{OutputBuffer, PreparedOutput};
 use hexaroam_servo_signal::{PulseLimits, PulseTarget, SignalPlan};
 use rp_pico::hal::{
     Timer,
+    clocks::{Clock, PeripheralClock},
     dma::DMAExt,
-    gpio::{FunctionPio0, PullNone},
+    gpio::{FunctionPio0, FunctionUart, PullNone},
     pac,
     pio::PIOExt,
+    uart::{Pins, UartConfig, UartPeripheral},
 };
 
 pub fn run(
@@ -18,7 +22,28 @@ pub fn run(
     resets: &mut pac::RESETS,
     system_clock_hz: u32,
     timer: Timer,
+    uart_peripheral: pac::UART1,
+    peripheral_clock: PeripheralClock,
 ) -> ! {
+    let uart_pins = Pins::default().tx(pins
+        .gpio20
+        .into_function::<FunctionUart>());
+
+    let uart = UartPeripheral::new(uart_peripheral, uart_pins, resets)
+        .enable(
+            UartConfig::default(),
+            peripheral_clock.freq(),
+        )
+        .expect("Failed to initialize logging UART");
+
+    let mut logger = Logger::<_, 256>::new(UartLogOutput::new(uart));
+
+    logger
+        .log(
+            LogLevel::Info,
+            "Initializing servo output",
+        )
+        .expect("Startup message must fit");
     let (mut pio, sm0, _, _, _) = pio_peripheral.split(resets);
     let dma = dma_peripheral.split(resets);
 
@@ -80,10 +105,25 @@ pub fn run(
     let mut led_high = false;
     let mut last_toggle_us = timer.get_counter_low();
 
+    logger
+        .log(LogLevel::Info, "Servo output started")
+        .expect("Startup message must fit");
+
+    let mut last_log_us = timer.get_counter_low();
     loop {
         output.service();
+        logger
+            .service(16)
+            .expect("UART output is infallible");
 
         let now_us = timer.get_counter_low();
+
+        if now_us.wrapping_sub(last_log_us) >= 1_000_000 {
+            last_log_us = now_us;
+
+            // Runtime messages may be dropped when the buffer is full.
+            let _ = logger.log(LogLevel::Debug, "Servo demo alive");
+        }
 
         if now_us.wrapping_sub(last_toggle_us) >= 500_000 {
             last_toggle_us = now_us;

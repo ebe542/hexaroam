@@ -1,8 +1,10 @@
 #![no_std]
 #![no_main]
 
+mod panic_uart;
 mod servo_demo;
-use panic_halt as _;
+mod uart_logging;
+
 use rp_pico::entry;
 use rp_pico::hal::{
     Timer,
@@ -53,5 +55,7 @@ fn main() -> ! {
         &mut peripherals.RESETS,
         clocks.system_clock.freq().to_Hz(),
         timer,
+        peripherals.UART1,
+        clocks.peripheral_clock,
     )
 }
