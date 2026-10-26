@@ -26,7 +26,7 @@ The budget limits write attempts, not elapsed milliseconds. It relies on the bac
 
 ## Pico panic handler
 
-The separate [panic handler](../pico/src/panic_uart.rs) is currently selected only by `uart_panic`. The normal firmware and other hardware tests still use `panic-halt`.
+The [panic handler](../pico/src/panic_uart.rs) is selected by the normal firmware, fixed_plan, uart_panic, and the two restart hardware tests. Other hardware programs retain panic-halt unless they explicitly select this handler.
 
 The handler disables interrupts, checks that UART1 is out of reset with its UART and transmitter enabled, and writes directly through its registers using a total budget of 1,000,000 write attempts. An initial LF separates the panic from potentially interrupted normal output. `PanicInfo` supplies the message and source location, including for failed `expect`, `unwrap`, and assertions. If UART1 is not enabled, output is skipped. Afterwards, the CPU stays in a permanent loop while peripheral clocks continue running, so accepted UART FIFO bytes can still be transmitted.
 
@@ -46,4 +46,4 @@ python tools/dev.py hardware-build
 
 The development runner includes this library in formatting, checks, and host tests. `verify` builds the normal Pico firmware; `hardware-build` separately builds and converts the manual hardware programs to UF2.
 
-On 2026-10-17, the owner reported 17 passing logging unit tests and a full runner total of 145 passing tests. On the physical Pico, Info, Debug, and Error lines were received in HTerm, including after switching to LF-only line endings. The panic test emitted its message after approximately five seconds and left the LED permanently on. Manual hardware programs are excluded from the unit-test total. Early panic before UART initialization, stalled UART output, and concurrent logging with servo DMA have not been separately tested on hardware. CI for this revision has not yet been reported.
+On 2026-10-17, the owner reported 17 passing logging unit tests and a full runner total of 145 passing tests. On the physical Pico, Info, Debug, and Error lines were received in HTerm, including after switching to LF-only line endings. The panic test emitted its message after approximately five seconds and left the LED permanently on. Manual hardware programs are excluded from the unit-test total. The owner subsequently confirmed UART output alongside servo pulses in the normal demo, and state-transition logging is also used in the recovery tests. Early panic before UART initialization and stalled UART output have not been separately tested on hardware. The owner reported green CI for the earlier logging revision.

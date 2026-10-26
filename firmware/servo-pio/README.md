@@ -90,9 +90,10 @@ This calculation covers the normal path with valid words, no instruction delay f
 | src/buffer.rs | Public opaque storage with internal loading |
 | src/test_buffer.rs | Five host buffer tests |
 | src/pending_signal_plan.rs | Validation and preparation of a replacement plan |
-| src/test_pending_signal_plan.rs | Seven host submission tests |
+| src/test_pending_signal_plan.rs | Eleven host submission and restart-preparation tests |
 | src/signal_plan_dma_source.rs | Exclusive static buffer ownership for DMA reads |
-| src/switching_output.rs | Two-buffer plan submission and DMA handover |
+| src/switching_output.rs | Two-buffer plan submission, DMA handover, and explicit restart |
+| src/dma_abort.rs | Bounded, channel-specific DMA abort with RP2040-E13 handling |
 | Cargo.lock | Locked dependency resolution; commit this file |
 
 From the repository root:
@@ -164,4 +165,27 @@ A transfer already running at the time of detection is not aborted. Its source r
 
 On 2026-10-17 the owner reported all requested checks passing and expected execution of faulted_signal_output. That hardware test verifies Faulted taking precedence over an occupied ready slot, persistence after hardware-flag acknowledgement, and continued Low output when servicing resumes. It does not exercise the stale-flag startup rejection separately. The existing unit-test total remains 128; this firmware test is manually evaluated, not counted as a host test. Remote CI for this revision is pending.
 
-Explicit recovery remains unimplemented. Deleting the hardware flag is not recovery: PIO remains in its halt loop and the driver remains faulted. Recovery must separately stop DMA safely, reset PIO/FIFO state, and prefill a complete valid plan before starting again.
+Clearing the hardware flag alone is not recovery: PIO remains in its halt loop and the driver remains faulted. Explicit recovery is now available through restart, described below.
+
+## Explicit restart after a fault
+
+`SwitchingOutput::restart(&signal_plan)` is allowed only after a detected or latched fault. Otherwise it returns `OutputRestartError::NotFaulted`. The replacement must have the original period and complete output set. Preparation validates and encodes the whole plan before changing hardware; it may replace an already-ready pending plan. Validation failure preserves the previous payload, readiness, and fault state. Four new host tests cover ready-plan replacement and preservation after period, output, and capacity errors.
+
+After validation, the driver aborts its owned DMA channel while retaining the transfer and source buffer inside the driver. The internal abort helper disables both interrupt routes for that channel using atomic-clear aliases, requests CHAN_ABORT, and polls at most 100,000 times. Due to RP2040-E13, it checks BUSY as well as the channel's abort bit. Once stopped, it clears only that channel's raw completion interrupt. Other DMA channels are not reset. This driver uses polling; its channel interrupt routes remain disabled.
+
+If the polling budget expires, `DmaAbortTimeout` leaves the driver faulted with its DMA resources still bound. The validated restart plan may already occupy the pending slot. No FIFO reset or PIO restart occurs. The budget counts polling attempts, not milliseconds.
+
+After a confirmed abort, HAL wait recovers channel, source, and TX ownership and applies its memory fences. The driver clears old FIFO words, prefills the new plan's first complete entry, starts DMA for the remaining words, and makes the former DMA buffer the new writable slot. It clears reserved PIO flag 0 and uses the HAL restart operation to pause execution, reset internal execution state, jump to the installed program's wrap target, and enable output. The cached fault is then cleared. Normal underflow keeps pins Low during preparation. Success means restart was initiated, not that output activation was measured or acknowledged.
+
+The initial period and GPIO allocation remain fixed. Restart does not resume an old stream or automatically execute the previously pending plan. Validation errors include PeriodMismatch, OutputMismatch, InvalidPlan, and InsufficientCapacity. The normal application still uses FixedOutput; this restart API belongs to SwitchingOutput.
+
+### Manual recovery checks
+
+On 2026-10-17 the owner reported 149 passing unit tests and successful execution of both recovery programs:
+
+- `restart_signal_output`: five seconds of initial pulses, a real underflow, two seconds Low, then the replacement pulse pattern. Assertions reject restart while healthy and reject invalid period/output requests while faulted. LED behavior matched the expected phases.
+- `restart_active_dma`: an injected fault disables the state machine and forces Low. The test starts a six-word transfer into the four-word TX FIFO without consuming words. Its feature-gated hook confirms FIFO full and DMA active; assertions confirm DMA remains active through invalid restart attempts and immediately before successful recovery. Signals and LED behavior were reported correct.
+
+`dma_is_active` and `force_fault_with_active_dma` exist only with the `hardware-tests` feature. The hook is deliberate fault injection, not underflow detection. See the [hardware-test guide](../pico/hardware_tests/README.md#controlled-restart-tests).
+
+An intentionally forced DMA-abort timeout, exact restart latency, brief-glitch exclusion, and 18-channel operation remain unverified. Manual programs are excluded from the 149 unit-test count. CI for this recovery revision has not yet been reported.

@@ -85,7 +85,7 @@ An empty FIFO while PIO is counting is not itself a fault. A missing word at a r
 
 Low is a defined electrical failure state, not proof of a mechanically safe posture or a particular servo torque response.
 
-Explicit reactivation disables the state machine, stops DMA and waits for completion/abort, clears FIFO and stale interrupt flags, resets execution state and program counter, selects a complete valid plan, starts DMA and prefills the FIFO, resets the clock divider, and enables PIO. Use the same controlled startup path for initial activation and recovery. Do not resume in the middle of a previous stream.
+Explicit reactivation first validates a complete replacement plan. While PIO holds Low in its fault loop, the current implementation aborts the owned DMA channel with a bounded polling budget and retains source ownership until BUSY and the abort bit are clear. It then clears FIFO contents, prefills the initial complete entry, starts DMA for the remaining words, clears flag 0, and invokes HAL restart to reset execution state and the program counter before enabling PIO. The configured divider is retained. Timeout leaves the driver faulted and resources bound. Do not resume in the middle of a previous stream. See the [driver guide](../firmware/servo-pio/README.md#explicit-restart-after-a-fault) for the implemented sequence.
 
 ## Verification and remaining decisions
 
@@ -132,3 +132,9 @@ The separate switching_signal_plans hardware test alternates 1-ms/2-ms and 2-ms/
 2026-10-17: SwitchingOutput now latches an observed underflow flag. Submissions return Faulted before Busy or plan validation, and service does not rearm or exchange buffers after detecting the fault. A stale set flag also rejects start; that startup branch has not yet been independently exercised by a hardware test. Existing in-flight DMA resources remain bound rather than being synchronously aborted or waited on.
 
 The owner reported all requested checks passing and faulted_signal_output running as expected. Its assertions cover a pending plan during underflow, Faulted precedence, persistence after clearing the hardware IRQ flag, and no automatic restart under later servicing. No new unit tests were added; the total remains 128. Exact fault latency and controlled recovery remain open, and CI for this revision is pending. The preceding two-buffer switching revision passed CI.
+
+## Recovery verification update
+
+2026-10-17: The owner reported 149 passing unit tests, including four new PendingSignalPlan restart-preparation tests. restart_signal_output successfully exercised real underflow, a Low interval, invalid restart rejection, and explicit replacement-plan restart. restart_active_dma then confirmed a full FIFO with a still-active transfer before successful recovery. Both manual tests showed the expected signal and LED phases. The latter uses feature-gated fault injection rather than a real underflow.
+
+The DMA-abort helper accounts for RP2040-E13 by checking BUSY in addition to CHAN_ABORT and disabling/acknowledging the owned channel's interrupt state. Timeout is bounded by polling attempts and retains source ownership. Intentionally forcing that timeout, exact recovery timing, brief-glitch exclusion, and 18-channel output remain open. See the [hardware-test guide](../firmware/pico/hardware_tests/README.md#controlled-restart-tests). CI for this revision has not yet been reported.

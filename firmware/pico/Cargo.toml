@@ -53,6 +53,20 @@ path = "hardware_tests/uart_panic.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "restart_signal_output"
+path = "hardware_tests/restart_signal_output.rs"
+required-features = ["hardware-tests"]
+test = false
+
+[[example]]
+bench = false
+name = "restart_active_dma"
+path = "hardware_tests/restart_active_dma.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"

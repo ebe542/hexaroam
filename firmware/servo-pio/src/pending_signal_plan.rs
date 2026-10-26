@@ -41,27 +41,7 @@ impl<'a, const WORD_CAPACITY: usize> PendingSignalPlan<'a, WORD_CAPACITY> {
             return Err(SubmissionError::Busy);
         }
 
-        if plan.period_us() != self.period_us {
-            return Err(SubmissionError::PeriodMismatch);
-        }
-
-        // Every configured output starts High in a complete SignalPlan.
-        let initial_mask = plan
-            .entries()
-            .first()
-            .map(|entry| entry.gpio_mask);
-
-        if initial_mask != Some(self.gpio_mask) {
-            return Err(SubmissionError::OutputMismatch);
-        }
-
-        self.buffer
-            .load(plan, self.gpio_mask)
-            .map_err(SubmissionError::Encoding)?;
-
-        self.ready = true;
-
-        Ok(())
+        self.prepare_restart(plan)
     }
 
     pub(crate) fn is_ready(&self) -> bool {
@@ -75,6 +55,36 @@ impl<'a, const WORD_CAPACITY: usize> PendingSignalPlan<'a, WORD_CAPACITY> {
         bool,
     ) {
         (self.buffer, self.ready)
+    }
+
+    /// Prepares an explicit restart, replacing any pending plan.
+    ///
+    /// Validation failure preserves the previous payload and ready state.
+    pub(crate) fn prepare_restart<const PLAN_CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<(), SubmissionError> {
+        if plan.period_us() != self.period_us {
+            return Err(SubmissionError::PeriodMismatch);
+        }
+
+        let initial_mask = plan
+            .entries()
+            .first()
+            .map(|entry| entry.gpio_mask);
+
+        if initial_mask != Some(self.gpio_mask) {
+            return Err(SubmissionError::OutputMismatch);
+        }
+
+        // Loading is transactional: encoding errors preserve the payload.
+        self.buffer
+            .load(plan, self.gpio_mask)
+            .map_err(SubmissionError::Encoding)?;
+
+        self.ready = true;
+
+        Ok(())
     }
 }
 

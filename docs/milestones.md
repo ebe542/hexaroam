@@ -83,3 +83,9 @@ Controlled recovery, independent stale-flag startup testing, and exact fault lat
 The owner confirmed Info, Debug, and Error output in HTerm from the UART1/GP20 hardware test. The separate uart_panic program emitted its message after approximately five seconds and left the LED permanently on. Its handler bypasses the runtime software queue and then holds the CPU in a permanent loop. The attempt budget is not a calibrated time limit.
 
 See the [logging guide](../firmware/logging/README.md) for contracts and the [hardware-test guide](../firmware/pico/hardware_tests/README.md#uart-connection-and-terminal) for reproduction. The regular servo firmware still uses panic-halt; UART integration with running servo DMA and controlled output recovery remain pending. CI for this revision has not yet been reported.
+
+## Controlled restart and active-DMA abort
+
+2026-10-17: The owner reported 149 passing unit tests and successful manual execution of restart_signal_output and restart_active_dma. The first test exercises recovery after real PIO underflow, rejecting invalid restart requests while preserving the fault. The second injects a fault, confirms a full FIFO with DMA still active, and checks active status immediately before the successful restart. Both showed initial pulses, a Low interval, renewed output, and correct LED behavior.
+
+Restart validates the supplied complete plan before hardware changes and retains DMA source ownership until a channel-specific abort confirms inactivity. RP2040-E13 handling includes BUSY polling and channel interrupt handling. A bounded polling failure leaves the driver faulted. The forced timeout path remains untested on hardware. The normal fixed-plan demo now runs UART logging alongside servo DMA and selects the bounded UART panic handler; the owner confirmed simultaneous output and pulses. CI for the recovery revision has not yet been reported.

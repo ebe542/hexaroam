@@ -6,7 +6,7 @@ See [development setup](../docs/development-setup.md) for prerequisites and [har
 
 ## Pico LED blink firmware
 
-The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. The normal firmware uses panic-halt: panic handling stops CPU execution without printing a diagnostic or automatically resetting the board. A separate UART panic handler is currently exercised only by the uart_panic hardware test; see [logging](logging/README.md).
+The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. The normal firmware now initializes UART1 logging and selects the bounded UART panic handler; see [logging](logging/README.md). Its main loop services servo DMA before the logger. The periodic alive message belongs to this demo, not a general runtime logging policy.
 
 ### Files
 
@@ -119,7 +119,7 @@ The switching_signal_plans hardware test alternates the GP0/GP1 pulse assignment
 
 ## Persistent switching-output fault
 
-SwitchingOutput detects and latches the reserved PIO underflow flag through is_faulted, submit_plan, and service. Once detected, new submissions return Faulted before Busy or validation, and service does not rearm DMA. Clearing the hardware flag does not resume PIO or clear the driver state. Existing DMA resources remain bound; controlled recovery is not implemented.
+SwitchingOutput detects and latches the reserved PIO underflow flag through is_faulted, submit_plan, and service. Once detected, new submissions return Faulted before Busy or validation, and service does not rearm DMA. Clearing the hardware flag does not resume PIO or clear the driver state. Existing DMA resources remain bound until an explicit restart safely aborts the transfer; service alone does not recover output. See [controlled restart](servo-pio/README.md#explicit-restart-after-a-fault).
 
 On 2026-10-17 the owner reported all checks passing and faulted_signal_output running as expected. It checks fault precedence with a ready plan, persistence after hardware-flag clearing, and continued Low outputs during subsequent servicing. See the [hardware-test guide](pico/hardware_tests/README.md#persistent-driver-fault-test). The unit-test total remains 128; remote CI for this revision is pending.
 
@@ -191,4 +191,10 @@ On 2026-10-14 the owner reported a successful full check, UF2 generation/upload,
 
 The [logging guide](logging/README.md) describes nonblocking Info, Debug, and Error output, whole-message rejection when the buffer is full, and bounded direct panic output. The [hardware-test guide](pico/hardware_tests/README.md#uart-connection-and-terminal) documents UART1 on GP20, the Waveshare TTL adapter, HTerm settings, and separate uart_diagnostics and uart_panic programs.
 
-On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests in the full runner. Buffered output with LF-only line endings was received in HTerm. In uart_panic, the panic message appeared after approximately five seconds and the LED stayed on. These manual checks are additional to the unit tests. The normal servo demo still uses panic-halt and has no UART logging yet. Combined servo/DMA and UART operation, early panic without UART initialization, and a stalled UART have not been separately tested. CI for this revision has not yet been reported.
+On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests in the full runner. Buffered output with LF-only line endings was received in HTerm. In uart_panic, the panic message appeared after approximately five seconds and the LED stayed on. These manual checks are additional to the unit tests. The owner subsequently confirmed simultaneous UART output and servo pulses in the regular demo, which now selects the UART panic handler. Early panic without UART initialization and a stalled UART have not been separately tested. The owner reported green CI for the earlier logging revision.
+
+## Controlled signal-output restart
+
+SwitchingOutput now offers explicit restart with a validated complete SignalPlan after a latched fault. It rejects healthy-state restart and invalid replacement plans, aborts its owned DMA channel with bounded polling, discards old FIFO contents, and starts the supplied plan from the beginning. An abort timeout leaves resources bound and the driver faulted. The normal application continues to use FixedOutput; its logging integration does not automatically switch it to this driver.
+
+On 2026-10-17 the owner reported 149 passing unit tests and successful execution of restart_signal_output and restart_active_dma. Both showed initial pulses, a Low interval, successful restart, and expected LED phases. The second test additionally asserts that DMA is still active immediately before restart. See the [driver contract](servo-pio/README.md#explicit-restart-after-a-fault) and [hardware procedures](pico/hardware_tests/README.md#controlled-restart-tests). Forced abort-timeout verification remains pending, and CI for this recovery revision has not yet been reported.

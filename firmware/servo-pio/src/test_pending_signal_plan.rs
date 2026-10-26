@@ -186,3 +186,97 @@ fn all_configured_outputs_are_prepared_together() {
         ],
     );
 }
+
+#[test]
+fn restart_preparation_replaces_a_ready_plan() {
+    let mut buffer = OutputBuffer::<4>::new();
+    let mut pending = PendingSignalPlan::new(&mut buffer, 20_000, 1);
+
+    pending
+        .submit(&single_plan(0, 1_000, 20_000))
+        .expect("Valid pending plan");
+
+    assert_eq!(
+        pending.prepare_restart(&single_plan(0, 2_000, 20_000)),
+        Ok(()),
+    );
+
+    let (buffer, ready) = pending.into_parts();
+
+    assert!(ready);
+    assert_eq!(
+        buffer.words(),
+        &[0x8000_0001, 49_989, 0x8000_0000, 449_989],
+    );
+}
+
+#[test]
+fn restart_period_mismatch_preserves_a_ready_plan() {
+    let mut buffer = OutputBuffer::<4>::new();
+    let mut pending = PendingSignalPlan::new(&mut buffer, 20_000, 1);
+
+    pending
+        .submit(&single_plan(0, 1_000, 20_000))
+        .expect("Valid pending plan");
+
+    assert_eq!(
+        pending.prepare_restart(&single_plan(0, 1_500, 10_000)),
+        Err(SubmissionError::PeriodMismatch),
+    );
+
+    let (buffer, ready) = pending.into_parts();
+
+    assert!(ready);
+    assert_eq!(
+        buffer.words(),
+        &[0x8000_0001, 24_989, 0x8000_0000, 474_989],
+    );
+}
+
+#[test]
+fn restart_output_mismatch_preserves_a_ready_plan() {
+    let mut buffer = OutputBuffer::<4>::new();
+    let mut pending = PendingSignalPlan::new(&mut buffer, 20_000, 1);
+
+    pending
+        .submit(&single_plan(0, 1_000, 20_000))
+        .expect("Valid pending plan");
+
+    assert_eq!(
+        pending.prepare_restart(&single_plan(1, 1_500, 20_000)),
+        Err(SubmissionError::OutputMismatch),
+    );
+
+    let (buffer, ready) = pending.into_parts();
+
+    assert!(ready);
+    assert_eq!(
+        buffer.words(),
+        &[0x8000_0001, 24_989, 0x8000_0000, 474_989],
+    );
+}
+
+#[test]
+fn restart_capacity_error_preserves_a_ready_plan() {
+    let mut buffer = OutputBuffer::<4>::new();
+    let mut pending = PendingSignalPlan::new(&mut buffer, 20_000, 0b11);
+
+    pending
+        .submit(&two_channel_plan(1_500, 1_500))
+        .expect("Equal pulse widths fit into four words");
+
+    assert_eq!(
+        pending.prepare_restart(&two_channel_plan(1_000, 2_000)),
+        Err(SubmissionError::Encoding(
+            EncodingError::InsufficientCapacity,
+        )),
+    );
+
+    let (buffer, ready) = pending.into_parts();
+
+    assert!(ready);
+    assert_eq!(
+        buffer.words(),
+        &[0x8000_0003, 37_489, 0x8000_0000, 462_489],
+    );
+}

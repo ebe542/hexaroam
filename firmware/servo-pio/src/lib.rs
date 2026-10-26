@@ -39,4 +39,11 @@ mod signal_plan_dma_source;
 mod switching_output;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
-pub use switching_output::{OutputSubmissionError, SwitchingOutput};
+pub use switching_output::{
+    OutputRestartError, OutputSubmissionError, SwitchingOutput,
+};
+
+// Used by the controlled restart implementation in the next step.
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+#[allow(dead_code)]
+mod dma_abort;
