@@ -89,3 +89,9 @@ See the [logging guide](../firmware/logging/README.md) for contracts and the [ha
 2026-10-17: The owner reported 149 passing unit tests and successful manual execution of restart_signal_output and restart_active_dma. The first test exercises recovery after real PIO underflow, rejecting invalid restart requests while preserving the fault. The second injects a fault, confirms a full FIFO with DMA still active, and checks active status immediately before the successful restart. Both showed initial pulses, a Low interval, renewed output, and correct LED behavior.
 
 Restart validates the supplied complete plan before hardware changes and retains DMA source ownership until a channel-specific abort confirms inactivity. RP2040-E13 handling includes BUSY polling and channel interrupt handling. A bounded polling failure leaves the driver faulted. The forced timeout path remains untested on hardware. The normal fixed-plan demo now runs UART logging alongside servo DMA and selects the bounded UART panic handler; the owner confirmed simultaneous output and pulses. CI for the recovery revision has not yet been reported.
+
+## Transactional servo-bank commands
+
+2026-10-26: The owner reported 16 passing bank tests and a full verification total of 155 passed, 0 failed, 0 skipped, and 0 filtered out. ServoBank now submits complete pulse-width batches through PulseBankOutput and commits angle commands only after backend acceptance. The first nonempty request initializes all servos; later requests can update a subset. Validation and backend errors preserve the accepted commands. This replaces the earlier sequential bank and its ten tests; the control package now has 39 tests.
+
+The library remains independent of GPIOs and the Pico HAL. A signal-plan adapter and Pico angle-demo integration are the next steps. This host-tested change does not establish new physical signal behavior or servo calibration. CI for this revision has not yet been reported.

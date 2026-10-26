@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting multiple targets. It has no external dependencies and is now used by the Pico firmware through its private PIO driver.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting complete pulse batches. It has no external dependencies. The current PIO/DMA demo uses pulse widths directly; the new bank is not yet connected to that backend.
 
 ## Angle representation
 
@@ -19,12 +19,12 @@ Fields are private. Angle imposes no joint travel limits; Calibration defines th
 | --- | --- |
 | src/lib.rs | no_std declaration and public exports |
 | src/angle.rs | Angle and checked degree conversion |
-| src/angle/tests.rs | Angle unit tests |
+| src/test_angle.rs | Angle unit tests |
 | src/calibration.rs | Calibration validation and integer interpolation |
 | src/test_calibration.rs | Calibration unit tests |
 | src/servo.rs | PulseOutput, Servo, and error forwarding |
 | src/test_servo.rs | Servo wrapper and validation unit tests |
-| src/servo_bank.rs | Servo IDs, targets, batch validation, and submission |
+| src/servo_bank.rs | PulseBankOutput, servo IDs, transactional batch submission, and accepted commands |
 | src/test_servo_bank.rs | Servo bank unit tests |
 
 ## Verification
@@ -42,7 +42,7 @@ cd firmware/servo-control
 cargo test --lib --locked
 ```
 
-Use python3 on Ubuntu if python is unavailable. The shared task runner formats/checks all three Rust packages and tests both libraries; see the [task guide](../../tools/README.md).
+Use python3 on Ubuntu if python is unavailable. The shared task runner includes this package in formatting, code checks, and host tests; see the [task guide](../../tools/README.md).
 
 Four Angle tests cover signed centidegree values including i32 extremes, conversion of negative/zero/positive whole degrees, representable whole-degree boundaries, and rejection beyond both boundaries.
 
@@ -78,20 +78,24 @@ The owner subsequently reported a successful full check and UF2 upload for Pico 
 
 ## Servo bank
 
-`Servo::validate_angle()` checks a target using the existing calibration without calling the output. `ServoChannel` exposes this check and `set_angle()` through a common interface, allowing channels with different concrete output types to be managed together.
+`ServoBank<O, N>` owns N calibrations, N optional last-accepted angle commands, and one backend implementing `PulseBankOutput`. It requires no heap allocation and contains no GPIO, PIO, or Pico types. `ServoId(0)` identifies the first configured calibration; subsequent IDs follow array order. The single-servo `Servo` and `PulseOutput` interfaces remain available independently.
 
-`ServoBank<'a, E, N>` borrows a fixed-size array of mutable channel references. All channels share the output error type E; their concrete types may differ. The bank requires no heap allocation. `ServoId(0)` identifies the first configured channel, and subsequent IDs follow array order.
+Construction performs no output and initializes every accepted command to None. `commanded_angle(id)` returns that servo's last accepted Angle, or None before initialization. Unknown IDs return UnknownServo. These are command records, not physical position feedback or confirmation of GPIO activation.
 
-`set_targets(&[ServoTarget])` is the only batch command API. A single target, equal angles for multiple channels, and different angles all use this method. An empty slice succeeds without output; omitted channels receive no command.
+`set_targets(&[ServoTarget])` handles a single changed servo, equal angles for several servos, or different angles. An empty slice succeeds without output or initialization. The first nonempty request must contain every servo, so a complete pulse batch can be formed. Missing initial values return UninitializedServo. Rejected partial initial requests do not accumulate changes.
 
-The bank validates the entire request before submitting any command. Unknown IDs, duplicate IDs, or angles outside the selected channel's calibration reject the request without calling any output. Calibration errors include the affected servo ID. This guarantee covers bank-level ID and angle validation; backend-specific pulse limits remain independently enforced during submission.
+For each nonempty request, the bank copies its accepted angles into a local candidate, rejects unknown or duplicate IDs, and validates every requested angle against its own calibration. It then converts the complete candidate into a fixed-size pulse-width array in ServoId order. Once initialized, omitted servos retain their accepted targets and are included in every complete output batch. Calibration failures identify the affected servo.
 
-After successful validation, commands are submitted in the supplied order. The first command error stops submission and is returned with its servo ID. There is no retry or rollback: an earlier command may already have been accepted. Success means that all outputs accepted their commands; it does not guarantee simultaneous activation or measured joint positions. Existing PWM signals continue with their previous values when validation rejects a request.
+The bank submits this entire array exactly once through `PulseBankOutput::submit_pulses(&[u32])`. The backend must consume or copy the borrowed slice before returning; it cannot retain the slice for later DMA access. A failed submission must not accept part of the new batch. Only success commits the candidate angles. Busy, Faulted, and other backend errors are preserved through ServoBankError::Output and leave previously accepted commands unchanged. There is no retry or hidden accumulation of rejected targets.
 
-Two additional Servo tests cover valid boundary/center validation and rejected out-of-range angles without output. Ten bank tests cover construction, empty requests, a single selected channel, ID-based assignment, individual calibrations for equal angles, unknown and duplicate IDs, invalid angles after a valid target, and early/late output failures. The tests use real Servo instances with recorded mock outputs.
+This replaces the former sequential bank implementation. The bank no longer borrows individual ServoChannel instances or reports per-channel output errors. A future signal-plan adapter will map the pulse array to configured GPIOs, construct one complete SignalPlan, and submit it to SwitchingOutput. Backend-specific pulse limits and plan capacity remain the adapter's responsibility.
 
-On 2026-10-16, the owner reported all ten bank tests passing and a successful full local check with 80 tests, Rust formatting checks, and the Pico build. The control package now has 33 tests. The Pico application does not yet use ServoBank; synchronized PIO startup and bank integration are the next firmware step. Remote CI for this library revision has not yet been reported.
+### Verification record
+
+On 2026-10-26 the owner reported all 16 new bank tests passing and full verification with 155 passed, 0 failed, 0 skipped, and 0 filtered out. The bank tests cover construction, empty requests, initial completeness, ServoId output order, partial updates, per-servo and decreasing calibration, unknown/duplicate IDs, invalid angles, Busy/Faulted preservation, and subsequent requests after rejection. The control package now contains 39 tests; the prior ten sequential-bank tests were replaced by sixteen transactional-bank tests.
+
+These are host tests with a recording backend. No new Pico behavior, physical servo calibration, or simultaneous GPIO activation is established by this step. CI for this bank revision has not yet been reported.
 
 ## Next step
 
-Integrate ServoBank into the Pico application and prepare both PIO channels before starting them synchronously. Prepare and verify the electrical servo test setup before connecting a servo. Replace synthetic calibration with measured joint calibration only after hardware commissioning.
+Implement and test the signal-plan adapter, then connect the bank to a separate Pico angle-command demo. Keep the single-state-machine PIO/DMA backend and synthetic calibration explicit. Actual servo commissioning and measured joint calibration remain separate hardware steps.

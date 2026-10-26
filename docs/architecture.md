@@ -41,3 +41,9 @@ Develop parsing, limits, and motion calculations on the host where possible. Ver
 ## Servo output working design
 
 See the [multi-channel servo output design](servo-output-design.md) for the single-state-machine PIO/DMA backend, whole-plan updates, buffer ownership, and underflow recovery. The current fixed-plan demo drives two outputs through one state machine and DMA. A separate SwitchingOutput driver and hardware test now exercise two-buffer plan replacement. SwitchingOutput now supports explicit restart with a validated complete plan after a latched fault. Separate hardware tests cover recovery after real underflow and aborting a still-active DMA transfer. The normal demo remains fixed-plan; explicit activation feedback, interrupt-based handover, and forced abort-timeout verification remain open.
+
+## Transactional servo commands
+
+ServoBank owns per-servo calibrations and last-accepted angle commands. Each nonempty request is validated in full, expanded with unchanged accepted targets, and converted to one complete pulse-width batch. The first nonempty request must initialize every servo. Bank state changes only after the PulseBankOutput backend accepts the complete batch. Busy or Faulted leaves the command records unchanged; acceptance does not establish activation or measured joint position.
+
+The bank has no board mapping. The next adapter will map ServoId-ordered pulse widths to GPIOs and build a complete SignalPlan for SwitchingOutput. This adapter and the new bank's Pico integration remain pending. See the [servo-control guide](../firmware/servo-control/README.md#servo-bank).

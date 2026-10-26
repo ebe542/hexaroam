@@ -1,262 +1,360 @@
-use core::cell::Cell;
-
 use super::*;
-use crate::{Calibration, PulseOutput, Servo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TestError {
     Busy,
+    Faulted,
 }
 
 #[derive(Default)]
-struct OutputRecord {
-    calls: Cell<usize>,
-    last_pulse_us: Cell<Option<u32>>,
-    error: Cell<Option<TestError>>,
+struct TestOutput {
+    calls: usize,
+    accepted: Option<[u32; 2]>,
+    error: Option<TestError>,
 }
 
-struct TestOutput<'a>(&'a OutputRecord);
-
-impl PulseOutput for TestOutput<'_> {
+impl PulseBankOutput for TestOutput {
     type Error = TestError;
 
-    fn set_pulse_width_us(
+    fn submit_pulses(
         &mut self,
-        pulse_width_us: u32,
+        pulse_widths_us: &[u32],
     ) -> Result<(), Self::Error> {
-        self.0.calls.set(self.0.calls.get() + 1);
+        self.calls += 1;
 
-        if let Some(error) = self.0.error.get() {
+        let pulses: [u32; 2] = pulse_widths_us
+            .try_into()
+            .expect("Expected one complete two-servo batch");
+
+        if let Some(error) = self.error {
             return Err(error);
         }
 
-        self.0
-            .last_pulse_us
-            .set(Some(pulse_width_us));
+        self.accepted = Some(pulses);
+
         Ok(())
     }
 }
 
-fn calibration(lower_pulse: u32, upper_pulse: u32) -> Calibration {
-    Calibration::new(
-        Angle::from_centidegrees(-4_500),
-        lower_pulse,
-        Angle::from_centidegrees(4_500),
-        upper_pulse,
-    )
-    .expect("Valid test calibration")
+fn angle(centidegrees: i32) -> Angle {
+    Angle::from_centidegrees(centidegrees)
 }
 
 fn target(id: usize, centidegrees: i32) -> ServoTarget {
     ServoTarget {
         id: ServoId(id),
-        angle: Angle::from_centidegrees(centidegrees),
+        angle: angle(centidegrees),
     }
 }
 
-fn make_servos(records: &[OutputRecord; 2]) -> [Servo<TestOutput<'_>>; 2] {
-    [
-        Servo::new(
-            calibration(1_000, 2_000),
-            TestOutput(&records[0]),
-        ),
-        Servo::new(
-            calibration(1_200, 1_800),
-            TestOutput(&records[1]),
-        ),
-    ]
+fn calibration(lower_pulse: u32, upper_pulse: u32) -> Calibration {
+    Calibration::new(
+        angle(-4_500),
+        lower_pulse,
+        angle(4_500),
+        upper_pulse,
+    )
+    .expect("Valid test calibration")
 }
 
-fn assert_untouched(records: &[OutputRecord; 2]) {
-    for record in records {
-        assert_eq!(record.calls.get(), 0);
-        assert_eq!(record.last_pulse_us.get(), None);
-    }
+fn bank() -> ServoBank<TestOutput, 2> {
+    ServoBank::new(
+        [calibration(1_000, 2_000), calibration(1_200, 1_800)],
+        TestOutput::default(),
+    )
+}
+
+fn initialized_bank() -> ServoBank<TestOutput, 2> {
+    let mut bank = bank();
+
+    bank.set_targets(&[target(0, 0), target(1, 0)])
+        .expect("Initial batch must succeed");
+
+    bank
+}
+
+fn assert_angles(
+    bank: &ServoBank<TestOutput, 2>,
+    first: Option<i32>,
+    second: Option<i32>,
+) {
+    assert_eq!(
+        bank.commanded_angle(ServoId(0)),
+        Ok(first.map(angle)),
+    );
+    assert_eq!(
+        bank.commanded_angle(ServoId(1)),
+        Ok(second.map(angle)),
+    );
 }
 
 #[test]
-fn construction_does_not_submit_commands() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
+fn construction_does_not_submit_or_claim_accepted_angles() {
+    let bank = bank();
 
-    let _bank = ServoBank::new([&mut first, &mut second]);
-
-    assert_untouched(&records);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+    assert_angles(&bank, None, None);
 }
 
 #[test]
-fn empty_targets_succeed_without_output() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn empty_initial_request_does_not_submit_or_initialize() {
+    let mut bank = bank();
 
     assert_eq!(bank.set_targets(&[]), Ok(()));
-    assert_untouched(&records);
+
+    assert_eq!(bank.output.calls, 0);
+    assert_angles(&bank, None, None);
 }
 
 #[test]
-fn single_target_updates_only_the_selected_servo() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn first_complete_request_submits_once_in_servo_id_order() {
+    let mut bank = bank();
 
     assert_eq!(
-        bank.set_targets(&[target(1, 4_500)]),
-        Ok(())
-    );
-
-    assert_eq!(records[0].calls.get(), 0);
-    assert_eq!(records[0].last_pulse_us.get(), None);
-    assert_eq!(records[1].calls.get(), 1);
-    assert_eq!(
-        records[1].last_pulse_us.get(),
-        Some(1_800)
-    );
-}
-
-#[test]
-fn different_angles_are_assigned_by_id() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
-
-    // Deliberately supply targets in reverse channel order.
-    assert_eq!(
-        bank.set_targets(&[target(1, 4_500), target(0, -4_500)]),
+        bank.set_targets(&[target(1, 4_500), target(0, -4_500),]),
         Ok(()),
     );
 
-    assert_eq!(records[0].calls.get(), 1);
+    assert_eq!(bank.output.calls, 1);
     assert_eq!(
-        records[0].last_pulse_us.get(),
-        Some(1_000)
+        bank.output.accepted,
+        Some([1_000, 1_800])
     );
-    assert_eq!(records[1].calls.get(), 1);
-    assert_eq!(
-        records[1].last_pulse_us.get(),
-        Some(1_800)
-    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
 }
 
 #[test]
-fn same_angle_uses_each_servos_own_calibration() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn incomplete_first_request_is_rejected_without_output() {
+    let mut bank = bank();
 
     assert_eq!(
-        bank.set_targets(&[target(0, 2_250), target(1, 2_250)]),
+        bank.set_targets(&[target(0, 0)]),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(1)
+        )),
+    );
+
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+    assert_angles(&bank, None, None);
+}
+
+#[test]
+fn partial_update_preserves_the_omitted_servo() {
+    let mut bank = initialized_bank();
+
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500)]),
         Ok(()),
     );
 
-    assert_eq!(records[0].calls.get(), 1);
+    assert_eq!(bank.output.calls, 2);
     assert_eq!(
-        records[0].last_pulse_us.get(),
-        Some(1_750)
+        bank.output.accepted,
+        Some([1_000, 1_500])
     );
-    assert_eq!(records[1].calls.get(), 1);
-    assert_eq!(
-        records[1].last_pulse_us.get(),
-        Some(1_650)
-    );
+    assert_angles(&bank, Some(-4_500), Some(0));
 }
 
 #[test]
-fn unknown_id_rejects_all_targets_before_output() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn equal_angles_use_individual_calibrations() {
+    let mut bank = bank();
 
     assert_eq!(
-        bank.set_targets(&[target(0, 0), target(2, 0)]),
+        bank.set_targets(&[target(0, 4_500), target(1, 4_500),]),
+        Ok(()),
+    );
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([2_000, 1_800])
+    );
+    assert_angles(&bank, Some(4_500), Some(4_500));
+}
+
+#[test]
+fn unknown_servo_rejects_the_whole_request() {
+    let mut bank = initialized_bank();
+
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500), target(2, 0),]),
         Err(ServoBankError::UnknownServo(ServoId(2))),
     );
 
-    assert_untouched(&records);
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_500])
+    );
+    assert_angles(&bank, Some(0), Some(0));
 }
 
 #[test]
-fn duplicate_id_rejects_all_targets_before_output() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn duplicate_servo_rejects_the_whole_request() {
+    let mut bank = initialized_bank();
 
     assert_eq!(
-        bank.set_targets(&[target(0, 0), target(0, 2_250)]),
+        bank.set_targets(&[target(0, -4_500), target(0, 4_500),]),
         Err(ServoBankError::DuplicateServo(ServoId(
             0
         ))),
     );
 
-    assert_untouched(&records);
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_500])
+    );
+    assert_angles(&bank, Some(0), Some(0));
 }
 
 #[test]
-fn invalid_angle_rejects_all_targets_before_output() {
-    for invalid_angle in [-4_501, 4_501] {
-        let records = [OutputRecord::default(), OutputRecord::default()];
-        let [mut first, mut second] = make_servos(&records);
-        let mut bank = ServoBank::new([&mut first, &mut second]);
+fn invalid_angle_after_a_valid_target_preserves_all_commands() {
+    let mut bank = initialized_bank();
 
-        assert_eq!(
-            bank.set_targets(&[target(0, 0), target(1, invalid_angle),]),
-            Err(ServoBankError::Calibration {
-                id: ServoId(1),
-                error: CalibrationError::AngleOutOfRange,
-            }),
-        );
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500), target(1, 4_501),]),
+        Err(ServoBankError::Calibration {
+            id: ServoId(1),
+            error: CalibrationError::AngleOutOfRange,
+        }),
+    );
 
-        assert_untouched(&records);
-    }
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_500])
+    );
+    assert_angles(&bank, Some(0), Some(0));
 }
 
 #[test]
-fn first_output_error_stops_submission_without_retry() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    records[0]
-        .error
-        .set(Some(TestError::Busy));
-
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn busy_first_submission_does_not_initialize_commands() {
+    let mut bank = bank();
+    bank.output.error = Some(TestError::Busy);
 
     assert_eq!(
         bank.set_targets(&[target(0, 0), target(1, 0)]),
-        Err(ServoBankError::Output {
-            id: ServoId(0),
-            error: ServoError::Output(TestError::Busy),
-        }),
+        Err(ServoBankError::Output(TestError::Busy)),
     );
 
-    assert_eq!(records[0].calls.get(), 1);
-    assert_eq!(records[0].last_pulse_us.get(), None);
-    assert_eq!(records[1].calls.get(), 0);
-    assert_eq!(records[1].last_pulse_us.get(), None);
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(bank.output.accepted, None);
+    assert_angles(&bank, None, None);
 }
 
 #[test]
-fn later_output_error_preserves_already_accepted_command() {
-    let records = [OutputRecord::default(), OutputRecord::default()];
-    records[1]
-        .error
-        .set(Some(TestError::Busy));
-
-    let [mut first, mut second] = make_servos(&records);
-    let mut bank = ServoBank::new([&mut first, &mut second]);
+fn faulted_output_preserves_previous_accepted_commands() {
+    let mut bank = initialized_bank();
+    bank.output.error = Some(TestError::Faulted);
 
     assert_eq!(
-        bank.set_targets(&[target(0, -4_500), target(1, 0)]),
-        Err(ServoBankError::Output {
-            id: ServoId(1),
-            error: ServoError::Output(TestError::Busy),
-        }),
+        bank.set_targets(&[target(0, -4_500), target(1, 4_500),]),
+        Err(ServoBankError::Output(
+            TestError::Faulted
+        )),
     );
 
-    assert_eq!(records[0].calls.get(), 1);
+    assert_eq!(bank.output.calls, 2);
     assert_eq!(
-        records[0].last_pulse_us.get(),
-        Some(1_000)
+        bank.output.accepted,
+        Some([1_500, 1_500])
     );
-    assert_eq!(records[1].calls.get(), 1);
-    assert_eq!(records[1].last_pulse_us.get(), None);
+    assert_angles(&bank, Some(0), Some(0));
+}
+
+#[test]
+fn next_request_does_not_inherit_a_rejected_change() {
+    let mut bank = initialized_bank();
+    bank.output.error = Some(TestError::Busy);
+
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500)]),
+        Err(ServoBankError::Output(TestError::Busy)),
+    );
+    assert_angles(&bank, Some(0), Some(0));
+
+    bank.output.error = None;
+
+    assert_eq!(
+        bank.set_targets(&[target(1, 4_500)]),
+        Ok(()),
+    );
+
+    assert_eq!(bank.output.calls, 3);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_800])
+    );
+    assert_angles(&bank, Some(0), Some(4_500));
+}
+
+#[test]
+fn decreasing_pulse_calibration_is_supported() {
+    let mut bank = ServoBank::new(
+        [calibration(2_000, 1_000), calibration(1_200, 1_800)],
+        TestOutput::default(),
+    );
+
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500), target(1, -4_500),]),
+        Ok(()),
+    );
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([2_000, 1_200])
+    );
+    assert_angles(&bank, Some(-4_500), Some(-4_500));
+}
+
+#[test]
+fn querying_an_unknown_servo_returns_an_error() {
+    let bank = bank();
+
+    assert_eq!(
+        bank.commanded_angle(ServoId(2)),
+        Err(ServoBankError::UnknownServo(ServoId(2))),
+    );
+
+    assert_eq!(bank.output.calls, 0);
+}
+
+#[test]
+fn incomplete_initial_requests_do_not_accumulate_changes() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.set_targets(&[target(0, -4_500)]),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(1)
+        )),
+    );
+
+    assert_eq!(
+        bank.set_targets(&[target(1, 4_500)]),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(0)
+        )),
+    );
+
+    assert_eq!(bank.output.calls, 0);
+    assert_angles(&bank, None, None);
+}
+
+#[test]
+fn empty_request_preserves_initialized_commands_without_output() {
+    let mut bank = initialized_bank();
+
+    assert_eq!(bank.set_targets(&[]), Ok(()));
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_500])
+    );
+    assert_angles(&bank, Some(0), Some(0));
 }
