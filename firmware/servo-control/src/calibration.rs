@@ -68,6 +68,22 @@ impl Calibration {
 
         Ok(pulse_width_us as u32)
     }
+
+    pub fn lower_angle(&self) -> Angle {
+        self.lower_angle
+    }
+
+    pub fn lower_pulse_us(&self) -> u32 {
+        self.lower_pulse_us
+    }
+
+    pub fn upper_angle(&self) -> Angle {
+        self.upper_angle
+    }
+
+    pub fn upper_pulse_us(&self) -> u32 {
+        self.upper_pulse_us
+    }
 }
 
 #[cfg(test)]

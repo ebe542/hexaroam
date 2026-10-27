@@ -1,0 +1,8 @@
+[package]
+name = "hexaroam-servo-storage"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+hexaroam-servo-control = { path = "../servo-control" }

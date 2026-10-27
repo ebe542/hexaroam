@@ -186,3 +186,41 @@ fn full_input_ranges_are_interpolated_without_overflow() {
         );
     }
 }
+
+#[test]
+fn getters_return_configured_angles() {
+    let lower = Angle::from_centidegrees(-4_500);
+    let upper = Angle::from_centidegrees(9_000);
+    let calibration = Calibration::new(lower, 1_000, upper, 2_000).unwrap();
+
+    assert_eq!(calibration.lower_angle(), lower);
+    assert_eq!(calibration.upper_angle(), upper);
+}
+
+#[test]
+fn getters_return_configured_pulse_widths() {
+    let calibration = Calibration::new(
+        Angle::from_centidegrees(-4_500),
+        1_000,
+        Angle::from_centidegrees(9_000),
+        2_000,
+    )
+    .unwrap();
+
+    assert_eq!(calibration.lower_pulse_us(), 1_000);
+    assert_eq!(calibration.upper_pulse_us(), 2_000);
+}
+
+#[test]
+fn getters_preserve_reversed_pulse_widths() {
+    let calibration = Calibration::new(
+        Angle::from_centidegrees(-4_500),
+        2_000,
+        Angle::from_centidegrees(9_000),
+        1_000,
+    )
+    .unwrap();
+
+    assert_eq!(calibration.lower_pulse_us(), 2_000);
+    assert_eq!(calibration.upper_pulse_us(), 1_000);
+}

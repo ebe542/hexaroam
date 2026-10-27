@@ -198,3 +198,7 @@ On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests 
 SwitchingOutput now offers explicit restart with a validated complete SignalPlan after a latched fault. It rejects healthy-state restart and invalid replacement plans, aborts its owned DMA channel with bounded polling, discards old FIFO contents, and starts the supplied plan from the beginning. An abort timeout leaves resources bound and the driver faulted. The normal application continues to use FixedOutput; its logging integration does not automatically switch it to this driver.
 
 On 2026-10-17 the owner reported 149 passing unit tests and successful execution of restart_signal_output and restart_active_dma. Both showed initial pulses, a Low interval, successful restart, and expected LED phases. The second test additionally asserts that DMA is still active immediately before restart. See the [driver contract](servo-pio/README.md#explicit-restart-after-a-fault) and [hardware procedures](pico/hardware_tests/README.md#controlled-restart-tests). Forced abort-timeout verification remains pending, and CI for this recovery revision has not yet been reported.
+
+## Calibration storage format
+
+The [servo-storage library](servo-storage/README.md) provides hardware-independent binary calibration encoding/decoding and an interchangeable CRC-32 interface. The owner reported 23 passing host tests. This implements the data format only; flash journal, reserved storage, UART configuration and startup enforcement remain future work.
