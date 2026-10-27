@@ -34,6 +34,8 @@ impl PulseBankOutput for TestOutput {
 
         Ok(())
     }
+
+    fn service(&mut self) {}
 }
 
 fn angle(centidegrees: i32) -> Angle {

@@ -478,3 +478,26 @@ impl<
         panic!("Expected full FIFO and active DMA were not observed");
     }
 }
+
+impl<
+    P: PIOExt,
+    SM: StateMachineIndex,
+    CH: ChannelIndex,
+    const N: usize,
+    const WORD_CAPACITY: usize,
+> hexaroam_servo_signal::SignalPlanOutput
+    for SwitchingOutput<P, SM, CH, N, WORD_CAPACITY>
+{
+    type Error = OutputSubmissionError;
+
+    fn submit_plan<const CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<CAPACITY>,
+    ) -> Result<(), Self::Error> {
+        SwitchingOutput::submit_plan(self, plan)
+    }
+
+    fn service(&mut self) {
+        SwitchingOutput::service(self);
+    }
+}

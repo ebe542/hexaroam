@@ -73,5 +73,9 @@ pub use signal_plan::{
     PulseTarget, SignalPlan, SignalPlanEntry, SignalPlanError,
 };
 
+mod signal_plan_output;
+
+pub use signal_plan_output::SignalPlanOutput;
+
 #[cfg(test)]
 mod tests;

@@ -393,6 +393,9 @@ dependencies = [
 [[package]]
 name = "hexaroam-servo-control"
 version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-signal",
+]
 
 [[package]]
 name = "hexaroam-servo-pio"

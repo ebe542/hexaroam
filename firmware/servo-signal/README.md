@@ -44,3 +44,11 @@ The Pico firmware uses a local path dependency. Its private adapter handles actu
 Host tests do not prove FIFO register behavior, physical pulse timing, or actual servo operation. The owner separately confirmed a successful embedded build and apparently unchanged three-pulse behavior on the Pico.
 
 Each package currently has its own Cargo.lock. No shared Cargo workspace is configured.
+
+## Complete signal-plan output interface
+
+`SignalPlanOutput` defines submission of a borrowed SignalPlan and nonblocking servicing. A backend accepts the whole plan or rejects it without partial acceptance. It must copy or encode the plan during the call rather than retain the borrowed reference. Acceptance is not confirmation of physical activation. `service()` advances backend work without waiting for a full signal period or issuing a new target request.
+
+The interface has no Pico dependency. SwitchingOutput in servo-pio implements it; ServoSignalOutput in servo-control uses it to adapt ServoId-ordered pulse batches to complete GPIO plans. This leaves PIO encoding and DMA ownership inside the hardware driver. See the [adapter guide](../servo-control/README.md#signal-plan-output-adapter).
+
+On 2026-10-26 the owner reported 14 passing adapter tests and a full verification total of 169 tests. Those fourteen tests belong to servo-control; the signal library's existing test count is unchanged. The new angle-command hardware demo remains pending.

@@ -95,3 +95,9 @@ Restart validates the supplied complete plan before hardware changes and retains
 2026-10-26: The owner reported 16 passing bank tests and a full verification total of 155 passed, 0 failed, 0 skipped, and 0 filtered out. ServoBank now submits complete pulse-width batches through PulseBankOutput and commits angle commands only after backend acceptance. The first nonempty request initializes all servos; later requests can update a subset. Validation and backend errors preserve the accepted commands. This replaces the earlier sequential bank and its ten tests; the control package now has 39 tests.
 
 The library remains independent of GPIOs and the Pico HAL. A signal-plan adapter and Pico angle-demo integration are the next steps. This host-tested change does not establish new physical signal behavior or servo calibration. CI for this revision has not yet been reported.
+
+## Signal-plan adapter
+
+2026-10-26: The owner reported 14 passing ServoSignalOutput tests and full verification with 169 passed, 0 failed, 0 skipped, and 0 filtered out. The adapter validates fixed GPIO mapping and capacity, converts a complete pulse batch to one SignalPlan, and forwards backend errors without partial acceptance. A bank-to-adapter test confirms that plan validation failure does not commit angle commands. The control package now has 53 tests.
+
+SignalPlanOutput keeps the backend interface independent of the Pico. SwitchingOutput implements it, and bank.service delegates through the adapter to DMA servicing. The preceding bank revision passed CI. A separate Pico angle-command demo and CI for this adapter revision remain pending; prior pulse-only hardware tests do not establish this new integrated angle path.

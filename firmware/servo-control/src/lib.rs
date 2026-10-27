@@ -19,3 +19,9 @@ mod servo_bank;
 pub use servo_bank::{
     PulseBankOutput, ServoBank, ServoBankError, ServoId, ServoTarget,
 };
+
+mod servo_signal_output;
+
+pub use servo_signal_output::{
+    ServoSignalOutput, ServoSignalOutputError, ServoSignalOutputInitError,
+};

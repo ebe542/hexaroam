@@ -4,7 +4,7 @@ A modular six-legged robot built to explore — a learning project in Rust, robo
 
 ## Status
 
-Rust firmware for Raspberry Pi Pico (RP2040) generates synchronous two-channel servo signals through one PIO state machine and DMA. Separate hardware tests exercise signal-plan switching, persistent faults, explicit restart after underflow, and aborting active DMA before recovery. The normal demo includes buffered UART logging and bounded panic output. The owner reported 155 passing unit tests and successful manual logging, panic, and recovery checks. The transactional angle-command bank is host-tested; its signal-plan adapter and Pico integration are the next steps. The normal firmware remains a fixed-plan demo; attached-servo operation and autonomous behavior are not yet verified. See the [firmware guide](firmware/README.md) for the verification record.
+Rust firmware for Raspberry Pi Pico (RP2040) generates synchronous two-channel servo signals through one PIO state machine and DMA. Separate hardware tests exercise signal-plan switching, persistent faults, explicit restart after underflow, and aborting active DMA before recovery. The normal demo includes buffered UART logging and bounded panic output. The owner reported 169 passing unit tests and successful manual logging, panic, and recovery checks. The transactional angle-command bank and signal-plan adapter are host-tested; their combined Pico angle demo is the next step. The normal firmware remains a fixed-plan demo; attached-servo operation and autonomous behavior are not yet verified. See the [firmware guide](firmware/README.md) for the verification record.
 
 ## Goals
 

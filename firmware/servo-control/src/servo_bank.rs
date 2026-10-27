@@ -14,6 +14,9 @@ pub trait PulseBankOutput {
         &mut self,
         pulse_widths_us: &[u32],
     ) -> Result<(), Self::Error>;
+
+    /// Services the backend without submitting new target values.
+    fn service(&mut self);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -127,6 +130,10 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
         self.commanded_angles = candidate_angles;
 
         Ok(())
+    }
+
+    pub fn service(&mut self) {
+        self.output.service();
     }
 }
 

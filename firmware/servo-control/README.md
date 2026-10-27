@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting complete pulse batches. It has no external dependencies. The current PIO/DMA demo uses pulse widths directly; the new bank is not yet connected to that backend.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting complete pulse batches. It depends on the local servo-signal library for its signal-plan adapter and has no Pico HAL dependency. The current PIO/DMA demo still uses pulse widths directly; the bank and adapter have not yet been exercised together on the Pico.
 
 ## Angle representation
 
@@ -26,6 +26,8 @@ Fields are private. Angle imposes no joint travel limits; Calibration defines th
 | src/test_servo.rs | Servo wrapper and validation unit tests |
 | src/servo_bank.rs | PulseBankOutput, servo IDs, transactional batch submission, and accepted commands |
 | src/test_servo_bank.rs | Servo bank unit tests |
+| src/servo_signal_output.rs | GPIO mapping, complete-plan adapter, and configuration checks |
+| src/test_servo_signal_output.rs | Adapter and bank-to-adapter tests |
 
 ## Verification
 
@@ -68,7 +70,7 @@ Servo<O> owns a Calibration and an output implementing PulseOutput. Construction
 
 ServoError::Calibration wraps conversion errors. Invalid angles do not call the output. ServoError::Output preserves the backend error, including Busy, without automatic retry or buffering. Ok confirms output acceptance only, not pulse activation or measured joint position.
 
-PulseOutput uses an associated Error type and contains no PIO-specific types. The shared servo-control package does not depend on the signal package or Pico HAL. Actual output-backend pulse limits remain independently enforced; the wrapper constructor does not validate calibration against backend limits.
+PulseOutput uses an associated Error type and contains no PIO-specific types. The single-servo wrapper does not use signal-plan types. The package now depends on servo-signal for the separate bank adapter, but not on the Pico HAL. Actual output-backend pulse limits remain independently enforced; the wrapper constructor does not validate calibration against backend limits.
 
 Five wrapper tests cover construction without output, a calibrated command, rejection of angles below and above the range without output, forwarding Busy without retry, and successive commands with their own pulse widths. The test output records calls and accepted values using core::cell::Cell.
 
@@ -88,14 +90,32 @@ For each nonempty request, the bank copies its accepted angles into a local cand
 
 The bank submits this entire array exactly once through `PulseBankOutput::submit_pulses(&[u32])`. The backend must consume or copy the borrowed slice before returning; it cannot retain the slice for later DMA access. A failed submission must not accept part of the new batch. Only success commits the candidate angles. Busy, Faulted, and other backend errors are preserved through ServoBankError::Output and leave previously accepted commands unchanged. There is no retry or hidden accumulation of rejected targets.
 
-This replaces the former sequential bank implementation. The bank no longer borrows individual ServoChannel instances or reports per-channel output errors. A future signal-plan adapter will map the pulse array to configured GPIOs, construct one complete SignalPlan, and submit it to SwitchingOutput. Backend-specific pulse limits and plan capacity remain the adapter's responsibility.
+This replaces the former sequential bank implementation. The bank no longer borrows individual ServoChannel instances or reports per-channel output errors. ServoSignalOutput now maps the pulse array to configured GPIOs, constructs one complete SignalPlan, and submits it through SignalPlanOutput. SwitchingOutput implements that backend interface. Backend-specific pulse limits and plan capacity remain the adapter's responsibility.
 
 ### Verification record
 
 On 2026-10-26 the owner reported all 16 new bank tests passing and full verification with 155 passed, 0 failed, 0 skipped, and 0 filtered out. The bank tests cover construction, empty requests, initial completeness, ServoId output order, partial updates, per-servo and decreasing calibration, unknown/duplicate IDs, invalid angles, Busy/Faulted preservation, and subsequent requests after rejection. The control package now contains 39 tests; the prior ten sequential-bank tests were replaced by sixteen transactional-bank tests.
 
-These are host tests with a recording backend. No new Pico behavior, physical servo calibration, or simultaneous GPIO activation is established by this step. CI for this bank revision has not yet been reported.
+These are host tests with a recording backend. No new Pico behavior, physical servo calibration, or simultaneous GPIO activation is established by this step. The owner subsequently reported green CI for this bank revision.
 
 ## Next step
 
-Implement and test the signal-plan adapter, then connect the bank to a separate Pico angle-command demo. Keep the single-state-machine PIO/DMA backend and synthetic calibration explicit. Actual servo commissioning and measured joint calibration remain separate hardware steps.
+Connect the tested bank and adapter to a separate Pico angle-command demo. Keep the single-state-machine PIO/DMA backend and synthetic calibration explicit. Actual servo commissioning and measured joint calibration remain separate hardware steps.
+
+## Signal-plan output adapter
+
+`ServoSignalOutput<O, N, PLAN_CAPACITY>` implements PulseBankOutput over a SignalPlanOutput backend. It owns the backend, a fixed GPIO list in ServoId order, shared pulse limits, and a period. Construction rejects an empty output list, GPIOs outside the generic 0..31 range, duplicate assignments, a zero period, and insufficient worst-case plan capacity. Require PLAN_CAPACITY >= N + 1: three entries for two servos or nineteen for eighteen. Equal pulse widths can use fewer entries, but configuration reserves the worst case.
+
+Generic GPIO validation does not establish RP2040 pin availability. The RP2040 driver independently restricts GPIOs to 0..29, owns the actual pins, and checks that submitted plans match its configured output set and period. Board wiring and reserved pins remain application responsibilities.
+
+`submit_pulses` requires exactly N values. It maps each value to its configured GPIO, builds a complete local SignalPlan, and submits the plan exactly once only after successful validation. The constructor checks a nonzero period; actual pulse positivity, shared limits, and pulse widths strictly below the period are checked when building each plan. PulseCountMismatch and SignalPlan errors do not call the backend. Backend errors, including Busy and Faulted, are wrapped as Output errors without retry. The bank commits its candidate angles only after this whole chain succeeds.
+
+The borrowed pulse slice and local SignalPlan are not retained. SignalPlanOutput implementations must copy or encode the complete plan before returning. SwitchingOutput does this in its owned pending buffer; DMA does not read the temporary stack plan.
+
+The main loop calls `bank.service()`, which delegates through PulseBankOutput, ServoSignalOutput, and SignalPlanOutput to the backend's service method. This services DMA without changing commanded angles or submitting a new target plan. It does not automatically restart faulted output.
+
+### Adapter verification
+
+On 2026-10-26 the owner reported all 14 adapter tests passing and full verification with 169 passed, 0 failed, 0 skipped, and 0 filtered out. The tests cover configuration rejection, complete pulse counts, ServoId-to-GPIO mapping, merging equal pulse endings, invalid pulses and period boundaries, backend error forwarding without replacement or retry, servicing, and preservation of bank commands after adapter-level validation failure. The control package now contains 53 host tests.
+
+SwitchingOutput implements SignalPlanOutput by forwarding submission and servicing to its existing methods. The owner reported the full verification task successful; the new bank-to-adapter angle path has not yet been manually exercised on the Pico. CI for this adapter revision has not yet been reported.

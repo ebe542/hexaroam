@@ -189,3 +189,9 @@ On 2026-10-17 the owner reported 149 passing unit tests and successful execution
 `dma_is_active` and `force_fault_with_active_dma` exist only with the `hardware-tests` feature. The hook is deliberate fault injection, not underflow detection. See the [hardware-test guide](../pico/hardware_tests/README.md#controlled-restart-tests).
 
 An intentionally forced DMA-abort timeout, exact restart latency, brief-glitch exclusion, and 18-channel operation remain unverified. Manual programs are excluded from the 149 unit-test count. CI for this recovery revision has not yet been reported.
+
+## SignalPlanOutput integration
+
+SwitchingOutput implements the hardware-independent SignalPlanOutput trait from servo-signal. Trait calls forward explicitly to the existing submit_plan and service methods, preserving complete-plan validation, Busy/Faulted behavior, buffer ownership, and polling-based DMA handover. This adds no new hardware behavior by itself and does not expose restart through the trait.
+
+The ServoSignalOutput adapter can therefore own SwitchingOutput while ServoBank owns the adapter. A main-loop bank.service call reaches this driver's service method without exposing GPIO or PIO types to the bank. On 2026-10-26 the owner reported full verification with 169 passing tests after the trait integration. The new angle-command demo and adapter revision CI remain pending. See the [adapter guide](../servo-control/README.md#signal-plan-output-adapter).
