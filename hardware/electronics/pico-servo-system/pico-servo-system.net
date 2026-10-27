@@ -1,0 +1,3640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\fox\Sandbox\Robotic\hexaroam\hardware\electronics\pico-servo-system\pico-servo-system.kicad_sch</source>
+    <date>2026-10-27T18:07:05</date>
+    <tool>Eeschema 10.0.7</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>Pico baseboard - 18 servo signals</title>
+        <company>HexaRoam</company>
+        <rev>C - PROPOSAL</rev>
+        <date>2026-10-27</date>
+        <source>pico-servo-system.kicad_sch</source>
+        <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+    <sheet number="2" name="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/">
+      <title_block>
+        <title>Six-channel signal output module</title>
+        <company>HexaRoam</company>
+        <rev>C - PROPOSAL</rev>
+        <date>2026-10-27</date>
+        <source>servo-output-module.kicad_sch</source>
+        <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+    <sheet number="3" name="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/">
+      <title_block>
+        <title>ONE-servo supply - discrete energy dump</title>
+        <company>HexaRoam</company>
+        <rev>C - PROPOSAL</rev>
+        <date>2026-10-27</date>
+        <source>bench-power.kicad_sch</source>
+        <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="D2">
+      <value>1N5819</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="D_Schottky" description="Schottky diode"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <property name="ki_fp_filters" value="TO-???* *_Diode_* *SingleDiode* D_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00b00032-ac5b-4c00-bfdb-639a3d8aa5e9</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J1">
+      <value>PICO 5V IN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>876554d7-f957-4b24-bd9a-c13ad5e1c290</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>PORT A: 0..5</value>
+      <footprint>Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</footprint>
+      <fields>
+        <field name="Footprint">Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_02x06_Odd_Even" description="Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_2x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8363480a-fabb-443f-ac8c-3fe0bc8cb468</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="11"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J3">
+      <value>PORT B: 6..11</value>
+      <footprint>Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</footprint>
+      <fields>
+        <field name="Footprint">Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_02x06_Odd_Even" description="Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_2x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3a292292-6c7e-4258-a89d-a2afdcbeddbd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="11"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J4">
+      <value>PORT C: 12..17</value>
+      <footprint>Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</footprint>
+      <fields>
+        <field name="Footprint">Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_02x06_Odd_Even" description="Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_2x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2abb0870-0fec-4254-b26c-dc64d073eae3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="11"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J5">
+      <value>UART 3V3 TTL</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f959b20f-5f5b-4ba3-bb32-245b18709aed</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J6">
+      <value>EXPANSION</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x08" description="Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>156a2e28-33ef-49aa-ab30-9c912a5cab09</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP1">
+      <value>VSYS</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1f749754-762f-45be-ab5a-0facbdf9de4c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP2">
+      <value>USB VBUS</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2e3af2b3-8dfb-409d-a1ed-7550fa91109f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP3">
+      <value>GP0</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>db3616d0-5e3b-422b-8cd3-a731d4e510f1</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP4">
+      <value>GP1</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>71b8cf30-562c-4ba1-84c2-4b9e82f859dd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP5">
+      <value>GND</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5a0bfe72-ff0a-4bd3-bbc5-bd8afb5c8e40</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U1">
+      <value>Raspberry Pi Pico</value>
+      <footprint>Module:RaspberryPi_Pico_Common_Unspecified</footprint>
+      <datasheet>https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Module:RaspberryPi_Pico_Common_Unspecified</field>
+        <field name="Datasheet">https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="MCU_Module" part="RaspberryPi_Pico" description="Versatile and inexpensive microcontroller module powered by RP2040 dual-core Arm Cortex-M0+ processor up to 133 MHz, 264kB SRAM, 2MB QSPI flash; also supports Raspberry Pi Pico 2"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="RP2350A M33 RISC-V Hazard3 usb"/>
+      <property name="ki_fp_filters" value="RaspberryPi?Pico?Common* RaspberryPi?Pico?SMD*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>07c14b24-0247-4050-97ba-6b4335c4dd7f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="30"/>
+            <pin num="37"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="39"/>
+            <pin num="40"/>
+            <pin num="3"/>
+            <pin num="23"/>
+            <pin num="28"/>
+            <pin num="18"/>
+            <pin num="13"/>
+            <pin num="38"/>
+            <pin num="8"/>
+            <pin num="36"/>
+            <pin num="21"/>
+            <pin num="22"/>
+            <pin num="24"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="29"/>
+            <pin num="35"/>
+            <pin num="31"/>
+            <pin num="32"/>
+            <pin num="34"/>
+            <pin num="33"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C100">
+      <value>470uF / 35V</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C_Polarized" description="Polarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="CP_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>fc95acfd-8c5c-44b0-9079-0e1418448fb7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C101">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>2df3469d-3678-498e-b15f-957277837724</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C102">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>968e56d2-cfd8-41f8-bf7a-8f97d2b9fcf5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C103">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>7b9559b5-32ef-46dc-8437-d248d0ba0e30</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C104">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>b23b8c99-ad3a-4fcf-90ea-ec59129240e3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C105">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>c0099176-c60e-49ce-b3d9-2bd4cb225450</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C106">
+      <value>100nF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>bd2a6f30-296e-493a-a308-5ec3f6ba746d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J101">
+      <value>SIGNAL INPUT</value>
+      <footprint>Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</footprint>
+      <fields>
+        <field name="Footprint">Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_02x06_Odd_Even" description="Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_2x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>d8cda0b7-b4d3-4394-9e3d-c197d37ab689</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="11"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J102">
+      <value>SERVO POWER IN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>faab78cf-67e5-4790-be6b-279ac8a49558</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J110">
+      <value>SERVO 0</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>28e86b2b-d0f8-4433-8350-d49354c69468</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J111">
+      <value>SERVO 1</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>d4e4a8ef-c025-47f5-a4c5-d14f73561c1b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J112">
+      <value>SERVO 2</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>38fca264-f332-4ae7-bed0-19cbf5844973</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J113">
+      <value>SERVO 3</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>21bc2de4-9d77-455e-aa5a-073b31e467ef</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J114">
+      <value>SERVO 4</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>86110984-6e8c-461a-a2a9-d4639434a87c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J115">
+      <value>SERVO 5</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>e3c3f718-8bbc-475d-b7e3-766a8d426a3c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q101">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>f20695c7-503b-48b1-91ae-5e76f46f6be3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q102">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>eb7538f4-def9-498a-827c-a8a967954555</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q103">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>45ac43a2-be22-4d11-8beb-82f6cfdc3393</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q104">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>e6923e9c-89c8-4f67-b244-44d29c6a2461</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q105">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>97b8219b-c6b3-428f-8b65-ace54ffb82a8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q106">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>44b2c754-a460-4139-a1d9-229d4aa7688d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q107">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>5ef9a4fa-ffda-451c-841b-510d3ef4d92b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q108">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>84691784-fd19-4576-9b8c-2340c101828a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q109">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>7802d3b8-1bb9-4481-abc2-67d111812dbc</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q110">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>2d5bc30d-b0c0-4f1d-bf74-b127b5e8c871</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q111">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>820622dd-ec8a-4bfc-b3f7-dfeb48659a7f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q112">
+      <value>BC547B</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_BJT" part="BC547" description="0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="NPN Transistor"/>
+      <property name="ki_fp_filters" value="TO?92*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>7fea3f3d-2b85-4fdd-ac87-d9ae90e22cc8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R101">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>ccec9554-cd0a-47dc-9730-c27c42df48b4</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R102">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>a3a5cbda-70dd-49a1-bd77-cfc3bb1431d8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R103">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>53b3f52e-cb6f-49a9-9ecf-8dabfd133d58</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R104">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>374333be-2bae-42cb-b369-a57824dd975f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R105">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>9d9e04c9-26ee-4092-89e8-3482bc06e252</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R106">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>67f0cc8e-fb18-476d-be2f-7ada0a2d2198</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R107">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>2812f2e8-84fc-4a4f-948f-6940e40abe66</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R111">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>3d61e429-66ed-4ec5-bffa-1cfcf82e5128</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R112">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>3222c1df-d1c7-4942-bf70-ba024107e663</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R113">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>f06107da-628e-4c28-b44f-8ef7cd042d35</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R114">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>fbb7e049-ae4c-4fb0-b5fa-fc6b8034f7f6</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R115">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>2f069cdb-d624-448e-a08c-e9d41fd7116f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R116">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>c23d6475-4a67-4d9c-9ac9-618b3e8b828d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R117">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>aebac583-1c2b-48a1-9d2c-5e140b01cacf</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R121">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>b7be1a47-fb6e-4bab-ac59-83618166e337</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R122">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>e2f153cb-64c8-40dd-9af2-2fe20351ddd8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R123">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>0c2ba1ff-b9bc-4443-9f57-baba83a4b884</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R124">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>06f25c2a-c5d3-4cde-8e42-3a76538486cf</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R125">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>0b9559af-44a9-416e-b446-ed889057ef6a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R126">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>15e5dd8e-4bc5-446e-9d68-c0b6560ee5fe</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R127">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>26378d21-90f5-4beb-825a-4af700fcd94e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R131">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>888b771b-4e46-462b-a76d-77f485e54ae7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R132">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>020d925f-b142-4174-b749-f6fda216936b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R133">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>ceff72b7-674e-4f00-a237-01be9367f68c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R134">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>83094bdc-6023-45a1-b361-5e3d5e3ae493</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R135">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>ab85ea18-e8a9-4563-a1e9-a138d6296893</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R136">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>3f4e90a1-52db-4453-ac33-38a7a9fc07ab</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R137">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>9ea18b4f-bec0-4f63-9070-f0128a7ebb00</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R141">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>6353a742-9f8c-40f7-a753-7b6f2a58668c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R142">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>f90e307a-80ae-4ec7-ab0b-470d66279bb8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R143">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>dbbe7fef-256a-45ba-8259-2621399af6f9</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R144">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>4a1213fb-0277-4636-84fc-ef1e2aaa53de</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R145">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>7dc2c763-5ea3-48c2-a188-5028cba8e7b2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R146">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>6f42dff9-c820-4a15-89d7-9c432bc8e59e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R147">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>7692dcf7-9faf-4eba-9f0d-dab40fd8e13a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R151">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>159141cf-ef83-444d-b841-c3539d9edae4</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R152">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>3011ac44-6d4e-4596-9ee5-de0aecdbf76c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R153">
+      <value>4.7k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>6407a6f2-6ca4-4298-8ff1-45ddb7898106</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R154">
+      <value>1k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>06a38c5b-1d38-4b59-b788-1d5118314dd0</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R155">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>e3bcbccc-1345-4778-8bdd-6fdfdfb01170</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R156">
+      <value>180</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>cde07e38-45be-4113-9d8f-5c059be71cd4</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R157">
+      <value>100k</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>76038728-df46-42fb-b54f-b81a22c0036f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP101">
+      <value>SERVO 0 SIGNAL</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>e035f073-707e-4f6e-95ff-f117c4fd0cf9</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP102">
+      <value>LOCAL GND</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="Six-channel output module"/>
+      <property name="Sheetfile" value="servo-output-module.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/Six-channel output module/" tstamps="/9bef8002-e9fd-45ac-94b3-3f0be3fcc9fc/"/>
+      <tstamps>af2b32a6-fa96-4248-80da-1ac0ed25c992</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C201">
+      <value>1000uF / 25V</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C_Polarized" description="Polarized capacitor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="CP_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>fbf887d6-6065-4ea8-a8d4-e33ca9a8ac4f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C202">
+      <value>100nF / &gt;=25V</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>2bd2214d-1a97-438d-a0c6-7a600e849f70</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C203">
+      <value>100nF / &gt;=25V</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>27db78db-0b49-4a98-bbc7-88b34fac6ef2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D201">
+      <value>SR540</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="D_Schottky" description="Schottky diode"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <property name="ki_fp_filters" value="TO-???* *_Diode_* *SingleDiode* D_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>c023af39-c4a6-4a13-96d9-37a9aed5b89c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D202">
+      <value>1N5822</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="D_Schottky" description="Schottky diode"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <property name="ki_fp_filters" value="TO-???* *_Diode_* *SingleDiode* D_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>191d5b12-2ee8-4bbc-bd0e-05b75c77ba88</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="F201">
+      <value>T2.5A provisional</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="Fuse" description="Fuse"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="fuse"/>
+      <property name="ki_fp_filters" value="*Fuse*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>349a9639-92f5-4dd8-9e5a-16e285f5b21d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J201">
+      <value>SERVO PSU IN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>3beaba5c-d89a-4cf3-a06b-610ff01f4719</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J202">
+      <value>POWER OUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>65b9c384-bbbd-49c5-9df1-54a51be24b9d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Q201">
+      <value>IRLZ44NPBF</value>
+      <footprint>Package_TO_SOT_THT:TO-220-3_Vertical</footprint>
+      <datasheet>http://www.irf.com/product-info/datasheets/data/irlz44n.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-220-3_Vertical</field>
+        <field name="Datasheet">http://www.irf.com/product-info/datasheets/data/irlz44n.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Transistor_FET" part="IRLZ44N" description="47A Id, 55V Vds, 22mOhm Rds Single N-Channel HEXFET Power MOSFET, TO-220AB"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="N-Channel HEXFET MOSFET Logic-Level"/>
+      <property name="ki_fp_filters" value="TO?220*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>9a978b0b-1411-4b0b-b424-5aa3ce0c3199</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R201">
+      <value>330 / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>715779f4-7f4d-4127-b59b-1c4ad39041a5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R202">
+      <value>13.7k / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>733a4afa-9386-4eb0-be76-8f47d6325d43</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R203">
+      <value>10k / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>5732c72b-a508-4747-a33a-5688923ba0f2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R204">
+      <value>270k / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>32894e4f-4eca-45da-811f-b040eb5e8e1f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R205">
+      <value>2.2k / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>3b0a20fe-7229-40f4-b267-987a378e8859</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R206">
+      <value>100 / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>d601b897-c81b-4b5e-891e-69ef34c501fd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R207">
+      <value>100k / 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>b6ca109a-def8-445d-ace9-1e62fdd801e3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R208">
+      <value>2.2 / HS25 25W 1%</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="exclude_from_board"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>10c40a42-0573-4d90-899c-d7fa6273a859</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="SW201">
+      <value>5A / 12V DC min.</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPST" description="Single Pole Single Throw (SPST) switch"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="switch lever"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>85180481-f565-43fa-91a4-c96d0a9cc4c3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP201">
+      <value>SERVO VS</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>8bcdfb55-57d2-4afc-b1a9-92be793a9a14</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP202">
+      <value>GND</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>9af239df-835a-4b17-84d7-90bbb195569b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP203">
+      <value>VREF</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>82ba8789-b44b-45d6-9317-a50c82956251</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP204">
+      <value>SENSE</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>7ecc617b-f064-483f-a972-b03bf41a58e2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP205">
+      <value>GATE</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>6a7ee87d-435b-4d83-a50e-aa835dddfa5f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP206">
+      <value>DRAIN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="test point tp"/>
+      <property name="ki_fp_filters" value="Pin* Test*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>037619b3-73c1-4589-8450-793e02c4d0d7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U201">
+      <value>TL431CZ (ST)</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>https://www.st.com/resource/en/datasheet/tl431.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.st.com/resource/en/datasheet/tl431.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Reference_Voltage" part="TL431LP" description="Shunt Regulator, TO-92"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="diode device regulator shunt"/>
+      <property name="ki_fp_filters" value="TO*92*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>90214fc7-8ac9-401e-a900-b402fc1c08b0</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U202">
+      <value>LM393 DIP</value>
+      <footprint>Package_DIP:DIP-8_W7.62mm</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/lm393.pdf</datasheet>
+      <fields>
+        <field name="Footprint">Package_DIP:DIP-8_W7.62mm</field>
+        <field name="Datasheet">http://www.ti.com/lit/ds/symlink/lm393.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Comparator" part="LM393" description="Low-Power, Low-Offset Voltage, Dual Comparators, DIP-8/SOIC-8/TO-99-8"/>
+      <property name="Sheetname" value="ONE-SERVO protected supply"/>
+      <property name="Sheetfile" value="bench-power.kicad_sch"/>
+      <property name="ki_keywords" value="cmp open collector"/>
+      <property name="ki_fp_filters" value="SOIC*3.9x4.9mm*P1.27mm* DIP*W7.62mm* SOP*5.28x5.23mm*P1.27mm* VSSOP*3x3mm*P0.65mm* TSSOP*4.4x3mm*P0.65mm*"/>
+      <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
+      <tstamps>95390c08-3a78-41d1-8f8f-58819b7e9371 85bd7d1d-7b31-4946-a585-914941d32420 55cae382-4bc6-4102-ab41-34944367ff47</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="3"/>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="8"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Comparator" part="LM393">
+      <description>Low-Power, Low-Offset Voltage, Dual Comparators, DIP-8/SOIC-8/TO-99-8</description>
+      <docs>http://www.ti.com/lit/ds/symlink/lm393.pdf</docs>
+      <footprints>
+        <fp>SOIC*3.9x4.9mm*P1.27mm*</fp>
+        <fp>DIP*W7.62mm*</fp>
+        <fp>SOP*5.28x5.23mm*P1.27mm*</fp>
+        <fp>VSSOP*3x3mm*P0.65mm*</fp>
+        <fp>TSSOP*4.4x3mm*P0.65mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LM393</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">http://www.ti.com/lit/ds/symlink/lm393.pdf</field>
+        <field name="Description">Low-Power, Low-Offset Voltage, Dual Comparators, DIP-8/SOIC-8/TO-99-8</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="open_collector"/>
+        <pin num="2" name="-" type="input"/>
+        <pin num="3" name="+" type="input"/>
+        <pin num="4" name="V-" type="power_in"/>
+        <pin num="5" name="+" type="input"/>
+        <pin num="6" name="-" type="input"/>
+        <pin num="7" name="" type="open_collector"/>
+        <pin num="8" name="V+" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="TestPoint">
+      <description>test point</description>
+      <footprints>
+        <fp>Pin*</fp>
+        <fp>Test*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">TP</field>
+        <field name="Value">TestPoint</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">test point</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x02">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x03">
+      <description>Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x03</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x08">
+      <description>Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x08</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_02x06_Odd_Even">
+      <description>Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_2x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_02x06_Odd_Even</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+        <pin num="11" name="Pin_11" type="passive"/>
+        <pin num="12" name="Pin_12" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C_Polarized">
+      <description>Polarized capacitor</description>
+      <footprints>
+        <fp>CP_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C_Polarized</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Polarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="D_Schottky">
+      <description>Schottky diode</description>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D_Schottky</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Schottky diode</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Fuse">
+      <description>Fuse</description>
+      <footprints>
+        <fp>*Fuse*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">F</field>
+        <field name="Value">Fuse</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Fuse</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="MCU_Module" part="RaspberryPi_Pico">
+      <description>Versatile and inexpensive microcontroller module powered by RP2040 dual-core Arm Cortex-M0+ processor up to 133 MHz, 264kB SRAM, 2MB QSPI flash; also supports Raspberry Pi Pico 2</description>
+      <docs>https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf</docs>
+      <footprints>
+        <fp>RaspberryPi?Pico?Common*</fp>
+        <fp>RaspberryPi?Pico?SMD*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">A</field>
+        <field name="Value">RaspberryPi_Pico</field>
+        <field name="Footprint">Module:RaspberryPi_Pico_Common_Unspecified</field>
+        <field name="Datasheet">https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf</field>
+        <field name="Description">Versatile and inexpensive microcontroller module powered by RP2040 dual-core Arm Cortex-M0+ processor up to 133 MHz, 264kB SRAM, 2MB QSPI flash; also supports Raspberry Pi Pico 2</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GPIO0" type="bidirectional"/>
+        <pin num="2" name="GPIO1" type="bidirectional"/>
+        <pin num="3" name="GND" type="power_out"/>
+        <pin num="4" name="GPIO2" type="bidirectional"/>
+        <pin num="5" name="GPIO3" type="bidirectional"/>
+        <pin num="6" name="GPIO4" type="bidirectional"/>
+        <pin num="7" name="GPIO5" type="bidirectional"/>
+        <pin num="8" name="GND" type="passive"/>
+        <pin num="9" name="GPIO6" type="bidirectional"/>
+        <pin num="10" name="GPIO7" type="bidirectional"/>
+        <pin num="11" name="GPIO8" type="bidirectional"/>
+        <pin num="12" name="GPIO9" type="bidirectional"/>
+        <pin num="13" name="GND" type="passive"/>
+        <pin num="14" name="GPIO10" type="bidirectional"/>
+        <pin num="15" name="GPIO11" type="bidirectional"/>
+        <pin num="16" name="GPIO12" type="bidirectional"/>
+        <pin num="17" name="GPIO13" type="bidirectional"/>
+        <pin num="18" name="GND" type="passive"/>
+        <pin num="19" name="GPIO14" type="bidirectional"/>
+        <pin num="20" name="GPIO15" type="bidirectional"/>
+        <pin num="21" name="GPIO16" type="bidirectional"/>
+        <pin num="22" name="GPIO17" type="bidirectional"/>
+        <pin num="23" name="GND" type="passive"/>
+        <pin num="24" name="GPIO18" type="bidirectional"/>
+        <pin num="25" name="GPIO19" type="bidirectional"/>
+        <pin num="26" name="GPIO20" type="bidirectional"/>
+        <pin num="27" name="GPIO21" type="bidirectional"/>
+        <pin num="28" name="GND" type="passive"/>
+        <pin num="29" name="GPIO22" type="bidirectional"/>
+        <pin num="30" name="RUN" type="passive"/>
+        <pin num="31" name="GPIO26_ADC0" type="bidirectional"/>
+        <pin num="32" name="GPIO27_ADC1" type="bidirectional"/>
+        <pin num="33" name="AGND" type="power_out"/>
+        <pin num="34" name="GPIO28_ADC2" type="bidirectional"/>
+        <pin num="35" name="ADC_VREF" type="power_in"/>
+        <pin num="36" name="3V3" type="power_out"/>
+        <pin num="37" name="3V3_EN" type="passive"/>
+        <pin num="38" name="GND" type="passive"/>
+        <pin num="39" name="VSYS" type="power_in"/>
+        <pin num="40" name="VBUS" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="Reference_Voltage" part="TL431LP">
+      <description>Shunt Regulator, TO-92</description>
+      <docs>http://www.ti.com/lit/ds/symlink/tl431.pdf</docs>
+      <footprints>
+        <fp>TO*92*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">TL431LP</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">http://www.ti.com/lit/ds/symlink/tl431.pdf</field>
+        <field name="Description">Shunt Regulator, TO-92</field>
+      </fields>
+      <pins>
+        <pin num="1" name="REF" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+        <pin num="3" name="K" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_SPST">
+      <description>Single Pole Single Throw (SPST) switch</description>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_SPST</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Single Pole Single Throw (SPST) switch</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Transistor_BJT" part="BC547">
+      <description>0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92</description>
+      <docs>https://www.onsemi.com/pub/Collateral/BC550-D.pdf</docs>
+      <footprints>
+        <fp>TO?92*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">BC547</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/BC550-D.pdf</field>
+        <field name="Description">0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92</field>
+        <field name="Sim.Device">NPN</field>
+        <field name="Sim.Pins">1=C 2=B 3=E</field>
+      </fields>
+      <pins>
+        <pin num="1" name="C" type="passive"/>
+        <pin num="2" name="B" type="input"/>
+        <pin num="3" name="E" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Transistor_FET" part="IRLZ44N">
+      <description>47A Id, 55V Vds, 22mOhm Rds Single N-Channel HEXFET Power MOSFET, TO-220AB</description>
+      <docs>http://www.irf.com/product-info/datasheets/data/irlz44n.pdf</docs>
+      <footprints>
+        <fp>TO?220*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">IRLZ44N</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-220-3_Vertical</field>
+        <field name="Datasheet">http://www.irf.com/product-info/datasheets/data/irlz44n.pdf</field>
+        <field name="Description">47A Id, 55V Vds, 22mOhm Rds Single N-Channel HEXFET Power MOSFET, TO-220AB</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="input"/>
+        <pin num="2" name="D" type="passive"/>
+        <pin num="3" name="S" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Comparator">
+      <uri>${KICAD10_SYMBOL_DIR}/Comparator.kicad_sym</uri>
+    </library>
+    <library logical="Connector">
+      <uri>${KICAD10_SYMBOL_DIR}/Connector.kicad_sym</uri>
+    </library>
+    <library logical="Connector_Generic">
+      <uri>${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
+    </library>
+    <library logical="MCU_Module">
+      <uri>${KICAD10_SYMBOL_DIR}/MCU_Module.kicad_sym</uri>
+    </library>
+    <library logical="Reference_Voltage">
+      <uri>${KICAD10_SYMBOL_DIR}/Reference_Voltage.kicad_sym</uri>
+    </library>
+    <library logical="Switch">
+      <uri>${KICAD10_SYMBOL_DIR}/Switch.kicad_sym</uri>
+    </library>
+    <library logical="Transistor_BJT">
+      <uri>${KICAD10_SYMBOL_DIR}/Transistor_BJT.kicad_sym</uri>
+    </library>
+    <library logical="Transistor_FET">
+      <uri>${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="/GP18" class="Default">
+      <node ref="J6" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U1" pin="24" pinfunction="GPIO18_24" pintype="bidirectional"/>
+    </net>
+    <net code="2" name="/GP19" class="Default">
+      <node ref="J6" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U1" pin="25" pinfunction="GPIO19_25" pintype="bidirectional"/>
+    </net>
+    <net code="3" name="/GP22" class="Default">
+      <node ref="J6" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U1" pin="29" pinfunction="GPIO22_29" pintype="bidirectional"/>
+    </net>
+    <net code="4" name="/GP26" class="Default">
+      <node ref="J6" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U1" pin="31" pinfunction="GPIO26_ADC0_31" pintype="bidirectional"/>
+    </net>
+    <net code="5" name="/GP27" class="Default">
+      <node ref="J6" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="U1" pin="32" pinfunction="GPIO27_ADC1_32" pintype="bidirectional"/>
+    </net>
+    <net code="6" name="/GP28" class="Default">
+      <node ref="J6" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="U1" pin="34" pinfunction="GPIO28_ADC2_34" pintype="bidirectional"/>
+    </net>
+    <net code="7" name="/ONE-SERVO protected supply/DUMP_DRAIN" class="Default">
+      <node ref="D202" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="Q201" pin="2" pinfunction="D_2" pintype="passive"/>
+      <node ref="R208" pin="2" pintype="passive"/>
+      <node ref="TP206" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="8" name="/ONE-SERVO protected supply/DUMP_GATE" class="Default">
+      <node ref="Q201" pin="1" pinfunction="G_1" pintype="input"/>
+      <node ref="R206" pin="2" pintype="passive"/>
+      <node ref="R207" pin="1" pintype="passive"/>
+      <node ref="TP205" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="9" name="/ONE-SERVO protected supply/DUMP_OUT" class="Default">
+      <node ref="R204" pin="2" pintype="passive"/>
+      <node ref="R205" pin="2" pintype="passive"/>
+      <node ref="R206" pin="1" pintype="passive"/>
+      <node ref="U202" pin="1" pintype="open_collector"/>
+    </net>
+    <net code="10" name="/ONE-SERVO protected supply/FUSED_POS" class="Default">
+      <node ref="F201" pin="2" pintype="passive"/>
+      <node ref="SW201" pin="1" pinfunction="A_1" pintype="passive"/>
+    </net>
+    <net code="11" name="/ONE-SERVO protected supply/PSU_POS" class="Default">
+      <node ref="F201" pin="1" pintype="passive"/>
+      <node ref="J201" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+    </net>
+    <net code="12" name="/ONE-SERVO protected supply/SENSE" class="Default">
+      <node ref="R202" pin="2" pintype="passive"/>
+      <node ref="R203" pin="1" pintype="passive"/>
+      <node ref="R204" pin="1" pintype="passive"/>
+      <node ref="TP204" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U202" pin="3" pinfunction="+_3" pintype="input"/>
+    </net>
+    <net code="13" name="/ONE-SERVO protected supply/SWITCHED_POS" class="Default">
+      <node ref="D201" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="SW201" pin="2" pinfunction="B_2" pintype="passive"/>
+    </net>
+    <net code="14" name="/ONE-SERVO protected supply/VREF" class="Default">
+      <node ref="R201" pin="2" pintype="passive"/>
+      <node ref="TP203" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U201" pin="1" pinfunction="REF_1" pintype="passive"/>
+      <node ref="U201" pin="3" pinfunction="K_3" pintype="passive"/>
+      <node ref="U202" pin="2" pinfunction="-_2" pintype="input"/>
+      <node ref="U202" pin="6" pinfunction="-_6" pintype="input"/>
+    </net>
+    <net code="15" name="/PICO_3V3" class="Default">
+      <node ref="J6" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="U1" pin="36" pinfunction="3V3_36" pintype="power_out"/>
+    </net>
+    <net code="16" name="/PICO_EXT_5V" class="Default">
+      <node ref="D2" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="J1" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+    </net>
+    <net code="17" name="/PICO_VSYS" class="Default">
+      <node ref="D2" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="TP1" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U1" pin="39" pinfunction="VSYS_39" pintype="power_in"/>
+    </net>
+    <net code="18" name="/SERVO0_3V3" class="Default">
+      <node ref="J101" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R101" pin="1" pintype="passive"/>
+      <node ref="TP3" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="GPIO0_1" pintype="bidirectional"/>
+    </net>
+    <net code="19" name="/SERVO1_3V3" class="Default">
+      <node ref="J101" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J2" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="R111" pin="1" pintype="passive"/>
+      <node ref="TP4" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U1" pin="2" pinfunction="GPIO1_2" pintype="bidirectional"/>
+    </net>
+    <net code="20" name="/SERVO2_3V3" class="Default">
+      <node ref="J101" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="R121" pin="1" pintype="passive"/>
+      <node ref="U1" pin="4" pinfunction="GPIO2_4" pintype="bidirectional"/>
+    </net>
+    <net code="21" name="/SERVO3_3V3" class="Default">
+      <node ref="J101" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="J2" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="R131" pin="1" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="GPIO3_5" pintype="bidirectional"/>
+    </net>
+    <net code="22" name="/SERVO4_3V3" class="Default">
+      <node ref="J101" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="J2" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="R141" pin="1" pintype="passive"/>
+      <node ref="U1" pin="6" pinfunction="GPIO4_6" pintype="bidirectional"/>
+    </net>
+    <net code="23" name="/SERVO5_3V3" class="Default">
+      <node ref="J101" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="J2" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="R151" pin="1" pintype="passive"/>
+      <node ref="U1" pin="7" pinfunction="GPIO5_7" pintype="bidirectional"/>
+    </net>
+    <net code="24" name="/SERVO6_3V3" class="Default">
+      <node ref="J3" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U1" pin="9" pinfunction="GPIO6_9" pintype="bidirectional"/>
+    </net>
+    <net code="25" name="/SERVO7_3V3" class="Default">
+      <node ref="J3" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U1" pin="10" pinfunction="GPIO7_10" pintype="bidirectional"/>
+    </net>
+    <net code="26" name="/SERVO8_3V3" class="Default">
+      <node ref="J3" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="U1" pin="11" pinfunction="GPIO8_11" pintype="bidirectional"/>
+    </net>
+    <net code="27" name="/SERVO9_3V3" class="Default">
+      <node ref="J3" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="U1" pin="12" pinfunction="GPIO9_12" pintype="bidirectional"/>
+    </net>
+    <net code="28" name="/SERVO10_3V3" class="Default">
+      <node ref="J3" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="U1" pin="14" pinfunction="GPIO10_14" pintype="bidirectional"/>
+    </net>
+    <net code="29" name="/SERVO11_3V3" class="Default">
+      <node ref="J3" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="U1" pin="15" pinfunction="GPIO11_15" pintype="bidirectional"/>
+    </net>
+    <net code="30" name="/SERVO12_3V3" class="Default">
+      <node ref="J4" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U1" pin="16" pinfunction="GPIO12_16" pintype="bidirectional"/>
+    </net>
+    <net code="31" name="/SERVO13_3V3" class="Default">
+      <node ref="J4" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U1" pin="17" pinfunction="GPIO13_17" pintype="bidirectional"/>
+    </net>
+    <net code="32" name="/SERVO14_3V3" class="Default">
+      <node ref="J4" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="U1" pin="19" pinfunction="GPIO14_19" pintype="bidirectional"/>
+    </net>
+    <net code="33" name="/SERVO15_3V3" class="Default">
+      <node ref="J4" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="U1" pin="20" pinfunction="GPIO15_20" pintype="bidirectional"/>
+    </net>
+    <net code="34" name="/SERVO16_3V3" class="Default">
+      <node ref="J4" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="U1" pin="21" pinfunction="GPIO16_21" pintype="bidirectional"/>
+    </net>
+    <net code="35" name="/SERVO17_3V3" class="Default">
+      <node ref="J4" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="U1" pin="22" pinfunction="GPIO17_22" pintype="bidirectional"/>
+    </net>
+    <net code="36" name="/SERVO_VS" class="Default">
+      <node ref="C100" pin="1" pintype="passive"/>
+      <node ref="C101" pin="1" pintype="passive"/>
+      <node ref="C102" pin="1" pintype="passive"/>
+      <node ref="C103" pin="1" pintype="passive"/>
+      <node ref="C104" pin="1" pintype="passive"/>
+      <node ref="C105" pin="1" pintype="passive"/>
+      <node ref="C106" pin="1" pintype="passive"/>
+      <node ref="C201" pin="1" pintype="passive"/>
+      <node ref="C202" pin="1" pintype="passive"/>
+      <node ref="C203" pin="1" pintype="passive"/>
+      <node ref="D201" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D202" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="J102" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J110" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J111" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J112" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J113" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J114" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J115" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J202" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R102" pin="1" pintype="passive"/>
+      <node ref="R104" pin="1" pintype="passive"/>
+      <node ref="R112" pin="1" pintype="passive"/>
+      <node ref="R114" pin="1" pintype="passive"/>
+      <node ref="R122" pin="1" pintype="passive"/>
+      <node ref="R124" pin="1" pintype="passive"/>
+      <node ref="R132" pin="1" pintype="passive"/>
+      <node ref="R134" pin="1" pintype="passive"/>
+      <node ref="R142" pin="1" pintype="passive"/>
+      <node ref="R144" pin="1" pintype="passive"/>
+      <node ref="R152" pin="1" pintype="passive"/>
+      <node ref="R154" pin="1" pintype="passive"/>
+      <node ref="R201" pin="1" pintype="passive"/>
+      <node ref="R202" pin="1" pintype="passive"/>
+      <node ref="R205" pin="1" pintype="passive"/>
+      <node ref="R208" pin="1" pintype="passive"/>
+      <node ref="TP201" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U202" pin="8" pinfunction="V+_8" pintype="power_in"/>
+    </net>
+    <net code="37" name="/UART1_RX" class="Default">
+      <node ref="J5" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U1" pin="27" pinfunction="GPIO21_27" pintype="bidirectional"/>
+    </net>
+    <net code="38" name="/UART1_TX" class="Default">
+      <node ref="J5" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U1" pin="26" pinfunction="GPIO20_26" pintype="bidirectional"/>
+    </net>
+    <net code="39" name="/USB_VBUS" class="Default">
+      <node ref="TP2" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U1" pin="40" pinfunction="VBUS_40" pintype="power_out"/>
+    </net>
+    <net code="40" name="GND" class="Default">
+      <node ref="C100" pin="2" pintype="passive"/>
+      <node ref="C101" pin="2" pintype="passive"/>
+      <node ref="C102" pin="2" pintype="passive"/>
+      <node ref="C103" pin="2" pintype="passive"/>
+      <node ref="C104" pin="2" pintype="passive"/>
+      <node ref="C105" pin="2" pintype="passive"/>
+      <node ref="C106" pin="2" pintype="passive"/>
+      <node ref="C201" pin="2" pintype="passive"/>
+      <node ref="C202" pin="2" pintype="passive"/>
+      <node ref="C203" pin="2" pintype="passive"/>
+      <node ref="J1" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J101" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="J101" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="J101" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J101" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="J101" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="J101" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="J102" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J110" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J111" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J112" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J113" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J114" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J115" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J2" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="J2" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J2" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="J2" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="J2" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="J201" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J202" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J3" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="J3" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="J3" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J3" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="J3" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="J3" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="J4" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="J4" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="J4" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J4" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="J4" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="J4" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="J5" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J6" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="Q101" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q102" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q103" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q104" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q105" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q106" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q107" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q108" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q109" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q110" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q111" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q112" pin="3" pinfunction="E_3" pintype="passive"/>
+      <node ref="Q201" pin="3" pinfunction="S_3" pintype="passive"/>
+      <node ref="R105" pin="2" pintype="passive"/>
+      <node ref="R107" pin="2" pintype="passive"/>
+      <node ref="R115" pin="2" pintype="passive"/>
+      <node ref="R117" pin="2" pintype="passive"/>
+      <node ref="R125" pin="2" pintype="passive"/>
+      <node ref="R127" pin="2" pintype="passive"/>
+      <node ref="R135" pin="2" pintype="passive"/>
+      <node ref="R137" pin="2" pintype="passive"/>
+      <node ref="R145" pin="2" pintype="passive"/>
+      <node ref="R147" pin="2" pintype="passive"/>
+      <node ref="R155" pin="2" pintype="passive"/>
+      <node ref="R157" pin="2" pintype="passive"/>
+      <node ref="R203" pin="2" pintype="passive"/>
+      <node ref="R207" pin="2" pintype="passive"/>
+      <node ref="TP102" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="TP202" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="TP5" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U1" pin="13" pinfunction="GND_13" pintype="passive"/>
+      <node ref="U1" pin="18" pinfunction="GND_18" pintype="passive"/>
+      <node ref="U1" pin="23" pinfunction="GND_23" pintype="passive"/>
+      <node ref="U1" pin="28" pinfunction="GND_28" pintype="passive"/>
+      <node ref="U1" pin="3" pinfunction="GND_3" pintype="power_out"/>
+      <node ref="U1" pin="38" pinfunction="GND_38" pintype="passive"/>
+      <node ref="U1" pin="8" pinfunction="GND_8" pintype="passive"/>
+      <node ref="U201" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="U202" pin="4" pinfunction="V-_4" pintype="power_in"/>
+      <node ref="U202" pin="5" pinfunction="+_5" pintype="input"/>
+    </net>
+    <net code="41" name="Net-(J110-Pin_1)" class="Default">
+      <node ref="J110" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R106" pin="2" pintype="passive"/>
+      <node ref="R107" pin="1" pintype="passive"/>
+      <node ref="TP101" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="42" name="Net-(J111-Pin_1)" class="Default">
+      <node ref="J111" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R116" pin="2" pintype="passive"/>
+      <node ref="R117" pin="1" pintype="passive"/>
+    </net>
+    <net code="43" name="Net-(J112-Pin_1)" class="Default">
+      <node ref="J112" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R126" pin="2" pintype="passive"/>
+      <node ref="R127" pin="1" pintype="passive"/>
+    </net>
+    <net code="44" name="Net-(J113-Pin_1)" class="Default">
+      <node ref="J113" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R136" pin="2" pintype="passive"/>
+      <node ref="R137" pin="1" pintype="passive"/>
+    </net>
+    <net code="45" name="Net-(J114-Pin_1)" class="Default">
+      <node ref="J114" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R146" pin="2" pintype="passive"/>
+      <node ref="R147" pin="1" pintype="passive"/>
+    </net>
+    <net code="46" name="Net-(J115-Pin_1)" class="Default">
+      <node ref="J115" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R156" pin="2" pintype="passive"/>
+      <node ref="R157" pin="1" pintype="passive"/>
+    </net>
+    <net code="47" name="Net-(Q101-B)" class="Default">
+      <node ref="Q101" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R101" pin="2" pintype="passive"/>
+      <node ref="R105" pin="1" pintype="passive"/>
+    </net>
+    <net code="48" name="Net-(Q101-C)" class="Default">
+      <node ref="Q101" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R102" pin="2" pintype="passive"/>
+      <node ref="R103" pin="1" pintype="passive"/>
+    </net>
+    <net code="49" name="Net-(Q102-B)" class="Default">
+      <node ref="Q102" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R103" pin="2" pintype="passive"/>
+    </net>
+    <net code="50" name="Net-(Q102-C)" class="Default">
+      <node ref="Q102" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R104" pin="2" pintype="passive"/>
+      <node ref="R106" pin="1" pintype="passive"/>
+    </net>
+    <net code="51" name="Net-(Q103-B)" class="Default">
+      <node ref="Q103" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R111" pin="2" pintype="passive"/>
+      <node ref="R115" pin="1" pintype="passive"/>
+    </net>
+    <net code="52" name="Net-(Q103-C)" class="Default">
+      <node ref="Q103" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R112" pin="2" pintype="passive"/>
+      <node ref="R113" pin="1" pintype="passive"/>
+    </net>
+    <net code="53" name="Net-(Q104-B)" class="Default">
+      <node ref="Q104" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R113" pin="2" pintype="passive"/>
+    </net>
+    <net code="54" name="Net-(Q104-C)" class="Default">
+      <node ref="Q104" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R114" pin="2" pintype="passive"/>
+      <node ref="R116" pin="1" pintype="passive"/>
+    </net>
+    <net code="55" name="Net-(Q105-B)" class="Default">
+      <node ref="Q105" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R121" pin="2" pintype="passive"/>
+      <node ref="R125" pin="1" pintype="passive"/>
+    </net>
+    <net code="56" name="Net-(Q105-C)" class="Default">
+      <node ref="Q105" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R122" pin="2" pintype="passive"/>
+      <node ref="R123" pin="1" pintype="passive"/>
+    </net>
+    <net code="57" name="Net-(Q106-B)" class="Default">
+      <node ref="Q106" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R123" pin="2" pintype="passive"/>
+    </net>
+    <net code="58" name="Net-(Q106-C)" class="Default">
+      <node ref="Q106" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R124" pin="2" pintype="passive"/>
+      <node ref="R126" pin="1" pintype="passive"/>
+    </net>
+    <net code="59" name="Net-(Q107-B)" class="Default">
+      <node ref="Q107" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R131" pin="2" pintype="passive"/>
+      <node ref="R135" pin="1" pintype="passive"/>
+    </net>
+    <net code="60" name="Net-(Q107-C)" class="Default">
+      <node ref="Q107" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R132" pin="2" pintype="passive"/>
+      <node ref="R133" pin="1" pintype="passive"/>
+    </net>
+    <net code="61" name="Net-(Q108-B)" class="Default">
+      <node ref="Q108" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R133" pin="2" pintype="passive"/>
+    </net>
+    <net code="62" name="Net-(Q108-C)" class="Default">
+      <node ref="Q108" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R134" pin="2" pintype="passive"/>
+      <node ref="R136" pin="1" pintype="passive"/>
+    </net>
+    <net code="63" name="Net-(Q109-B)" class="Default">
+      <node ref="Q109" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R141" pin="2" pintype="passive"/>
+      <node ref="R145" pin="1" pintype="passive"/>
+    </net>
+    <net code="64" name="Net-(Q109-C)" class="Default">
+      <node ref="Q109" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R142" pin="2" pintype="passive"/>
+      <node ref="R143" pin="1" pintype="passive"/>
+    </net>
+    <net code="65" name="Net-(Q110-B)" class="Default">
+      <node ref="Q110" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R143" pin="2" pintype="passive"/>
+    </net>
+    <net code="66" name="Net-(Q110-C)" class="Default">
+      <node ref="Q110" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R144" pin="2" pintype="passive"/>
+      <node ref="R146" pin="1" pintype="passive"/>
+    </net>
+    <net code="67" name="Net-(Q111-B)" class="Default">
+      <node ref="Q111" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R151" pin="2" pintype="passive"/>
+      <node ref="R155" pin="1" pintype="passive"/>
+    </net>
+    <net code="68" name="Net-(Q111-C)" class="Default">
+      <node ref="Q111" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R152" pin="2" pintype="passive"/>
+      <node ref="R153" pin="1" pintype="passive"/>
+    </net>
+    <net code="69" name="Net-(Q112-B)" class="Default">
+      <node ref="Q112" pin="2" pinfunction="B_2" pintype="input"/>
+      <node ref="R153" pin="2" pintype="passive"/>
+    </net>
+    <net code="70" name="Net-(Q112-C)" class="Default">
+      <node ref="Q112" pin="1" pinfunction="C_1" pintype="passive"/>
+      <node ref="R154" pin="2" pintype="passive"/>
+      <node ref="R156" pin="1" pintype="passive"/>
+    </net>
+    <net code="71" name="unconnected-(U1-3V3_EN-Pad37)" class="Default">
+      <node ref="U1" pin="37" pinfunction="3V3_EN_37" pintype="passive+no_connect"/>
+    </net>
+    <net code="72" name="unconnected-(U1-ADC_VREF-Pad35)" class="Default">
+      <node ref="U1" pin="35" pinfunction="ADC_VREF_35" pintype="power_in+no_connect"/>
+    </net>
+    <net code="73" name="unconnected-(U1-AGND-Pad33)" class="Default">
+      <node ref="U1" pin="33" pinfunction="AGND_33" pintype="power_out+no_connect"/>
+    </net>
+    <net code="74" name="unconnected-(U1-RUN-Pad30)" class="Default">
+      <node ref="U1" pin="30" pinfunction="RUN_30" pintype="passive+no_connect"/>
+    </net>
+    <net code="75" name="unconnected-(U202-Pad7)" class="Default">
+      <node ref="U202" pin="7" pintype="open_collector+no_connect"/>
+    </net>
+  </nets>
+</export>

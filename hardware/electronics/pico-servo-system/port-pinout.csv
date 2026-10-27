@@ -1,0 +1,13 @@
+Pin,Module signal,Port A GPIO,Port B GPIO,Port C GPIO,Electrical role
+1,S0,GP0,GP6,GP12,3.3V logic
+2,GND,GND,GND,GND,Ground reference only
+3,S1,GP1,GP7,GP13,3.3V logic
+4,GND,GND,GND,GND,Ground reference only
+5,S2,GP2,GP8,GP14,3.3V logic
+6,GND,GND,GND,GND,Ground reference only
+7,S3,GP3,GP9,GP15,3.3V logic
+8,GND,GND,GND,GND,Ground reference only
+9,S4,GP4,GP10,GP16,3.3V logic
+10,GND,GND,GND,GND,Ground reference only
+11,S5,GP5,GP11,GP17,3.3V logic
+12,GND,GND,GND,GND,Ground reference only

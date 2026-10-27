@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-27",
+  "revision": "C - PROPOSAL",
+  "tool": "KiCad 10.0.7",
+  "erc_errors": 0,
+  "erc_warnings": 0,
+  "schematic_components": 110,
+  "reserved_dnp_components": 55,
+  "nets": 75,
+  "checks": [
+    "18 distinct Pico GPIO-to-port assignments; IDC even pins ground",
+    "Port A cable and six complete NPN-buffer topologies",
+    "External Pico diode direction; VBUS/VSYS/servo rail isolation",
+    "UART1 and expansion mappings",
+    "Complete power-card pin partitions, no unintended shorts",
+    "TL431 REF/cathode tie and anode ground; ST-compatible TO-92 mapping",
+    "LM393 active/unused/power units belong to one DIP-8 IC",
+    "Positive feedback from comparator output before the gate resistor",
+    "MOSFET G/D/S; dump resistor; flyback diode cathode to servo rail",
+    "Resistor values and off-board dump-resistor mounting",
+    "No Pololu component in the current netlist"
+  ],
+  "limits": [
+    "No hardware build, SPICE transient analysis or thermal qualification",
+    "Current-limited startup and dynamic voltage maximum remain unverified",
+    "One-servo supply only; five output channels DNP",
+    "No routed PCB or drilling template"
+  ],
+  "sha256": {
+    "pico-servo-system.kicad_sch": "fc104c1f37a0a826091cdf0b4070496d884b47f38bac8ad07b188b02b824d71e",
+    "servo-output-module.kicad_sch": "783754809564d4a5da17f8de9e034409e3673b4ceb2355a6d302d317600d75a8",
+    "bench-power.kicad_sch": "1b3a3c0fe14a78eb84c7930958283bc9607c05b77b91a0071b69b6ce21b7eed0",
+    "pico-servo-system.net": "f77e6ca3135d9e7d7a5d0443e58c36bdcce0a7b1a6cf2c647a2afc05efcf752a",
+    "pico-servo-system.pdf": "19f967358bf7c9c142bf5f41da08c4a93f2b11076a2dc23db5fb46e6bc632a0c"
+  }
+}

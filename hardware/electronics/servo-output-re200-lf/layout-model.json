@@ -1,0 +1,7987 @@
+{
+  "revision": "P1 - UNBUILT",
+  "board": {
+    "manufacturer": "Roth Elektronik",
+    "part": "RE200-LF",
+    "width_mm": 160.15,
+    "height_mm": 100.2,
+    "pitch_mm": 2.54,
+    "columns": 61,
+    "rows": 38,
+    "first_hole_mm": [
+      3.89,
+      3.07
+    ],
+    "view": "component side; copper underneath",
+    "pcb_editor_origin_mm": [
+      50,
+      50
+    ]
+  },
+  "parts": [
+    {
+      "ref": "J101",
+      "value": "SIGNAL INPUT",
+      "footprint": "Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical",
+      "x_mm": 19.13,
+      "y_mm": 10.69,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        15.95,
+        5.59,
+        8.9,
+        22.9
+      ],
+      "kind": "IDC",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ]
+    },
+    {
+      "ref": "J102",
+      "value": "SERVO POWER IN",
+      "footprint": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "x_mm": 52.15,
+      "y_mm": 10.69,
+      "rotation_deg": 180,
+      "bounds_mm": [
+        44.53,
+        6.6899999999999995,
+        10.16,
+        9.8
+      ],
+      "kind": "power",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "C100",
+      "value": "470uF / 35V",
+      "footprint": "HexaRoam_Perfboard:CP_Radial_D10.0mm_P5.08mm_HandFormed",
+      "x_mm": 67.39,
+      "y_mm": 18.31,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        64.93,
+        13.309999999999999,
+        10,
+        10
+      ],
+      "kind": "bulk",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "TP101",
+      "value": "SERVO 0 SIGNAL",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 57.230000000000004,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        56.13,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP102",
+      "value": "LOCAL GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 36.910000000000004,
+      "y_mm": 10.69,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        35.81,
+        9.59,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R101",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 14.05,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        15.980000000000002,
+        39.92,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R102",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 29.29,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        28.04,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R103",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 36.910000000000004,
+      "y_mm": 36.09,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        38.84,
+        34.84,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R104",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 49.61,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        48.36,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R105",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 24.21,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        22.96,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R106",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 39.45,
+      "y_mm": 46.25,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        41.38,
+        45.0,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R107",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 54.69,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        53.44,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q101",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 29.29,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        29.229999999999997,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q102",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 49.61,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        49.55,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C101",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 36.910000000000004,
+      "y_mm": 51.33,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        35.660000000000004,
+        50.08,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J110",
+      "value": "SERVO 0",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 44.53,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        43.26,
+        55.14,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 0,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV0",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 14.05,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        12.950000000000001,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 0,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG0",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 19.13,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        18.029999999999998,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 0,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R111",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 59.77,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        61.70000000000001,
+        39.92,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R112",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 75.01,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        73.76,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R113",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 82.63,
+      "y_mm": 36.09,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        84.55999999999999,
+        34.84,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R114",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 95.33,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        94.08,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R115",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 69.93,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        68.68,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R116",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 85.17,
+      "y_mm": 46.25,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        87.1,
+        45.0,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R117",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 100.41,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        99.16,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q103",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 75.01,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        74.95000000000002,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q104",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 95.33,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        95.27000000000001,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C102",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 82.63,
+      "y_mm": 51.33,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        81.38,
+        50.08,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J111",
+      "value": "SERVO 1",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 90.25,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        88.98,
+        55.14,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 1,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV1",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 59.77,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        58.67,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 1,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG1",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 64.85,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        63.74999999999999,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 1,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R121",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 105.49,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        107.41999999999999,
+        39.92,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R122",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 120.73,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        119.48,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R123",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 128.35,
+      "y_mm": 36.09,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        130.28,
+        34.84,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R124",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 141.04999999999998,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        139.79999999999998,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R125",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 115.65,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        114.4,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R126",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 130.89,
+      "y_mm": 46.25,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        132.82,
+        45.0,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R127",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 146.13,
+      "y_mm": 46.25,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        144.88,
+        48.18,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q105",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 120.73,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        120.67000000000002,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q106",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 141.04999999999998,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        140.98999999999998,
+        38.57,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C103",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 128.35,
+      "y_mm": 51.33,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        127.1,
+        50.08,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J112",
+      "value": "SERVO 2",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 135.97,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        134.7,
+        55.14,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 2,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV2",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 105.49,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        104.39,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 2,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG2",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 2,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R131",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 14.05,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        15.980000000000002,
+        72.94,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R132",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 29.29,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        28.04,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R133",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 36.910000000000004,
+      "y_mm": 69.11,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        38.84,
+        67.86,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R134",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 49.61,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        48.36,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R135",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 24.21,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        22.96,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R136",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 39.45,
+      "y_mm": 79.27,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        41.38,
+        78.02,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R137",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 54.69,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        53.44,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q107",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 29.29,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        29.229999999999997,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q108",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 49.61,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        49.55,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C104",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 36.910000000000004,
+      "y_mm": 84.35,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        35.660000000000004,
+        83.1,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J113",
+      "value": "SERVO 3",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 44.53,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        43.26,
+        88.16,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 3,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV3",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 14.05,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        12.950000000000001,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 3,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG3",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 19.13,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        18.029999999999998,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 3,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R141",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 59.77,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        61.70000000000001,
+        72.94,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R142",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 75.01,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        73.76,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R143",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 82.63,
+      "y_mm": 69.11,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        84.55999999999999,
+        67.86,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R144",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 95.33,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        94.08,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R145",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 69.93,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        68.68,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R146",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 85.17,
+      "y_mm": 79.27,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        87.1,
+        78.02,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R147",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 100.41,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        99.16,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q109",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 75.01,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        74.95000000000002,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q110",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 95.33,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        95.27000000000001,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C105",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 82.63,
+      "y_mm": 84.35,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        81.38,
+        83.1,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J114",
+      "value": "SERVO 4",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 90.25,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        88.98,
+        88.16,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 4,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV4",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 59.77,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        58.67,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 4,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG4",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 64.85,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        63.74999999999999,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 4,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "R151",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 105.49,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        107.41999999999999,
+        72.94,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R152",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 120.73,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        119.48,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R153",
+      "value": "4.7k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 128.35,
+      "y_mm": 69.11,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        130.28,
+        67.86,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R154",
+      "value": "1k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 141.04999999999998,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        139.79999999999998,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R155",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 115.65,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        114.4,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R156",
+      "value": "180",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 130.89,
+      "y_mm": 79.27,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        132.82,
+        78.02,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R157",
+      "value": "100k",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 146.13,
+      "y_mm": 79.27,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        144.88,
+        81.19999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "Q111",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 120.73,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        120.67000000000002,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q112",
+      "value": "BC547B",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 141.04999999999998,
+      "y_mm": 74.19,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        140.98999999999998,
+        71.59,
+        5.2,
+        5.2
+      ],
+      "kind": "Q",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "C106",
+      "value": "100nF",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 128.35,
+      "y_mm": 84.35,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        127.1,
+        83.1,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J115",
+      "value": "SERVO 5",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+      "x_mm": 135.97,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 90,
+      "bounds_mm": [
+        134.7,
+        88.16,
+        7.62,
+        2.54
+      ],
+      "kind": "servo",
+      "channel": 5,
+      "dnp": true,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "BV5",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 105.49,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        104.39,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 5,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG5",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 89.42999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        88.33,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": 5,
+      "dnp": true,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    }
+  ],
+  "pads": [
+    {
+      "ref": "J101",
+      "pin": "1",
+      "hole": "C07-R04",
+      "column": 7,
+      "row": 4,
+      "x_mm": 19.13,
+      "y_mm": 10.69,
+      "net": "/SERVO0_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "2",
+      "hole": "C08-R04",
+      "column": 8,
+      "row": 4,
+      "x_mm": 21.67,
+      "y_mm": 10.69,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "3",
+      "hole": "C07-R05",
+      "column": 7,
+      "row": 5,
+      "x_mm": 19.13,
+      "y_mm": 13.23,
+      "net": "/SERVO1_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "4",
+      "hole": "C08-R05",
+      "column": 8,
+      "row": 5,
+      "x_mm": 21.67,
+      "y_mm": 13.23,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "5",
+      "hole": "C07-R06",
+      "column": 7,
+      "row": 6,
+      "x_mm": 19.13,
+      "y_mm": 15.77,
+      "net": "/SERVO2_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "6",
+      "hole": "C08-R06",
+      "column": 8,
+      "row": 6,
+      "x_mm": 21.67,
+      "y_mm": 15.77,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "7",
+      "hole": "C07-R07",
+      "column": 7,
+      "row": 7,
+      "x_mm": 19.13,
+      "y_mm": 18.31,
+      "net": "/SERVO3_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "8",
+      "hole": "C08-R07",
+      "column": 8,
+      "row": 7,
+      "x_mm": 21.67,
+      "y_mm": 18.31,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "9",
+      "hole": "C07-R08",
+      "column": 7,
+      "row": 8,
+      "x_mm": 19.13,
+      "y_mm": 20.85,
+      "net": "/SERVO4_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "10",
+      "hole": "C08-R08",
+      "column": 8,
+      "row": 8,
+      "x_mm": 21.67,
+      "y_mm": 20.85,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "11",
+      "hole": "C07-R09",
+      "column": 7,
+      "row": 9,
+      "x_mm": 19.13,
+      "y_mm": 23.39,
+      "net": "/SERVO5_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J101",
+      "pin": "12",
+      "hole": "C08-R09",
+      "column": 8,
+      "row": 9,
+      "x_mm": 21.67,
+      "y_mm": 23.39,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J102",
+      "pin": "1",
+      "hole": "C20-R04",
+      "column": 20,
+      "row": 4,
+      "x_mm": 52.15,
+      "y_mm": 10.69,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J102",
+      "pin": "2",
+      "hole": "C18-R04",
+      "column": 18,
+      "row": 4,
+      "x_mm": 47.07,
+      "y_mm": 10.69,
+      "net": "GND",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C100",
+      "pin": "1",
+      "hole": "C26-R07",
+      "column": 26,
+      "row": 7,
+      "x_mm": 67.39,
+      "y_mm": 18.31,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C100",
+      "pin": "2",
+      "hole": "C28-R07",
+      "column": 28,
+      "row": 7,
+      "x_mm": 72.47,
+      "y_mm": 18.31,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP101",
+      "pin": "1",
+      "hole": "C22-R22",
+      "column": 22,
+      "row": 22,
+      "x_mm": 57.23,
+      "y_mm": 56.41,
+      "net": "Net-(J110-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP102",
+      "pin": "1",
+      "hole": "C14-R04",
+      "column": 14,
+      "row": 4,
+      "x_mm": 36.91,
+      "y_mm": 10.69,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R101",
+      "pin": "1",
+      "hole": "C05-R16",
+      "column": 5,
+      "row": 16,
+      "x_mm": 14.05,
+      "y_mm": 41.17,
+      "net": "/SERVO0_3V3",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R101",
+      "pin": "2",
+      "hole": "C09-R16",
+      "column": 9,
+      "row": 16,
+      "x_mm": 24.21,
+      "y_mm": 41.17,
+      "net": "Net-(Q101-B)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R102",
+      "pin": "1",
+      "hole": "C11-R11",
+      "column": 11,
+      "row": 11,
+      "x_mm": 29.29,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R102",
+      "pin": "2",
+      "hole": "C11-R15",
+      "column": 11,
+      "row": 15,
+      "x_mm": 29.29,
+      "y_mm": 38.63,
+      "net": "Net-(Q101-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R103",
+      "pin": "1",
+      "hole": "C14-R14",
+      "column": 14,
+      "row": 14,
+      "x_mm": 36.91,
+      "y_mm": 36.09,
+      "net": "Net-(Q101-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R103",
+      "pin": "2",
+      "hole": "C18-R14",
+      "column": 18,
+      "row": 14,
+      "x_mm": 47.07,
+      "y_mm": 36.09,
+      "net": "Net-(Q102-B)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R104",
+      "pin": "1",
+      "hole": "C19-R11",
+      "column": 19,
+      "row": 11,
+      "x_mm": 49.61,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R104",
+      "pin": "2",
+      "hole": "C19-R15",
+      "column": 19,
+      "row": 15,
+      "x_mm": 49.61,
+      "y_mm": 38.63,
+      "net": "Net-(Q102-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R105",
+      "pin": "1",
+      "hole": "C09-R18",
+      "column": 9,
+      "row": 18,
+      "x_mm": 24.21,
+      "y_mm": 46.25,
+      "net": "Net-(Q101-B)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R105",
+      "pin": "2",
+      "hole": "C09-R22",
+      "column": 9,
+      "row": 22,
+      "x_mm": 24.21,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R106",
+      "pin": "1",
+      "hole": "C15-R18",
+      "column": 15,
+      "row": 18,
+      "x_mm": 39.45,
+      "y_mm": 46.25,
+      "net": "Net-(Q102-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R106",
+      "pin": "2",
+      "hole": "C19-R18",
+      "column": 19,
+      "row": 18,
+      "x_mm": 49.61,
+      "y_mm": 46.25,
+      "net": "Net-(J110-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R107",
+      "pin": "1",
+      "hole": "C21-R18",
+      "column": 21,
+      "row": 18,
+      "x_mm": 54.69,
+      "y_mm": 46.25,
+      "net": "Net-(J110-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "R107",
+      "pin": "2",
+      "hole": "C21-R22",
+      "column": 21,
+      "row": 22,
+      "x_mm": 54.69,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q101",
+      "pin": "1",
+      "hole": "C11-R16",
+      "column": 11,
+      "row": 16,
+      "x_mm": 29.29,
+      "y_mm": 41.17,
+      "net": "Net-(Q101-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q101",
+      "pin": "2",
+      "hole": "C12-R16",
+      "column": 12,
+      "row": 16,
+      "x_mm": 31.83,
+      "y_mm": 41.17,
+      "net": "Net-(Q101-B)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q101",
+      "pin": "3",
+      "hole": "C13-R16",
+      "column": 13,
+      "row": 16,
+      "x_mm": 34.37,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q102",
+      "pin": "1",
+      "hole": "C19-R16",
+      "column": 19,
+      "row": 16,
+      "x_mm": 49.61,
+      "y_mm": 41.17,
+      "net": "Net-(Q102-C)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q102",
+      "pin": "2",
+      "hole": "C20-R16",
+      "column": 20,
+      "row": 16,
+      "x_mm": 52.15,
+      "y_mm": 41.17,
+      "net": "Net-(Q102-B)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "Q102",
+      "pin": "3",
+      "hole": "C21-R16",
+      "column": 21,
+      "row": 16,
+      "x_mm": 54.69,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "C101",
+      "pin": "1",
+      "hole": "C14-R20",
+      "column": 14,
+      "row": 20,
+      "x_mm": 36.91,
+      "y_mm": 51.33,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "C101",
+      "pin": "2",
+      "hole": "C15-R20",
+      "column": 15,
+      "row": 20,
+      "x_mm": 39.45,
+      "y_mm": 51.33,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "J110",
+      "pin": "1",
+      "hole": "C17-R22",
+      "column": 17,
+      "row": 22,
+      "x_mm": 44.53,
+      "y_mm": 56.41,
+      "net": "Net-(J110-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "J110",
+      "pin": "2",
+      "hole": "C18-R22",
+      "column": 18,
+      "row": 22,
+      "x_mm": 47.07,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "J110",
+      "pin": "3",
+      "hole": "C19-R22",
+      "column": 19,
+      "row": 22,
+      "x_mm": 49.61,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": 0
+    },
+    {
+      "ref": "BV0",
+      "pin": "1",
+      "hole": "C05-R22",
+      "column": 5,
+      "row": 22,
+      "x_mm": 14.05,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": 0
+    },
+    {
+      "ref": "BG0",
+      "pin": "1",
+      "hole": "C07-R22",
+      "column": 7,
+      "row": 22,
+      "x_mm": 19.13,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": 0
+    },
+    {
+      "ref": "R111",
+      "pin": "1",
+      "hole": "C23-R16",
+      "column": 23,
+      "row": 16,
+      "x_mm": 59.77,
+      "y_mm": 41.17,
+      "net": "/SERVO1_3V3",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R111",
+      "pin": "2",
+      "hole": "C27-R16",
+      "column": 27,
+      "row": 16,
+      "x_mm": 69.93,
+      "y_mm": 41.17,
+      "net": "Net-(Q103-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R112",
+      "pin": "1",
+      "hole": "C29-R11",
+      "column": 29,
+      "row": 11,
+      "x_mm": 75.01,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R112",
+      "pin": "2",
+      "hole": "C29-R15",
+      "column": 29,
+      "row": 15,
+      "x_mm": 75.01,
+      "y_mm": 38.63,
+      "net": "Net-(Q103-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R113",
+      "pin": "1",
+      "hole": "C32-R14",
+      "column": 32,
+      "row": 14,
+      "x_mm": 82.63,
+      "y_mm": 36.09,
+      "net": "Net-(Q103-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R113",
+      "pin": "2",
+      "hole": "C36-R14",
+      "column": 36,
+      "row": 14,
+      "x_mm": 92.79,
+      "y_mm": 36.09,
+      "net": "Net-(Q104-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R114",
+      "pin": "1",
+      "hole": "C37-R11",
+      "column": 37,
+      "row": 11,
+      "x_mm": 95.33,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R114",
+      "pin": "2",
+      "hole": "C37-R15",
+      "column": 37,
+      "row": 15,
+      "x_mm": 95.33,
+      "y_mm": 38.63,
+      "net": "Net-(Q104-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R115",
+      "pin": "1",
+      "hole": "C27-R18",
+      "column": 27,
+      "row": 18,
+      "x_mm": 69.93,
+      "y_mm": 46.25,
+      "net": "Net-(Q103-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R115",
+      "pin": "2",
+      "hole": "C27-R22",
+      "column": 27,
+      "row": 22,
+      "x_mm": 69.93,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R116",
+      "pin": "1",
+      "hole": "C33-R18",
+      "column": 33,
+      "row": 18,
+      "x_mm": 85.17,
+      "y_mm": 46.25,
+      "net": "Net-(Q104-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R116",
+      "pin": "2",
+      "hole": "C37-R18",
+      "column": 37,
+      "row": 18,
+      "x_mm": 95.33,
+      "y_mm": 46.25,
+      "net": "Net-(J111-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R117",
+      "pin": "1",
+      "hole": "C39-R18",
+      "column": 39,
+      "row": 18,
+      "x_mm": 100.41,
+      "y_mm": 46.25,
+      "net": "Net-(J111-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "R117",
+      "pin": "2",
+      "hole": "C39-R22",
+      "column": 39,
+      "row": 22,
+      "x_mm": 100.41,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q103",
+      "pin": "1",
+      "hole": "C29-R16",
+      "column": 29,
+      "row": 16,
+      "x_mm": 75.01,
+      "y_mm": 41.17,
+      "net": "Net-(Q103-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q103",
+      "pin": "2",
+      "hole": "C30-R16",
+      "column": 30,
+      "row": 16,
+      "x_mm": 77.55,
+      "y_mm": 41.17,
+      "net": "Net-(Q103-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q103",
+      "pin": "3",
+      "hole": "C31-R16",
+      "column": 31,
+      "row": 16,
+      "x_mm": 80.09,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q104",
+      "pin": "1",
+      "hole": "C37-R16",
+      "column": 37,
+      "row": 16,
+      "x_mm": 95.33,
+      "y_mm": 41.17,
+      "net": "Net-(Q104-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q104",
+      "pin": "2",
+      "hole": "C38-R16",
+      "column": 38,
+      "row": 16,
+      "x_mm": 97.87,
+      "y_mm": 41.17,
+      "net": "Net-(Q104-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "Q104",
+      "pin": "3",
+      "hole": "C39-R16",
+      "column": 39,
+      "row": 16,
+      "x_mm": 100.41,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "C102",
+      "pin": "1",
+      "hole": "C32-R20",
+      "column": 32,
+      "row": 20,
+      "x_mm": 82.63,
+      "y_mm": 51.33,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "C102",
+      "pin": "2",
+      "hole": "C33-R20",
+      "column": 33,
+      "row": 20,
+      "x_mm": 85.17,
+      "y_mm": 51.33,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "J111",
+      "pin": "1",
+      "hole": "C35-R22",
+      "column": 35,
+      "row": 22,
+      "x_mm": 90.25,
+      "y_mm": 56.41,
+      "net": "Net-(J111-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "J111",
+      "pin": "2",
+      "hole": "C36-R22",
+      "column": 36,
+      "row": 22,
+      "x_mm": 92.79,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "J111",
+      "pin": "3",
+      "hole": "C37-R22",
+      "column": 37,
+      "row": 22,
+      "x_mm": 95.33,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 1
+    },
+    {
+      "ref": "BV1",
+      "pin": "1",
+      "hole": "C23-R22",
+      "column": 23,
+      "row": 22,
+      "x_mm": 59.77,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 1
+    },
+    {
+      "ref": "BG1",
+      "pin": "1",
+      "hole": "C25-R22",
+      "column": 25,
+      "row": 22,
+      "x_mm": 64.85,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 1
+    },
+    {
+      "ref": "R121",
+      "pin": "1",
+      "hole": "C41-R16",
+      "column": 41,
+      "row": 16,
+      "x_mm": 105.49,
+      "y_mm": 41.17,
+      "net": "/SERVO2_3V3",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R121",
+      "pin": "2",
+      "hole": "C45-R16",
+      "column": 45,
+      "row": 16,
+      "x_mm": 115.65,
+      "y_mm": 41.17,
+      "net": "Net-(Q105-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R122",
+      "pin": "1",
+      "hole": "C47-R11",
+      "column": 47,
+      "row": 11,
+      "x_mm": 120.73,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R122",
+      "pin": "2",
+      "hole": "C47-R15",
+      "column": 47,
+      "row": 15,
+      "x_mm": 120.73,
+      "y_mm": 38.63,
+      "net": "Net-(Q105-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R123",
+      "pin": "1",
+      "hole": "C50-R14",
+      "column": 50,
+      "row": 14,
+      "x_mm": 128.35,
+      "y_mm": 36.09,
+      "net": "Net-(Q105-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R123",
+      "pin": "2",
+      "hole": "C54-R14",
+      "column": 54,
+      "row": 14,
+      "x_mm": 138.51,
+      "y_mm": 36.09,
+      "net": "Net-(Q106-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R124",
+      "pin": "1",
+      "hole": "C55-R11",
+      "column": 55,
+      "row": 11,
+      "x_mm": 141.05,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R124",
+      "pin": "2",
+      "hole": "C55-R15",
+      "column": 55,
+      "row": 15,
+      "x_mm": 141.05,
+      "y_mm": 38.63,
+      "net": "Net-(Q106-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R125",
+      "pin": "1",
+      "hole": "C45-R18",
+      "column": 45,
+      "row": 18,
+      "x_mm": 115.65,
+      "y_mm": 46.25,
+      "net": "Net-(Q105-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R125",
+      "pin": "2",
+      "hole": "C45-R22",
+      "column": 45,
+      "row": 22,
+      "x_mm": 115.65,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R126",
+      "pin": "1",
+      "hole": "C51-R18",
+      "column": 51,
+      "row": 18,
+      "x_mm": 130.89,
+      "y_mm": 46.25,
+      "net": "Net-(Q106-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R126",
+      "pin": "2",
+      "hole": "C55-R18",
+      "column": 55,
+      "row": 18,
+      "x_mm": 141.05,
+      "y_mm": 46.25,
+      "net": "Net-(J112-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R127",
+      "pin": "1",
+      "hole": "C57-R18",
+      "column": 57,
+      "row": 18,
+      "x_mm": 146.13,
+      "y_mm": 46.25,
+      "net": "Net-(J112-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "R127",
+      "pin": "2",
+      "hole": "C57-R22",
+      "column": 57,
+      "row": 22,
+      "x_mm": 146.13,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q105",
+      "pin": "1",
+      "hole": "C47-R16",
+      "column": 47,
+      "row": 16,
+      "x_mm": 120.73,
+      "y_mm": 41.17,
+      "net": "Net-(Q105-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q105",
+      "pin": "2",
+      "hole": "C48-R16",
+      "column": 48,
+      "row": 16,
+      "x_mm": 123.27,
+      "y_mm": 41.17,
+      "net": "Net-(Q105-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q105",
+      "pin": "3",
+      "hole": "C49-R16",
+      "column": 49,
+      "row": 16,
+      "x_mm": 125.81,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q106",
+      "pin": "1",
+      "hole": "C55-R16",
+      "column": 55,
+      "row": 16,
+      "x_mm": 141.05,
+      "y_mm": 41.17,
+      "net": "Net-(Q106-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q106",
+      "pin": "2",
+      "hole": "C56-R16",
+      "column": 56,
+      "row": 16,
+      "x_mm": 143.59,
+      "y_mm": 41.17,
+      "net": "Net-(Q106-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "Q106",
+      "pin": "3",
+      "hole": "C57-R16",
+      "column": 57,
+      "row": 16,
+      "x_mm": 146.13,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "C103",
+      "pin": "1",
+      "hole": "C50-R20",
+      "column": 50,
+      "row": 20,
+      "x_mm": 128.35,
+      "y_mm": 51.33,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "C103",
+      "pin": "2",
+      "hole": "C51-R20",
+      "column": 51,
+      "row": 20,
+      "x_mm": 130.89,
+      "y_mm": 51.33,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "J112",
+      "pin": "1",
+      "hole": "C53-R22",
+      "column": 53,
+      "row": 22,
+      "x_mm": 135.97,
+      "y_mm": 56.41,
+      "net": "Net-(J112-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "J112",
+      "pin": "2",
+      "hole": "C54-R22",
+      "column": 54,
+      "row": 22,
+      "x_mm": 138.51,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "J112",
+      "pin": "3",
+      "hole": "C55-R22",
+      "column": 55,
+      "row": 22,
+      "x_mm": 141.05,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 2
+    },
+    {
+      "ref": "BV2",
+      "pin": "1",
+      "hole": "C41-R22",
+      "column": 41,
+      "row": 22,
+      "x_mm": 105.49,
+      "y_mm": 56.41,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 2
+    },
+    {
+      "ref": "BG2",
+      "pin": "1",
+      "hole": "C43-R22",
+      "column": 43,
+      "row": 22,
+      "x_mm": 110.57,
+      "y_mm": 56.41,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 2
+    },
+    {
+      "ref": "R131",
+      "pin": "1",
+      "hole": "C05-R29",
+      "column": 5,
+      "row": 29,
+      "x_mm": 14.05,
+      "y_mm": 74.19,
+      "net": "/SERVO3_3V3",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R131",
+      "pin": "2",
+      "hole": "C09-R29",
+      "column": 9,
+      "row": 29,
+      "x_mm": 24.21,
+      "y_mm": 74.19,
+      "net": "Net-(Q107-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R132",
+      "pin": "1",
+      "hole": "C11-R24",
+      "column": 11,
+      "row": 24,
+      "x_mm": 29.29,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R132",
+      "pin": "2",
+      "hole": "C11-R28",
+      "column": 11,
+      "row": 28,
+      "x_mm": 29.29,
+      "y_mm": 71.65,
+      "net": "Net-(Q107-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R133",
+      "pin": "1",
+      "hole": "C14-R27",
+      "column": 14,
+      "row": 27,
+      "x_mm": 36.91,
+      "y_mm": 69.11,
+      "net": "Net-(Q107-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R133",
+      "pin": "2",
+      "hole": "C18-R27",
+      "column": 18,
+      "row": 27,
+      "x_mm": 47.07,
+      "y_mm": 69.11,
+      "net": "Net-(Q108-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R134",
+      "pin": "1",
+      "hole": "C19-R24",
+      "column": 19,
+      "row": 24,
+      "x_mm": 49.61,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R134",
+      "pin": "2",
+      "hole": "C19-R28",
+      "column": 19,
+      "row": 28,
+      "x_mm": 49.61,
+      "y_mm": 71.65,
+      "net": "Net-(Q108-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R135",
+      "pin": "1",
+      "hole": "C09-R31",
+      "column": 9,
+      "row": 31,
+      "x_mm": 24.21,
+      "y_mm": 79.27,
+      "net": "Net-(Q107-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R135",
+      "pin": "2",
+      "hole": "C09-R35",
+      "column": 9,
+      "row": 35,
+      "x_mm": 24.21,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R136",
+      "pin": "1",
+      "hole": "C15-R31",
+      "column": 15,
+      "row": 31,
+      "x_mm": 39.45,
+      "y_mm": 79.27,
+      "net": "Net-(Q108-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R136",
+      "pin": "2",
+      "hole": "C19-R31",
+      "column": 19,
+      "row": 31,
+      "x_mm": 49.61,
+      "y_mm": 79.27,
+      "net": "Net-(J113-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R137",
+      "pin": "1",
+      "hole": "C21-R31",
+      "column": 21,
+      "row": 31,
+      "x_mm": 54.69,
+      "y_mm": 79.27,
+      "net": "Net-(J113-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "R137",
+      "pin": "2",
+      "hole": "C21-R35",
+      "column": 21,
+      "row": 35,
+      "x_mm": 54.69,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q107",
+      "pin": "1",
+      "hole": "C11-R29",
+      "column": 11,
+      "row": 29,
+      "x_mm": 29.29,
+      "y_mm": 74.19,
+      "net": "Net-(Q107-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q107",
+      "pin": "2",
+      "hole": "C12-R29",
+      "column": 12,
+      "row": 29,
+      "x_mm": 31.83,
+      "y_mm": 74.19,
+      "net": "Net-(Q107-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q107",
+      "pin": "3",
+      "hole": "C13-R29",
+      "column": 13,
+      "row": 29,
+      "x_mm": 34.37,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q108",
+      "pin": "1",
+      "hole": "C19-R29",
+      "column": 19,
+      "row": 29,
+      "x_mm": 49.61,
+      "y_mm": 74.19,
+      "net": "Net-(Q108-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q108",
+      "pin": "2",
+      "hole": "C20-R29",
+      "column": 20,
+      "row": 29,
+      "x_mm": 52.15,
+      "y_mm": 74.19,
+      "net": "Net-(Q108-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "Q108",
+      "pin": "3",
+      "hole": "C21-R29",
+      "column": 21,
+      "row": 29,
+      "x_mm": 54.69,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "C104",
+      "pin": "1",
+      "hole": "C14-R33",
+      "column": 14,
+      "row": 33,
+      "x_mm": 36.91,
+      "y_mm": 84.35,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "C104",
+      "pin": "2",
+      "hole": "C15-R33",
+      "column": 15,
+      "row": 33,
+      "x_mm": 39.45,
+      "y_mm": 84.35,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "J113",
+      "pin": "1",
+      "hole": "C17-R35",
+      "column": 17,
+      "row": 35,
+      "x_mm": 44.53,
+      "y_mm": 89.43,
+      "net": "Net-(J113-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "J113",
+      "pin": "2",
+      "hole": "C18-R35",
+      "column": 18,
+      "row": 35,
+      "x_mm": 47.07,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "J113",
+      "pin": "3",
+      "hole": "C19-R35",
+      "column": 19,
+      "row": 35,
+      "x_mm": 49.61,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 3
+    },
+    {
+      "ref": "BV3",
+      "pin": "1",
+      "hole": "C05-R35",
+      "column": 5,
+      "row": 35,
+      "x_mm": 14.05,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 3
+    },
+    {
+      "ref": "BG3",
+      "pin": "1",
+      "hole": "C07-R35",
+      "column": 7,
+      "row": 35,
+      "x_mm": 19.13,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 3
+    },
+    {
+      "ref": "R141",
+      "pin": "1",
+      "hole": "C23-R29",
+      "column": 23,
+      "row": 29,
+      "x_mm": 59.77,
+      "y_mm": 74.19,
+      "net": "/SERVO4_3V3",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R141",
+      "pin": "2",
+      "hole": "C27-R29",
+      "column": 27,
+      "row": 29,
+      "x_mm": 69.93,
+      "y_mm": 74.19,
+      "net": "Net-(Q109-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R142",
+      "pin": "1",
+      "hole": "C29-R24",
+      "column": 29,
+      "row": 24,
+      "x_mm": 75.01,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R142",
+      "pin": "2",
+      "hole": "C29-R28",
+      "column": 29,
+      "row": 28,
+      "x_mm": 75.01,
+      "y_mm": 71.65,
+      "net": "Net-(Q109-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R143",
+      "pin": "1",
+      "hole": "C32-R27",
+      "column": 32,
+      "row": 27,
+      "x_mm": 82.63,
+      "y_mm": 69.11,
+      "net": "Net-(Q109-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R143",
+      "pin": "2",
+      "hole": "C36-R27",
+      "column": 36,
+      "row": 27,
+      "x_mm": 92.79,
+      "y_mm": 69.11,
+      "net": "Net-(Q110-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R144",
+      "pin": "1",
+      "hole": "C37-R24",
+      "column": 37,
+      "row": 24,
+      "x_mm": 95.33,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R144",
+      "pin": "2",
+      "hole": "C37-R28",
+      "column": 37,
+      "row": 28,
+      "x_mm": 95.33,
+      "y_mm": 71.65,
+      "net": "Net-(Q110-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R145",
+      "pin": "1",
+      "hole": "C27-R31",
+      "column": 27,
+      "row": 31,
+      "x_mm": 69.93,
+      "y_mm": 79.27,
+      "net": "Net-(Q109-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R145",
+      "pin": "2",
+      "hole": "C27-R35",
+      "column": 27,
+      "row": 35,
+      "x_mm": 69.93,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R146",
+      "pin": "1",
+      "hole": "C33-R31",
+      "column": 33,
+      "row": 31,
+      "x_mm": 85.17,
+      "y_mm": 79.27,
+      "net": "Net-(Q110-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R146",
+      "pin": "2",
+      "hole": "C37-R31",
+      "column": 37,
+      "row": 31,
+      "x_mm": 95.33,
+      "y_mm": 79.27,
+      "net": "Net-(J114-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R147",
+      "pin": "1",
+      "hole": "C39-R31",
+      "column": 39,
+      "row": 31,
+      "x_mm": 100.41,
+      "y_mm": 79.27,
+      "net": "Net-(J114-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "R147",
+      "pin": "2",
+      "hole": "C39-R35",
+      "column": 39,
+      "row": 35,
+      "x_mm": 100.41,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q109",
+      "pin": "1",
+      "hole": "C29-R29",
+      "column": 29,
+      "row": 29,
+      "x_mm": 75.01,
+      "y_mm": 74.19,
+      "net": "Net-(Q109-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q109",
+      "pin": "2",
+      "hole": "C30-R29",
+      "column": 30,
+      "row": 29,
+      "x_mm": 77.55,
+      "y_mm": 74.19,
+      "net": "Net-(Q109-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q109",
+      "pin": "3",
+      "hole": "C31-R29",
+      "column": 31,
+      "row": 29,
+      "x_mm": 80.09,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q110",
+      "pin": "1",
+      "hole": "C37-R29",
+      "column": 37,
+      "row": 29,
+      "x_mm": 95.33,
+      "y_mm": 74.19,
+      "net": "Net-(Q110-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q110",
+      "pin": "2",
+      "hole": "C38-R29",
+      "column": 38,
+      "row": 29,
+      "x_mm": 97.87,
+      "y_mm": 74.19,
+      "net": "Net-(Q110-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "Q110",
+      "pin": "3",
+      "hole": "C39-R29",
+      "column": 39,
+      "row": 29,
+      "x_mm": 100.41,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "C105",
+      "pin": "1",
+      "hole": "C32-R33",
+      "column": 32,
+      "row": 33,
+      "x_mm": 82.63,
+      "y_mm": 84.35,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "C105",
+      "pin": "2",
+      "hole": "C33-R33",
+      "column": 33,
+      "row": 33,
+      "x_mm": 85.17,
+      "y_mm": 84.35,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "J114",
+      "pin": "1",
+      "hole": "C35-R35",
+      "column": 35,
+      "row": 35,
+      "x_mm": 90.25,
+      "y_mm": 89.43,
+      "net": "Net-(J114-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "J114",
+      "pin": "2",
+      "hole": "C36-R35",
+      "column": 36,
+      "row": 35,
+      "x_mm": 92.79,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "J114",
+      "pin": "3",
+      "hole": "C37-R35",
+      "column": 37,
+      "row": 35,
+      "x_mm": 95.33,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 4
+    },
+    {
+      "ref": "BV4",
+      "pin": "1",
+      "hole": "C23-R35",
+      "column": 23,
+      "row": 35,
+      "x_mm": 59.77,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 4
+    },
+    {
+      "ref": "BG4",
+      "pin": "1",
+      "hole": "C25-R35",
+      "column": 25,
+      "row": 35,
+      "x_mm": 64.85,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 4
+    },
+    {
+      "ref": "R151",
+      "pin": "1",
+      "hole": "C41-R29",
+      "column": 41,
+      "row": 29,
+      "x_mm": 105.49,
+      "y_mm": 74.19,
+      "net": "/SERVO5_3V3",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R151",
+      "pin": "2",
+      "hole": "C45-R29",
+      "column": 45,
+      "row": 29,
+      "x_mm": 115.65,
+      "y_mm": 74.19,
+      "net": "Net-(Q111-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R152",
+      "pin": "1",
+      "hole": "C47-R24",
+      "column": 47,
+      "row": 24,
+      "x_mm": 120.73,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R152",
+      "pin": "2",
+      "hole": "C47-R28",
+      "column": 47,
+      "row": 28,
+      "x_mm": 120.73,
+      "y_mm": 71.65,
+      "net": "Net-(Q111-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R153",
+      "pin": "1",
+      "hole": "C50-R27",
+      "column": 50,
+      "row": 27,
+      "x_mm": 128.35,
+      "y_mm": 69.11,
+      "net": "Net-(Q111-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R153",
+      "pin": "2",
+      "hole": "C54-R27",
+      "column": 54,
+      "row": 27,
+      "x_mm": 138.51,
+      "y_mm": 69.11,
+      "net": "Net-(Q112-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R154",
+      "pin": "1",
+      "hole": "C55-R24",
+      "column": 55,
+      "row": 24,
+      "x_mm": 141.05,
+      "y_mm": 61.49,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R154",
+      "pin": "2",
+      "hole": "C55-R28",
+      "column": 55,
+      "row": 28,
+      "x_mm": 141.05,
+      "y_mm": 71.65,
+      "net": "Net-(Q112-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R155",
+      "pin": "1",
+      "hole": "C45-R31",
+      "column": 45,
+      "row": 31,
+      "x_mm": 115.65,
+      "y_mm": 79.27,
+      "net": "Net-(Q111-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R155",
+      "pin": "2",
+      "hole": "C45-R35",
+      "column": 45,
+      "row": 35,
+      "x_mm": 115.65,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R156",
+      "pin": "1",
+      "hole": "C51-R31",
+      "column": 51,
+      "row": 31,
+      "x_mm": 130.89,
+      "y_mm": 79.27,
+      "net": "Net-(Q112-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R156",
+      "pin": "2",
+      "hole": "C55-R31",
+      "column": 55,
+      "row": 31,
+      "x_mm": 141.05,
+      "y_mm": 79.27,
+      "net": "Net-(J115-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R157",
+      "pin": "1",
+      "hole": "C57-R31",
+      "column": 57,
+      "row": 31,
+      "x_mm": 146.13,
+      "y_mm": 79.27,
+      "net": "Net-(J115-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "R157",
+      "pin": "2",
+      "hole": "C57-R35",
+      "column": 57,
+      "row": 35,
+      "x_mm": 146.13,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q111",
+      "pin": "1",
+      "hole": "C47-R29",
+      "column": 47,
+      "row": 29,
+      "x_mm": 120.73,
+      "y_mm": 74.19,
+      "net": "Net-(Q111-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q111",
+      "pin": "2",
+      "hole": "C48-R29",
+      "column": 48,
+      "row": 29,
+      "x_mm": 123.27,
+      "y_mm": 74.19,
+      "net": "Net-(Q111-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q111",
+      "pin": "3",
+      "hole": "C49-R29",
+      "column": 49,
+      "row": 29,
+      "x_mm": 125.81,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q112",
+      "pin": "1",
+      "hole": "C55-R29",
+      "column": 55,
+      "row": 29,
+      "x_mm": 141.05,
+      "y_mm": 74.19,
+      "net": "Net-(Q112-C)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q112",
+      "pin": "2",
+      "hole": "C56-R29",
+      "column": 56,
+      "row": 29,
+      "x_mm": 143.59,
+      "y_mm": 74.19,
+      "net": "Net-(Q112-B)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "Q112",
+      "pin": "3",
+      "hole": "C57-R29",
+      "column": 57,
+      "row": 29,
+      "x_mm": 146.13,
+      "y_mm": 74.19,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "C106",
+      "pin": "1",
+      "hole": "C50-R33",
+      "column": 50,
+      "row": 33,
+      "x_mm": 128.35,
+      "y_mm": 84.35,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "C106",
+      "pin": "2",
+      "hole": "C51-R33",
+      "column": 51,
+      "row": 33,
+      "x_mm": 130.89,
+      "y_mm": 84.35,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "J115",
+      "pin": "1",
+      "hole": "C53-R35",
+      "column": 53,
+      "row": 35,
+      "x_mm": 135.97,
+      "y_mm": 89.43,
+      "net": "Net-(J115-Pin_1)",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "J115",
+      "pin": "2",
+      "hole": "C54-R35",
+      "column": 54,
+      "row": 35,
+      "x_mm": 138.51,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "J115",
+      "pin": "3",
+      "hole": "C55-R35",
+      "column": 55,
+      "row": 35,
+      "x_mm": 141.05,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": false,
+      "channel": 5
+    },
+    {
+      "ref": "BV5",
+      "pin": "1",
+      "hole": "C41-R35",
+      "column": 41,
+      "row": 35,
+      "x_mm": 105.49,
+      "y_mm": 89.43,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 5
+    },
+    {
+      "ref": "BG5",
+      "pin": "1",
+      "hole": "C43-R35",
+      "column": 43,
+      "row": 35,
+      "x_mm": 110.57,
+      "y_mm": 89.43,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": true,
+      "anchor": true,
+      "channel": 5
+    }
+  ],
+  "wires": [
+    {
+      "id": "W001",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "J102",
+      "from_pin": "1",
+      "from_hole": "C20-R04",
+      "to_ref": "BV0",
+      "to_pin": "1",
+      "to_hole": "C05-R22",
+      "straight_mm": 59.5,
+      "cut_hint_mm": 80,
+      "points_mm": [
+        [
+          52.15,
+          10.69
+        ],
+        [
+          14.05,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W002",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "BV0",
+      "from_pin": "1",
+      "from_hole": "C05-R22",
+      "to_ref": "J110",
+      "to_pin": "2",
+      "to_hole": "C18-R22",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          14.05,
+          56.41
+        ],
+        [
+          47.07,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W003",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "J102",
+      "from_pin": "1",
+      "from_hole": "C20-R04",
+      "to_ref": "C100",
+      "to_pin": "1",
+      "to_hole": "C26-R07",
+      "straight_mm": 17.0,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          52.15,
+          10.69
+        ],
+        [
+          67.39,
+          18.31
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W004",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J102",
+      "from_pin": "2",
+      "from_hole": "C18-R04",
+      "to_ref": "BG0",
+      "to_pin": "1",
+      "to_hole": "C07-R22",
+      "straight_mm": 53.6,
+      "cut_hint_mm": 75,
+      "points_mm": [
+        [
+          47.07,
+          10.69
+        ],
+        [
+          19.13,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W005",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "BG0",
+      "from_pin": "1",
+      "from_hole": "C07-R22",
+      "to_ref": "J110",
+      "to_pin": "3",
+      "to_hole": "C19-R22",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          19.13,
+          56.41
+        ],
+        [
+          49.61,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W006",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J102",
+      "from_pin": "2",
+      "from_hole": "C18-R04",
+      "to_ref": "C100",
+      "to_pin": "2",
+      "to_hole": "C28-R07",
+      "straight_mm": 26.5,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          47.07,
+          10.69
+        ],
+        [
+          72.47,
+          18.31
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W007",
+      "net": "/SERVO0_3V3",
+      "group": "channel-0",
+      "from_ref": "J101",
+      "from_pin": "1",
+      "from_hole": "C07-R04",
+      "to_ref": "R101",
+      "to_pin": "1",
+      "to_hole": "C05-R16",
+      "straight_mm": 30.9,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          19.13,
+          10.69
+        ],
+        [
+          14.05,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W008",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "J110",
+      "from_pin": "2",
+      "from_hole": "C18-R22",
+      "to_ref": "C101",
+      "to_pin": "1",
+      "to_hole": "C14-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          47.07,
+          56.41
+        ],
+        [
+          36.91,
+          51.33
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W009",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "J102",
+      "from_pin": "1",
+      "from_hole": "C20-R04",
+      "to_ref": "R104",
+      "to_pin": "1",
+      "to_hole": "C19-R11",
+      "straight_mm": 18.0,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          52.15,
+          10.69
+        ],
+        [
+          49.61,
+          28.47
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W010",
+      "net": "/SERVO_VS",
+      "group": "initial-power",
+      "from_ref": "R104",
+      "from_pin": "1",
+      "from_hole": "C19-R11",
+      "to_ref": "R102",
+      "to_pin": "1",
+      "to_hole": "C11-R11",
+      "straight_mm": 20.3,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          49.61,
+          28.47
+        ],
+        [
+          29.29,
+          28.47
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W011",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "2",
+      "from_hole": "C08-R04",
+      "to_ref": "J101",
+      "to_pin": "4",
+      "to_hole": "C08-R05",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          21.67,
+          10.69
+        ],
+        [
+          21.67,
+          13.23
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W012",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "4",
+      "from_hole": "C08-R05",
+      "to_ref": "J101",
+      "to_pin": "6",
+      "to_hole": "C08-R06",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          21.67,
+          13.23
+        ],
+        [
+          21.67,
+          15.77
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W013",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "6",
+      "from_hole": "C08-R06",
+      "to_ref": "J101",
+      "to_pin": "8",
+      "to_hole": "C08-R07",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          21.67,
+          15.77
+        ],
+        [
+          21.67,
+          18.31
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W014",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "8",
+      "from_hole": "C08-R07",
+      "to_ref": "J101",
+      "to_pin": "10",
+      "to_hole": "C08-R08",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          21.67,
+          18.31
+        ],
+        [
+          21.67,
+          20.85
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W015",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "10",
+      "from_hole": "C08-R08",
+      "to_ref": "J101",
+      "to_pin": "12",
+      "to_hole": "C08-R09",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          21.67,
+          20.85
+        ],
+        [
+          21.67,
+          23.39
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W016",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J101",
+      "from_pin": "2",
+      "from_hole": "C08-R04",
+      "to_ref": "TP102",
+      "to_pin": "1",
+      "to_hole": "C14-R04",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          21.67,
+          10.69
+        ],
+        [
+          36.91,
+          10.69
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W017",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "TP102",
+      "from_pin": "1",
+      "from_hole": "C14-R04",
+      "to_ref": "J102",
+      "to_pin": "2",
+      "to_hole": "C18-R04",
+      "straight_mm": 10.2,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          36.91,
+          10.69
+        ],
+        [
+          47.07,
+          10.69
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W018",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J110",
+      "from_pin": "3",
+      "from_hole": "C19-R22",
+      "to_ref": "R107",
+      "to_pin": "2",
+      "to_hole": "C21-R22",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          49.61,
+          56.41
+        ],
+        [
+          54.69,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W019",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "J110",
+      "from_pin": "3",
+      "from_hole": "C19-R22",
+      "to_ref": "C101",
+      "to_pin": "2",
+      "to_hole": "C15-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          56.41
+        ],
+        [
+          39.45,
+          51.33
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W020",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "C101",
+      "from_pin": "2",
+      "from_hole": "C15-R20",
+      "to_ref": "Q101",
+      "to_pin": "3",
+      "to_hole": "C13-R16",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          39.45,
+          51.33
+        ],
+        [
+          34.37,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W021",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "R107",
+      "from_pin": "2",
+      "from_hole": "C21-R22",
+      "to_ref": "Q102",
+      "to_pin": "3",
+      "to_hole": "C21-R16",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          54.69,
+          56.41
+        ],
+        [
+          54.69,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W022",
+      "net": "GND",
+      "group": "initial-power",
+      "from_ref": "C101",
+      "from_pin": "2",
+      "from_hole": "C15-R20",
+      "to_ref": "R105",
+      "to_pin": "2",
+      "to_hole": "C09-R22",
+      "straight_mm": 16.1,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          39.45,
+          51.33
+        ],
+        [
+          24.21,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W023",
+      "net": "Net-(J110-Pin_1)",
+      "group": "channel-0",
+      "from_ref": "TP101",
+      "from_pin": "1",
+      "from_hole": "C22-R22",
+      "to_ref": "R107",
+      "to_pin": "1",
+      "to_hole": "C21-R18",
+      "straight_mm": 10.5,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          57.23,
+          56.41
+        ],
+        [
+          54.69,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W024",
+      "net": "Net-(J110-Pin_1)",
+      "group": "channel-0",
+      "from_ref": "R107",
+      "from_pin": "1",
+      "from_hole": "C21-R18",
+      "to_ref": "R106",
+      "to_pin": "2",
+      "to_hole": "C19-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          54.69,
+          46.25
+        ],
+        [
+          49.61,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W025",
+      "net": "Net-(J110-Pin_1)",
+      "group": "channel-0",
+      "from_ref": "R106",
+      "from_pin": "2",
+      "from_hole": "C19-R18",
+      "to_ref": "J110",
+      "to_pin": "1",
+      "to_hole": "C17-R22",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          46.25
+        ],
+        [
+          44.53,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W026",
+      "net": "Net-(Q101-B)",
+      "group": "channel-0",
+      "from_ref": "R101",
+      "from_pin": "2",
+      "from_hole": "C09-R16",
+      "to_ref": "R105",
+      "to_pin": "1",
+      "to_hole": "C09-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          24.21,
+          41.17
+        ],
+        [
+          24.21,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W027",
+      "net": "Net-(Q101-B)",
+      "group": "channel-0",
+      "from_ref": "R101",
+      "from_pin": "2",
+      "from_hole": "C09-R16",
+      "to_ref": "Q101",
+      "to_pin": "2",
+      "to_hole": "C12-R16",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          24.21,
+          41.17
+        ],
+        [
+          31.83,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W028",
+      "net": "Net-(Q101-C)",
+      "group": "channel-0",
+      "from_ref": "R102",
+      "from_pin": "2",
+      "from_hole": "C11-R15",
+      "to_ref": "Q101",
+      "to_pin": "1",
+      "to_hole": "C11-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          29.29,
+          38.63
+        ],
+        [
+          29.29,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W029",
+      "net": "Net-(Q101-C)",
+      "group": "channel-0",
+      "from_ref": "R102",
+      "from_pin": "2",
+      "from_hole": "C11-R15",
+      "to_ref": "R103",
+      "to_pin": "1",
+      "to_hole": "C14-R14",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          29.29,
+          38.63
+        ],
+        [
+          36.91,
+          36.09
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W030",
+      "net": "Net-(Q102-B)",
+      "group": "channel-0",
+      "from_ref": "R103",
+      "from_pin": "2",
+      "from_hole": "C18-R14",
+      "to_ref": "Q102",
+      "to_pin": "2",
+      "to_hole": "C20-R16",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          47.07,
+          36.09
+        ],
+        [
+          52.15,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W031",
+      "net": "Net-(Q102-C)",
+      "group": "channel-0",
+      "from_ref": "R104",
+      "from_pin": "2",
+      "from_hole": "C19-R15",
+      "to_ref": "Q102",
+      "to_pin": "1",
+      "to_hole": "C19-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          49.61,
+          38.63
+        ],
+        [
+          49.61,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W032",
+      "net": "Net-(Q102-C)",
+      "group": "channel-0",
+      "from_ref": "Q102",
+      "from_pin": "1",
+      "from_hole": "C19-R16",
+      "to_ref": "R106",
+      "to_pin": "1",
+      "to_hole": "C15-R18",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          41.17
+        ],
+        [
+          39.45,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W033",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV0",
+      "from_pin": "1",
+      "from_hole": "C05-R22",
+      "to_ref": "BV1",
+      "to_pin": "1",
+      "to_hole": "C23-R22",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          14.05,
+          56.41
+        ],
+        [
+          59.77,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W034",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV1",
+      "from_pin": "1",
+      "from_hole": "C23-R22",
+      "to_ref": "BV2",
+      "to_pin": "1",
+      "to_hole": "C41-R22",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          59.77,
+          56.41
+        ],
+        [
+          105.49,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W035",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV2",
+      "from_pin": "1",
+      "from_hole": "C41-R22",
+      "to_ref": "BV5",
+      "to_pin": "1",
+      "to_hole": "C41-R35",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          105.49,
+          56.41
+        ],
+        [
+          105.49,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W036",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV5",
+      "from_pin": "1",
+      "from_hole": "C41-R35",
+      "to_ref": "BV4",
+      "to_pin": "1",
+      "to_hole": "C23-R35",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          105.49,
+          89.43
+        ],
+        [
+          59.77,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W037",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV4",
+      "from_pin": "1",
+      "from_hole": "C23-R35",
+      "to_ref": "BV3",
+      "to_pin": "1",
+      "to_hole": "C05-R35",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          59.77,
+          89.43
+        ],
+        [
+          14.05,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W038",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV1",
+      "from_pin": "1",
+      "from_hole": "C23-R22",
+      "to_ref": "J111",
+      "to_pin": "2",
+      "to_hole": "C36-R22",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          59.77,
+          56.41
+        ],
+        [
+          92.79,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W039",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV2",
+      "from_pin": "1",
+      "from_hole": "C41-R22",
+      "to_ref": "J112",
+      "to_pin": "2",
+      "to_hole": "C54-R22",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          105.49,
+          56.41
+        ],
+        [
+          138.51,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W040",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV3",
+      "from_pin": "1",
+      "from_hole": "C05-R35",
+      "to_ref": "J113",
+      "to_pin": "2",
+      "to_hole": "C18-R35",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          14.05,
+          89.43
+        ],
+        [
+          47.07,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W041",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV4",
+      "from_pin": "1",
+      "from_hole": "C23-R35",
+      "to_ref": "J114",
+      "to_pin": "2",
+      "to_hole": "C36-R35",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          59.77,
+          89.43
+        ],
+        [
+          92.79,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W042",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "BV5",
+      "from_pin": "1",
+      "from_hole": "C41-R35",
+      "to_ref": "J115",
+      "to_pin": "2",
+      "to_hole": "C54-R35",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          105.49,
+          89.43
+        ],
+        [
+          138.51,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W043",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG0",
+      "from_pin": "1",
+      "from_hole": "C07-R22",
+      "to_ref": "BG1",
+      "to_pin": "1",
+      "to_hole": "C25-R22",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          19.13,
+          56.41
+        ],
+        [
+          64.85,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W044",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG1",
+      "from_pin": "1",
+      "from_hole": "C25-R22",
+      "to_ref": "BG2",
+      "to_pin": "1",
+      "to_hole": "C43-R22",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          64.85,
+          56.41
+        ],
+        [
+          110.57,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W045",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG2",
+      "from_pin": "1",
+      "from_hole": "C43-R22",
+      "to_ref": "BG5",
+      "to_pin": "1",
+      "to_hole": "C43-R35",
+      "straight_mm": 33.0,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          110.57,
+          56.41
+        ],
+        [
+          110.57,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W046",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG5",
+      "from_pin": "1",
+      "from_hole": "C43-R35",
+      "to_ref": "BG4",
+      "to_pin": "1",
+      "to_hole": "C25-R35",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          110.57,
+          89.43
+        ],
+        [
+          64.85,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W047",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG4",
+      "from_pin": "1",
+      "from_hole": "C25-R35",
+      "to_ref": "BG3",
+      "to_pin": "1",
+      "to_hole": "C07-R35",
+      "straight_mm": 45.7,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          64.85,
+          89.43
+        ],
+        [
+          19.13,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W048",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG1",
+      "from_pin": "1",
+      "from_hole": "C25-R22",
+      "to_ref": "J111",
+      "to_pin": "3",
+      "to_hole": "C37-R22",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          64.85,
+          56.41
+        ],
+        [
+          95.33,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W049",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG2",
+      "from_pin": "1",
+      "from_hole": "C43-R22",
+      "to_ref": "J112",
+      "to_pin": "3",
+      "to_hole": "C55-R22",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          110.57,
+          56.41
+        ],
+        [
+          141.05,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W050",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG3",
+      "from_pin": "1",
+      "from_hole": "C07-R35",
+      "to_ref": "J113",
+      "to_pin": "3",
+      "to_hole": "C19-R35",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          19.13,
+          89.43
+        ],
+        [
+          49.61,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W051",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG4",
+      "from_pin": "1",
+      "from_hole": "C25-R35",
+      "to_ref": "J114",
+      "to_pin": "3",
+      "to_hole": "C37-R35",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          64.85,
+          89.43
+        ],
+        [
+          95.33,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W052",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG5",
+      "from_pin": "1",
+      "from_hole": "C43-R35",
+      "to_ref": "J115",
+      "to_pin": "3",
+      "to_hole": "C55-R35",
+      "straight_mm": 30.5,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          110.57,
+          89.43
+        ],
+        [
+          141.05,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "load"
+    },
+    {
+      "id": "W053",
+      "net": "/SERVO1_3V3",
+      "group": "channel-1",
+      "from_ref": "J101",
+      "from_pin": "3",
+      "from_hole": "C07-R05",
+      "to_ref": "R111",
+      "to_pin": "1",
+      "to_hole": "C23-R16",
+      "straight_mm": 49.3,
+      "cut_hint_mm": 70,
+      "points_mm": [
+        [
+          19.13,
+          13.23
+        ],
+        [
+          59.77,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W054",
+      "net": "/SERVO2_3V3",
+      "group": "channel-2",
+      "from_ref": "J101",
+      "from_pin": "5",
+      "from_hole": "C07-R06",
+      "to_ref": "R121",
+      "to_pin": "1",
+      "to_hole": "C41-R16",
+      "straight_mm": 90.0,
+      "cut_hint_mm": 115,
+      "points_mm": [
+        [
+          19.13,
+          15.77
+        ],
+        [
+          105.49,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W055",
+      "net": "/SERVO3_3V3",
+      "group": "channel-3",
+      "from_ref": "J101",
+      "from_pin": "7",
+      "from_hole": "C07-R07",
+      "to_ref": "R131",
+      "to_pin": "1",
+      "to_hole": "C05-R29",
+      "straight_mm": 56.1,
+      "cut_hint_mm": 80,
+      "points_mm": [
+        [
+          19.13,
+          18.31
+        ],
+        [
+          14.05,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W056",
+      "net": "/SERVO4_3V3",
+      "group": "channel-4",
+      "from_ref": "J101",
+      "from_pin": "9",
+      "from_hole": "C07-R08",
+      "to_ref": "R141",
+      "to_pin": "1",
+      "to_hole": "C23-R29",
+      "straight_mm": 67.1,
+      "cut_hint_mm": 90,
+      "points_mm": [
+        [
+          19.13,
+          20.85
+        ],
+        [
+          59.77,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W057",
+      "net": "/SERVO5_3V3",
+      "group": "channel-5",
+      "from_ref": "J101",
+      "from_pin": "11",
+      "from_hole": "C07-R09",
+      "to_ref": "R151",
+      "to_pin": "1",
+      "to_hole": "C41-R29",
+      "straight_mm": 100.2,
+      "cut_hint_mm": 125,
+      "points_mm": [
+        [
+          19.13,
+          23.39
+        ],
+        [
+          105.49,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W058",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J111",
+      "from_pin": "2",
+      "from_hole": "C36-R22",
+      "to_ref": "R144",
+      "to_pin": "1",
+      "to_hole": "C37-R24",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          92.79,
+          56.41
+        ],
+        [
+          95.33,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W059",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J110",
+      "from_pin": "2",
+      "from_hole": "C18-R22",
+      "to_ref": "R134",
+      "to_pin": "1",
+      "to_hole": "C19-R24",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          47.07,
+          56.41
+        ],
+        [
+          49.61,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W060",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J112",
+      "from_pin": "2",
+      "from_hole": "C54-R22",
+      "to_ref": "R154",
+      "to_pin": "1",
+      "to_hole": "C55-R24",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          138.51,
+          56.41
+        ],
+        [
+          141.05,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W061",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J112",
+      "from_pin": "2",
+      "from_hole": "C54-R22",
+      "to_ref": "C103",
+      "to_pin": "1",
+      "to_hole": "C50-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          138.51,
+          56.41
+        ],
+        [
+          128.35,
+          51.33
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W062",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J115",
+      "from_pin": "2",
+      "from_hole": "C54-R35",
+      "to_ref": "C106",
+      "to_pin": "1",
+      "to_hole": "C50-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          138.51,
+          89.43
+        ],
+        [
+          128.35,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W063",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J113",
+      "from_pin": "2",
+      "from_hole": "C18-R35",
+      "to_ref": "C104",
+      "to_pin": "1",
+      "to_hole": "C14-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          47.07,
+          89.43
+        ],
+        [
+          36.91,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W064",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J111",
+      "from_pin": "2",
+      "from_hole": "C36-R22",
+      "to_ref": "C102",
+      "to_pin": "1",
+      "to_hole": "C32-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          92.79,
+          56.41
+        ],
+        [
+          82.63,
+          51.33
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W065",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "J114",
+      "from_pin": "2",
+      "from_hole": "C36-R35",
+      "to_ref": "C105",
+      "to_pin": "1",
+      "to_hole": "C32-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          92.79,
+          89.43
+        ],
+        [
+          82.63,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W066",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "C102",
+      "from_pin": "1",
+      "from_hole": "C32-R20",
+      "to_ref": "R142",
+      "to_pin": "1",
+      "to_hole": "C29-R24",
+      "straight_mm": 12.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          82.63,
+          51.33
+        ],
+        [
+          75.01,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W067",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "C103",
+      "from_pin": "1",
+      "from_hole": "C50-R20",
+      "to_ref": "R152",
+      "to_pin": "1",
+      "to_hole": "C47-R24",
+      "straight_mm": 12.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          128.35,
+          51.33
+        ],
+        [
+          120.73,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W068",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "C101",
+      "from_pin": "1",
+      "from_hole": "C14-R20",
+      "to_ref": "R132",
+      "to_pin": "1",
+      "to_hole": "C11-R24",
+      "straight_mm": 12.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          36.91,
+          51.33
+        ],
+        [
+          29.29,
+          61.49
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W069",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "C100",
+      "from_pin": "1",
+      "from_hole": "C26-R07",
+      "to_ref": "R112",
+      "to_pin": "1",
+      "to_hole": "C29-R11",
+      "straight_mm": 12.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          67.39,
+          18.31
+        ],
+        [
+          75.01,
+          28.47
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W070",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "R112",
+      "from_pin": "1",
+      "from_hole": "C29-R11",
+      "to_ref": "R114",
+      "to_pin": "1",
+      "to_hole": "C37-R11",
+      "straight_mm": 20.3,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          75.01,
+          28.47
+        ],
+        [
+          95.33,
+          28.47
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W071",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "C103",
+      "from_pin": "1",
+      "from_hole": "C50-R20",
+      "to_ref": "R122",
+      "to_pin": "1",
+      "to_hole": "C47-R11",
+      "straight_mm": 24.1,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          128.35,
+          51.33
+        ],
+        [
+          120.73,
+          28.47
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W072",
+      "net": "/SERVO_VS",
+      "group": "expansion-power",
+      "from_ref": "R122",
+      "from_pin": "1",
+      "from_hole": "C47-R11",
+      "to_ref": "R124",
+      "to_pin": "1",
+      "to_hole": "C55-R11",
+      "straight_mm": 20.3,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          120.73,
+          28.47
+        ],
+        [
+          141.05,
+          28.47
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W073",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J115",
+      "from_pin": "3",
+      "from_hole": "C55-R35",
+      "to_ref": "R157",
+      "to_pin": "2",
+      "to_hole": "C57-R35",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          141.05,
+          89.43
+        ],
+        [
+          146.13,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W074",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J112",
+      "from_pin": "3",
+      "from_hole": "C55-R22",
+      "to_ref": "R127",
+      "to_pin": "2",
+      "to_hole": "C57-R22",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          141.05,
+          56.41
+        ],
+        [
+          146.13,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W075",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J114",
+      "from_pin": "3",
+      "from_hole": "C37-R35",
+      "to_ref": "R147",
+      "to_pin": "2",
+      "to_hole": "C39-R35",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          95.33,
+          89.43
+        ],
+        [
+          100.41,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W076",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J113",
+      "from_pin": "3",
+      "from_hole": "C19-R35",
+      "to_ref": "R137",
+      "to_pin": "2",
+      "to_hole": "C21-R35",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          49.61,
+          89.43
+        ],
+        [
+          54.69,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W077",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J111",
+      "from_pin": "3",
+      "from_hole": "C37-R22",
+      "to_ref": "R117",
+      "to_pin": "2",
+      "to_hole": "C39-R22",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          95.33,
+          56.41
+        ],
+        [
+          100.41,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W078",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "BG3",
+      "from_pin": "1",
+      "from_hole": "C07-R35",
+      "to_ref": "R135",
+      "to_pin": "2",
+      "to_hole": "C09-R35",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          19.13,
+          89.43
+        ],
+        [
+          24.21,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W079",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J111",
+      "from_pin": "3",
+      "from_hole": "C37-R22",
+      "to_ref": "C102",
+      "to_pin": "2",
+      "to_hole": "C33-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          56.41
+        ],
+        [
+          85.17,
+          51.33
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W080",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "C102",
+      "from_pin": "2",
+      "from_hole": "C33-R20",
+      "to_ref": "Q103",
+      "to_pin": "3",
+      "to_hole": "C31-R16",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          85.17,
+          51.33
+        ],
+        [
+          80.09,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W081",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J114",
+      "from_pin": "3",
+      "from_hole": "C37-R35",
+      "to_ref": "C105",
+      "to_pin": "2",
+      "to_hole": "C33-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          89.43
+        ],
+        [
+          85.17,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W082",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "C105",
+      "from_pin": "2",
+      "from_hole": "C33-R33",
+      "to_ref": "Q109",
+      "to_pin": "3",
+      "to_hole": "C31-R29",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          85.17,
+          84.35
+        ],
+        [
+          80.09,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W083",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J113",
+      "from_pin": "3",
+      "from_hole": "C19-R35",
+      "to_ref": "C104",
+      "to_pin": "2",
+      "to_hole": "C15-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          89.43
+        ],
+        [
+          39.45,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W084",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "C104",
+      "from_pin": "2",
+      "from_hole": "C15-R33",
+      "to_ref": "Q107",
+      "to_pin": "3",
+      "to_hole": "C13-R29",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          39.45,
+          84.35
+        ],
+        [
+          34.37,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W085",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J112",
+      "from_pin": "3",
+      "from_hole": "C55-R22",
+      "to_ref": "C103",
+      "to_pin": "2",
+      "to_hole": "C51-R20",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          56.41
+        ],
+        [
+          130.89,
+          51.33
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W086",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "C103",
+      "from_pin": "2",
+      "from_hole": "C51-R20",
+      "to_ref": "Q105",
+      "to_pin": "3",
+      "to_hole": "C49-R16",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          130.89,
+          51.33
+        ],
+        [
+          125.81,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W087",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "J115",
+      "from_pin": "3",
+      "from_hole": "C55-R35",
+      "to_ref": "C106",
+      "to_pin": "2",
+      "to_hole": "C51-R33",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          89.43
+        ],
+        [
+          130.89,
+          84.35
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W088",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "C106",
+      "from_pin": "2",
+      "from_hole": "C51-R33",
+      "to_ref": "Q111",
+      "to_pin": "3",
+      "to_hole": "C49-R29",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          130.89,
+          84.35
+        ],
+        [
+          125.81,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W089",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R127",
+      "from_pin": "2",
+      "from_hole": "C57-R22",
+      "to_ref": "Q106",
+      "to_pin": "3",
+      "to_hole": "C57-R16",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          146.13,
+          56.41
+        ],
+        [
+          146.13,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W090",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R117",
+      "from_pin": "2",
+      "from_hole": "C39-R22",
+      "to_ref": "Q104",
+      "to_pin": "3",
+      "to_hole": "C39-R16",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          100.41,
+          56.41
+        ],
+        [
+          100.41,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W091",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R147",
+      "from_pin": "2",
+      "from_hole": "C39-R35",
+      "to_ref": "R155",
+      "to_pin": "2",
+      "to_hole": "C45-R35",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          100.41,
+          89.43
+        ],
+        [
+          115.65,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W092",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R147",
+      "from_pin": "2",
+      "from_hole": "C39-R35",
+      "to_ref": "Q110",
+      "to_pin": "3",
+      "to_hole": "C39-R29",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          100.41,
+          89.43
+        ],
+        [
+          100.41,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W093",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R107",
+      "from_pin": "2",
+      "from_hole": "C21-R22",
+      "to_ref": "R115",
+      "to_pin": "2",
+      "to_hole": "C27-R22",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          54.69,
+          56.41
+        ],
+        [
+          69.93,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W094",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R137",
+      "from_pin": "2",
+      "from_hole": "C21-R35",
+      "to_ref": "R145",
+      "to_pin": "2",
+      "to_hole": "C27-R35",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          54.69,
+          89.43
+        ],
+        [
+          69.93,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W095",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R137",
+      "from_pin": "2",
+      "from_hole": "C21-R35",
+      "to_ref": "Q108",
+      "to_pin": "3",
+      "to_hole": "C21-R29",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          54.69,
+          89.43
+        ],
+        [
+          54.69,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W096",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R157",
+      "from_pin": "2",
+      "from_hole": "C57-R35",
+      "to_ref": "Q112",
+      "to_pin": "3",
+      "to_hole": "C57-R29",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          146.13,
+          89.43
+        ],
+        [
+          146.13,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W097",
+      "net": "GND",
+      "group": "expansion-power",
+      "from_ref": "R117",
+      "from_pin": "2",
+      "from_hole": "C39-R22",
+      "to_ref": "R125",
+      "to_pin": "2",
+      "to_hole": "C45-R22",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          100.41,
+          56.41
+        ],
+        [
+          115.65,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W098",
+      "net": "Net-(J111-Pin_1)",
+      "group": "channel-1",
+      "from_ref": "R116",
+      "from_pin": "2",
+      "from_hole": "C37-R18",
+      "to_ref": "R117",
+      "to_pin": "1",
+      "to_hole": "C39-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          95.33,
+          46.25
+        ],
+        [
+          100.41,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W099",
+      "net": "Net-(J111-Pin_1)",
+      "group": "channel-1",
+      "from_ref": "R116",
+      "from_pin": "2",
+      "from_hole": "C37-R18",
+      "to_ref": "J111",
+      "to_pin": "1",
+      "to_hole": "C35-R22",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          46.25
+        ],
+        [
+          90.25,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W100",
+      "net": "Net-(J112-Pin_1)",
+      "group": "channel-2",
+      "from_ref": "R126",
+      "from_pin": "2",
+      "from_hole": "C55-R18",
+      "to_ref": "R127",
+      "to_pin": "1",
+      "to_hole": "C57-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          141.05,
+          46.25
+        ],
+        [
+          146.13,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W101",
+      "net": "Net-(J112-Pin_1)",
+      "group": "channel-2",
+      "from_ref": "R126",
+      "from_pin": "2",
+      "from_hole": "C55-R18",
+      "to_ref": "J112",
+      "to_pin": "1",
+      "to_hole": "C53-R22",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          46.25
+        ],
+        [
+          135.97,
+          56.41
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W102",
+      "net": "Net-(J113-Pin_1)",
+      "group": "channel-3",
+      "from_ref": "R136",
+      "from_pin": "2",
+      "from_hole": "C19-R31",
+      "to_ref": "R137",
+      "to_pin": "1",
+      "to_hole": "C21-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          49.61,
+          79.27
+        ],
+        [
+          54.69,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W103",
+      "net": "Net-(J113-Pin_1)",
+      "group": "channel-3",
+      "from_ref": "R136",
+      "from_pin": "2",
+      "from_hole": "C19-R31",
+      "to_ref": "J113",
+      "to_pin": "1",
+      "to_hole": "C17-R35",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          79.27
+        ],
+        [
+          44.53,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W104",
+      "net": "Net-(J114-Pin_1)",
+      "group": "channel-4",
+      "from_ref": "R146",
+      "from_pin": "2",
+      "from_hole": "C37-R31",
+      "to_ref": "R147",
+      "to_pin": "1",
+      "to_hole": "C39-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          95.33,
+          79.27
+        ],
+        [
+          100.41,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W105",
+      "net": "Net-(J114-Pin_1)",
+      "group": "channel-4",
+      "from_ref": "R146",
+      "from_pin": "2",
+      "from_hole": "C37-R31",
+      "to_ref": "J114",
+      "to_pin": "1",
+      "to_hole": "C35-R35",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          79.27
+        ],
+        [
+          90.25,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W106",
+      "net": "Net-(J115-Pin_1)",
+      "group": "channel-5",
+      "from_ref": "R156",
+      "from_pin": "2",
+      "from_hole": "C55-R31",
+      "to_ref": "R157",
+      "to_pin": "1",
+      "to_hole": "C57-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          141.05,
+          79.27
+        ],
+        [
+          146.13,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W107",
+      "net": "Net-(J115-Pin_1)",
+      "group": "channel-5",
+      "from_ref": "R156",
+      "from_pin": "2",
+      "from_hole": "C55-R31",
+      "to_ref": "J115",
+      "to_pin": "1",
+      "to_hole": "C53-R35",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          79.27
+        ],
+        [
+          135.97,
+          89.43
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W108",
+      "net": "Net-(Q103-B)",
+      "group": "channel-1",
+      "from_ref": "R111",
+      "from_pin": "2",
+      "from_hole": "C27-R16",
+      "to_ref": "R115",
+      "to_pin": "1",
+      "to_hole": "C27-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          69.93,
+          41.17
+        ],
+        [
+          69.93,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W109",
+      "net": "Net-(Q103-B)",
+      "group": "channel-1",
+      "from_ref": "R111",
+      "from_pin": "2",
+      "from_hole": "C27-R16",
+      "to_ref": "Q103",
+      "to_pin": "2",
+      "to_hole": "C30-R16",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          69.93,
+          41.17
+        ],
+        [
+          77.55,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W110",
+      "net": "Net-(Q103-C)",
+      "group": "channel-1",
+      "from_ref": "R112",
+      "from_pin": "2",
+      "from_hole": "C29-R15",
+      "to_ref": "Q103",
+      "to_pin": "1",
+      "to_hole": "C29-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          75.01,
+          38.63
+        ],
+        [
+          75.01,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W111",
+      "net": "Net-(Q103-C)",
+      "group": "channel-1",
+      "from_ref": "R112",
+      "from_pin": "2",
+      "from_hole": "C29-R15",
+      "to_ref": "R113",
+      "to_pin": "1",
+      "to_hole": "C32-R14",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          75.01,
+          38.63
+        ],
+        [
+          82.63,
+          36.09
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W112",
+      "net": "Net-(Q104-B)",
+      "group": "channel-1",
+      "from_ref": "R113",
+      "from_pin": "2",
+      "from_hole": "C36-R14",
+      "to_ref": "Q104",
+      "to_pin": "2",
+      "to_hole": "C38-R16",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          92.79,
+          36.09
+        ],
+        [
+          97.87,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W113",
+      "net": "Net-(Q104-C)",
+      "group": "channel-1",
+      "from_ref": "R114",
+      "from_pin": "2",
+      "from_hole": "C37-R15",
+      "to_ref": "Q104",
+      "to_pin": "1",
+      "to_hole": "C37-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          95.33,
+          38.63
+        ],
+        [
+          95.33,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W114",
+      "net": "Net-(Q104-C)",
+      "group": "channel-1",
+      "from_ref": "Q104",
+      "from_pin": "1",
+      "from_hole": "C37-R16",
+      "to_ref": "R116",
+      "to_pin": "1",
+      "to_hole": "C33-R18",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          41.17
+        ],
+        [
+          85.17,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W115",
+      "net": "Net-(Q105-B)",
+      "group": "channel-2",
+      "from_ref": "R121",
+      "from_pin": "2",
+      "from_hole": "C45-R16",
+      "to_ref": "R125",
+      "to_pin": "1",
+      "to_hole": "C45-R18",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          115.65,
+          41.17
+        ],
+        [
+          115.65,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W116",
+      "net": "Net-(Q105-B)",
+      "group": "channel-2",
+      "from_ref": "R121",
+      "from_pin": "2",
+      "from_hole": "C45-R16",
+      "to_ref": "Q105",
+      "to_pin": "2",
+      "to_hole": "C48-R16",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          115.65,
+          41.17
+        ],
+        [
+          123.27,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W117",
+      "net": "Net-(Q105-C)",
+      "group": "channel-2",
+      "from_ref": "R122",
+      "from_pin": "2",
+      "from_hole": "C47-R15",
+      "to_ref": "Q105",
+      "to_pin": "1",
+      "to_hole": "C47-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          120.73,
+          38.63
+        ],
+        [
+          120.73,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W118",
+      "net": "Net-(Q105-C)",
+      "group": "channel-2",
+      "from_ref": "R122",
+      "from_pin": "2",
+      "from_hole": "C47-R15",
+      "to_ref": "R123",
+      "to_pin": "1",
+      "to_hole": "C50-R14",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          120.73,
+          38.63
+        ],
+        [
+          128.35,
+          36.09
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W119",
+      "net": "Net-(Q106-B)",
+      "group": "channel-2",
+      "from_ref": "R123",
+      "from_pin": "2",
+      "from_hole": "C54-R14",
+      "to_ref": "Q106",
+      "to_pin": "2",
+      "to_hole": "C56-R16",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          138.51,
+          36.09
+        ],
+        [
+          143.59,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W120",
+      "net": "Net-(Q106-C)",
+      "group": "channel-2",
+      "from_ref": "R124",
+      "from_pin": "2",
+      "from_hole": "C55-R15",
+      "to_ref": "Q106",
+      "to_pin": "1",
+      "to_hole": "C55-R16",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          141.05,
+          38.63
+        ],
+        [
+          141.05,
+          41.17
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W121",
+      "net": "Net-(Q106-C)",
+      "group": "channel-2",
+      "from_ref": "Q106",
+      "from_pin": "1",
+      "from_hole": "C55-R16",
+      "to_ref": "R126",
+      "to_pin": "1",
+      "to_hole": "C51-R18",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          41.17
+        ],
+        [
+          130.89,
+          46.25
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W122",
+      "net": "Net-(Q107-B)",
+      "group": "channel-3",
+      "from_ref": "R131",
+      "from_pin": "2",
+      "from_hole": "C09-R29",
+      "to_ref": "R135",
+      "to_pin": "1",
+      "to_hole": "C09-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          24.21,
+          74.19
+        ],
+        [
+          24.21,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W123",
+      "net": "Net-(Q107-B)",
+      "group": "channel-3",
+      "from_ref": "R131",
+      "from_pin": "2",
+      "from_hole": "C09-R29",
+      "to_ref": "Q107",
+      "to_pin": "2",
+      "to_hole": "C12-R29",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          24.21,
+          74.19
+        ],
+        [
+          31.83,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W124",
+      "net": "Net-(Q107-C)",
+      "group": "channel-3",
+      "from_ref": "R132",
+      "from_pin": "2",
+      "from_hole": "C11-R28",
+      "to_ref": "Q107",
+      "to_pin": "1",
+      "to_hole": "C11-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          29.29,
+          71.65
+        ],
+        [
+          29.29,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W125",
+      "net": "Net-(Q107-C)",
+      "group": "channel-3",
+      "from_ref": "R132",
+      "from_pin": "2",
+      "from_hole": "C11-R28",
+      "to_ref": "R133",
+      "to_pin": "1",
+      "to_hole": "C14-R27",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          29.29,
+          71.65
+        ],
+        [
+          36.91,
+          69.11
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W126",
+      "net": "Net-(Q108-B)",
+      "group": "channel-3",
+      "from_ref": "R133",
+      "from_pin": "2",
+      "from_hole": "C18-R27",
+      "to_ref": "Q108",
+      "to_pin": "2",
+      "to_hole": "C20-R29",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          47.07,
+          69.11
+        ],
+        [
+          52.15,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W127",
+      "net": "Net-(Q108-C)",
+      "group": "channel-3",
+      "from_ref": "R134",
+      "from_pin": "2",
+      "from_hole": "C19-R28",
+      "to_ref": "Q108",
+      "to_pin": "1",
+      "to_hole": "C19-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          49.61,
+          71.65
+        ],
+        [
+          49.61,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W128",
+      "net": "Net-(Q108-C)",
+      "group": "channel-3",
+      "from_ref": "Q108",
+      "from_pin": "1",
+      "from_hole": "C19-R29",
+      "to_ref": "R136",
+      "to_pin": "1",
+      "to_hole": "C15-R31",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          74.19
+        ],
+        [
+          39.45,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W129",
+      "net": "Net-(Q109-B)",
+      "group": "channel-4",
+      "from_ref": "R141",
+      "from_pin": "2",
+      "from_hole": "C27-R29",
+      "to_ref": "R145",
+      "to_pin": "1",
+      "to_hole": "C27-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          69.93,
+          74.19
+        ],
+        [
+          69.93,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W130",
+      "net": "Net-(Q109-B)",
+      "group": "channel-4",
+      "from_ref": "R141",
+      "from_pin": "2",
+      "from_hole": "C27-R29",
+      "to_ref": "Q109",
+      "to_pin": "2",
+      "to_hole": "C30-R29",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          69.93,
+          74.19
+        ],
+        [
+          77.55,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W131",
+      "net": "Net-(Q109-C)",
+      "group": "channel-4",
+      "from_ref": "R142",
+      "from_pin": "2",
+      "from_hole": "C29-R28",
+      "to_ref": "Q109",
+      "to_pin": "1",
+      "to_hole": "C29-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          75.01,
+          71.65
+        ],
+        [
+          75.01,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W132",
+      "net": "Net-(Q109-C)",
+      "group": "channel-4",
+      "from_ref": "R142",
+      "from_pin": "2",
+      "from_hole": "C29-R28",
+      "to_ref": "R143",
+      "to_pin": "1",
+      "to_hole": "C32-R27",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          75.01,
+          71.65
+        ],
+        [
+          82.63,
+          69.11
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W133",
+      "net": "Net-(Q110-B)",
+      "group": "channel-4",
+      "from_ref": "R143",
+      "from_pin": "2",
+      "from_hole": "C36-R27",
+      "to_ref": "Q110",
+      "to_pin": "2",
+      "to_hole": "C38-R29",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          92.79,
+          69.11
+        ],
+        [
+          97.87,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W134",
+      "net": "Net-(Q110-C)",
+      "group": "channel-4",
+      "from_ref": "R144",
+      "from_pin": "2",
+      "from_hole": "C37-R28",
+      "to_ref": "Q110",
+      "to_pin": "1",
+      "to_hole": "C37-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          95.33,
+          71.65
+        ],
+        [
+          95.33,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W135",
+      "net": "Net-(Q110-C)",
+      "group": "channel-4",
+      "from_ref": "Q110",
+      "from_pin": "1",
+      "from_hole": "C37-R29",
+      "to_ref": "R146",
+      "to_pin": "1",
+      "to_hole": "C33-R31",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          95.33,
+          74.19
+        ],
+        [
+          85.17,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W136",
+      "net": "Net-(Q111-B)",
+      "group": "channel-5",
+      "from_ref": "R151",
+      "from_pin": "2",
+      "from_hole": "C45-R29",
+      "to_ref": "R155",
+      "to_pin": "1",
+      "to_hole": "C45-R31",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          115.65,
+          74.19
+        ],
+        [
+          115.65,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W137",
+      "net": "Net-(Q111-B)",
+      "group": "channel-5",
+      "from_ref": "R151",
+      "from_pin": "2",
+      "from_hole": "C45-R29",
+      "to_ref": "Q111",
+      "to_pin": "2",
+      "to_hole": "C48-R29",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          115.65,
+          74.19
+        ],
+        [
+          123.27,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W138",
+      "net": "Net-(Q111-C)",
+      "group": "channel-5",
+      "from_ref": "R152",
+      "from_pin": "2",
+      "from_hole": "C47-R28",
+      "to_ref": "Q111",
+      "to_pin": "1",
+      "to_hole": "C47-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          120.73,
+          71.65
+        ],
+        [
+          120.73,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W139",
+      "net": "Net-(Q111-C)",
+      "group": "channel-5",
+      "from_ref": "R152",
+      "from_pin": "2",
+      "from_hole": "C47-R28",
+      "to_ref": "R153",
+      "to_pin": "1",
+      "to_hole": "C50-R27",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          120.73,
+          71.65
+        ],
+        [
+          128.35,
+          69.11
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W140",
+      "net": "Net-(Q112-B)",
+      "group": "channel-5",
+      "from_ref": "R153",
+      "from_pin": "2",
+      "from_hole": "C54-R27",
+      "to_ref": "Q112",
+      "to_pin": "2",
+      "to_hole": "C56-R29",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          138.51,
+          69.11
+        ],
+        [
+          143.59,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W141",
+      "net": "Net-(Q112-C)",
+      "group": "channel-5",
+      "from_ref": "R154",
+      "from_pin": "2",
+      "from_hole": "C55-R28",
+      "to_ref": "Q112",
+      "to_pin": "1",
+      "to_hole": "C55-R29",
+      "straight_mm": 2.5,
+      "cut_hint_mm": 25,
+      "points_mm": [
+        [
+          141.05,
+          71.65
+        ],
+        [
+          141.05,
+          74.19
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    },
+    {
+      "id": "W142",
+      "net": "Net-(Q112-C)",
+      "group": "channel-5",
+      "from_ref": "Q112",
+      "from_pin": "1",
+      "from_hole": "C55-R29",
+      "to_ref": "R156",
+      "to_pin": "1",
+      "to_hole": "C51-R31",
+      "straight_mm": 11.4,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          141.05,
+          74.19
+        ],
+        [
+          130.89,
+          79.27
+        ]
+      ],
+      "dnp": true,
+      "role": "logic"
+    }
+  ],
+  "mounts": [
+    {
+      "name": "M1",
+      "hole": "C03-R03",
+      "x_mm": 8.97,
+      "y_mm": 8.15,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M2",
+      "hole": "C59-R03",
+      "x_mm": 151.20999999999998,
+      "y_mm": 8.15,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M3",
+      "hole": "C03-R36",
+      "x_mm": 8.97,
+      "y_mm": 91.97,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M4",
+      "hole": "C59-R36",
+      "x_mm": 151.20999999999998,
+      "y_mm": 91.97,
+      "drill_mm": 3.2,
+      "optional": true
+    }
+  ],
+  "source_netlist_sha256": "2735384cc9479db04049c0590dc0e1a09536a58a69cbc8ba97c58ae38dd41517",
+  "source_schematic_sha256": "783754809564d4a5da17f8de9e034409e3673b4ceb2355a6d302d317600d75a8",
+  "owner_capacitor": {
+    "ref": "C100",
+    "diameter_mm": 10,
+    "height_mm": 20,
+    "lead_pitch_mm": 5.0,
+    "formed_pitch_mm": 5.08
+  },
+  "notes": [
+    "71 schematic components plus 12 unused-pad wire junctions, not additional electronic parts",
+    "Only channel0 is fitted initially; other 55 channel parts are DNP",
+    "Only initial wires are needed for one-servo build; expansion wires are not qualified for six servos",
+    "Native THT pad front rings are virtual; actual RE200-LF is single-sided",
+    "Dedicated load wires connect J102, bulk capacitor, bus anchors and servo supply pins; no motor current via IDC or resistor leads"
+  ]
+}

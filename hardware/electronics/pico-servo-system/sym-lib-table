@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "HexaRoam") (type "KiCad") (uri "${KIPRJMOD}/HexaRoam.kicad_sym") (options "") (descr "HexaRoam external shunt module"))
+)

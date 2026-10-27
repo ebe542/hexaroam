@@ -1,0 +1,18 @@
+Reference,Quantity,Item,Notes
+U1,1,Raspberry Pi Pico RP2040,"Existing Pico; socketed, USB toward left edge"
+J1,1,"Phoenix Contact 1715721 / MKDS 1,5/2-5,08, 2-pole screw terminal","Reichelt: MKDS 1,5 2 5,08; 5.08mm pitch; 0.9mm square pins; enlarge C12-R04 and C10-R04 to 1.3mm; verify supplied part"
+D2,1,1N5819,Existing 1N5819; cathode band at C16-R08
+J2,1,"Keyed 2x6 IDC header, 2.54mm, vertical",Key notch toward Pico; check actual pin-1 mark and mating cable clearance
+J3,1,"Keyed 2x6 IDC header, 2.54mm, vertical",Key notch toward Pico; check actual pin-1 mark and mating cable clearance
+J4,1,"Keyed 2x6 IDC header, 2.54mm, vertical",Key notch toward Pico; check actual pin-1 mark and mating cable clearance
+J5,1,"1x3 male header, 2.54mm","3.3-V TTL UART, TX/RX/GND"
+J6,1,"1x8 male header, 2.54mm",Reserved GPIOs / 3V3 / GND
+TP1,1,Single 2.54mm male header pin or compatible test pin,VSYS; must fit 1.0mm hole
+TP2,1,Single 2.54mm male header pin or compatible test pin,USB VBUS; must fit 1.0mm hole
+TP3,1,Single 2.54mm male header pin or compatible test pin,GP0; must fit 1.0mm hole
+TP4,1,Single 2.54mm male header pin or compatible test pin,GP1; must fit 1.0mm hole
+TP5,1,Single 2.54mm male header pin or compatible test pin,GND; must fit 1.0mm hole
+SOCKETS,2,"1x20 female header, 2.54mm","Parallel socket rows, 17.78mm apart; verify Pico male-pin engagement and USB clearance"
+BASE,1,Roth RE200-LF,"Existing single-sided FR4 perfboard, 100x160mm, 38x61 holes"
+WIRE,1,"Insulated hookup wire, several colors",61 wires; cut-hint total 4.34m before extra routing allowance/waste; no motor current
+M1..M4,4,Optional M3 spacers / screws / washers,Mechanical choice pending; reserved positions are NOT pre-existing 3.2mm holes

@@ -1,0 +1,48 @@
+id,net,group,from_ref,from_pin,from_hole,to_ref,to_pin,to_hole,straight_mm,cut_hint_mm,dnp,role
+W001,/ONE-SERVO protected supply/PSU_POS,load,J201,1,C04-R06,F201,1,C10-R07,15.5,40,False,load
+W002,/ONE-SERVO protected supply/FUSED_POS,load,F201,2,C19-R07,SW201,1,C24-R04,14.8,35,False,load
+W003,/ONE-SERVO protected supply/SWITCHED_POS,load,SW201,2,C26-R04,D201,2,C29-R07,10.8,35,False,load
+W004,/SERVO_VS,load,D201,1,C35-R07,BV,1,C43-R08,20.5,45,False,load
+W005,/SERVO_VS,load,BV,1,C43-R08,J202,1,C52-R05,24.1,45,False,load
+W006,/SERVO_VS,load,BV,1,C43-R08,R208,1,C52-R13,26.2,50,False,load
+W007,/SERVO_VS,load,R208,1,C52-R13,C201,1,C38-R09,37.0,60,False,load
+W008,/SERVO_VS,load,D202,1,C47-R15,R208,1,C52-R13,13.7,35,False,load
+W009,/ONE-SERVO protected supply/DUMP_DRAIN,load,D202,2,C47-R21,BD,1,C45-R20,5.7,30,False,load
+W010,/ONE-SERVO protected supply/DUMP_DRAIN,load,BD,1,C45-R20,R208,2,C54-R13,29.0,50,False,load
+W011,/ONE-SERVO protected supply/DUMP_DRAIN,load,BD,1,C45-R20,Q201,2,C42-R19,8.0,30,False,load
+W012,GND,load,J201,2,C06-R06,BG,1,C43-R12,95.2,120,False,load
+W013,GND,load,BG,1,C43-R12,J202,2,C54-R05,33.1,55,False,load
+W014,GND,load,BG,1,C43-R12,C201,2,C40-R09,10.8,35,False,load
+W015,GND,load,C201,2,C40-R09,Q201,3,C43-R19,26.5,50,False,load
+W016,/SERVO_VS,load,C202,1,C38-R13,C201,1,C38-R09,10.2,35,False,load
+W017,GND,load,C202,2,C39-R13,C201,2,C40-R09,10.5,35,False,load
+W018,GND,control,Q201,3,C43-R19,GS,1,C43-R23,10.2,35,False,logic
+W019,GND,control,R207,2,C41-R28,Q201,3,C43-R19,23.4,45,False,logic
+W020,/ONE-SERVO protected supply/DUMP_DRAIN,control,D202,2,C47-R21,TP206,1,C49-R24,9.2,30,False,logic
+W021,/ONE-SERVO protected supply/DUMP_GATE,control,Q201,1,C41-R19,R206,2,C39-R19,5.1,30,False,logic
+W022,/ONE-SERVO protected supply/DUMP_GATE,control,R206,2,C39-R19,TP205,1,C39-R22,7.6,30,False,logic
+W023,/ONE-SERVO protected supply/DUMP_GATE,control,TP205,1,C39-R22,R207,1,C41-R24,7.2,30,False,logic
+W024,/ONE-SERVO protected supply/DUMP_OUT,control,R204,2,C33-R26,R206,1,C35-R19,18.5,40,False,logic
+W025,/ONE-SERVO protected supply/DUMP_OUT,control,R206,1,C35-R19,U202,1,C29-R18,15.5,40,False,logic
+W026,/ONE-SERVO protected supply/DUMP_OUT,control,U202,1,C29-R18,R205,2,C29-R15,7.6,30,False,logic
+W027,/ONE-SERVO protected supply/SENSE,control,R202,2,C26-R29,TP204,1,C28-R30,5.7,30,False,logic
+W028,/ONE-SERVO protected supply/SENSE,control,TP204,1,C28-R30,R203,1,C26-R33,9.2,30,False,logic
+W029,/ONE-SERVO protected supply/SENSE,control,TP204,1,C28-R30,R204,1,C29-R26,10.5,35,False,logic
+W030,/ONE-SERVO protected supply/SENSE,control,R204,1,C29-R26,U202,3,C29-R20,15.2,40,False,logic
+W031,/ONE-SERVO protected supply/VREF,control,R201,2,C22-R20,U201,3,C22-R23,7.6,30,False,logic
+W032,/ONE-SERVO protected supply/VREF,control,U201,3,C22-R23,U201,1,C20-R23,5.1,30,False,logic
+W033,/ONE-SERVO protected supply/VREF,control,U201,1,C20-R23,TP203,1,C18-R25,7.2,30,False,logic
+W034,/ONE-SERVO protected supply/VREF,control,R201,2,C22-R20,U202,2,C29-R19,18.0,40,False,logic
+W035,/ONE-SERVO protected supply/VREF,control,U202,2,C29-R19,U202,6,C32-R20,8.0,30,False,logic
+W036,/SERVO_VS,control,C201,1,C38-R09,TP201,1,C41-R05,12.7,35,False,logic
+W037,/SERVO_VS,control,C202,1,C38-R13,C203,1,C33-R16,14.8,35,False,logic
+W038,/SERVO_VS,control,C203,1,C33-R16,U202,8,C32-R18,5.7,30,False,logic
+W039,/SERVO_VS,control,C203,1,C33-R16,R205,1,C29-R11,16.3,40,False,logic
+W040,/SERVO_VS,control,R205,1,C29-R11,R201,1,C22-R16,21.8,45,False,logic
+W041,/SERVO_VS,control,U202,8,C32-R18,R202,1,C26-R25,23.4,45,False,logic
+W042,GND,control,GS,1,C43-R23,U202,5,C32-R21,28.4,50,False,logic
+W043,GND,control,U202,5,C32-R21,U202,4,C29-R21,7.6,30,False,logic
+W044,GND,control,U202,5,C32-R21,C203,2,C34-R16,13.7,35,False,logic
+W045,GND,control,U202,4,C29-R21,U201,2,C21-R23,20.9,45,False,logic
+W046,GND,control,C203,2,C34-R16,TP202,1,C43-R10,27.5,50,False,logic
+W047,GND,control,U201,2,C21-R23,R203,2,C26-R37,37.8,60,False,logic

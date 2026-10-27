@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-27",
+  "revision": "P1 - UNBUILT",
+  "schematic_components": 26,
+  "source_pins": 54,
+  "wire_junctions": 4,
+  "layout_pads": 58,
+  "wires": 47,
+  "checks": [
+    "KiCad reload: references, values, nets, positions, drill sizes and unique UUIDs",
+    "54 source pins match fresh revision C netlist; U202 pin7 remains unconnected",
+    "No occupied-hole collisions; body envelopes separated and within board",
+    "Mounting reserves clear of occupied holes",
+    "Each connected net forms a complete acyclic wire tree; maximum 3 wire ends per node",
+    "Dedicated load wiring excludes low-current reference/comparator/resistor pins",
+    "Quiet-ground junction joins load return at Q201 source; gate pulldown returns directly there",
+    "D201/D202 polarities, TL431 REF/A/K mapping and external resistor interface checked",
+    "No copper tracks; assembly guide only"
+  ],
+  "limits": [
+    "Unbuilt; hole enlargement, formed leads and actual part fit require dry fit",
+    "One servo only; fuse, startup, clamp voltage, transient behavior and heating require bench verification",
+    "Wire lines indicate insulated endpoints, not a mechanically validated routing",
+    "Off-board SW201/R208 must be fitted and correctly wired; terminal footprints represent cable interfaces",
+    "Single-sided unplated perfboard; native front copper rings are virtual"
+  ],
+  "sha256": {
+    ".gitignore": "09b6e0c5d96e2225ab3f27cbb9247e94c38b9e109b8a2d869bbcab331b6aafa9",
+    "assembly-bom.csv": "b0afeead91b45a8973d01f5ec7befd6d9f093824dde7a2ac64340bd8936d399f",
+    "assembly-guide.pdf": "9ca969691c9cd48137830bc6e81964aab5f035f26a5996de4dd0d0a0669b933e",
+    "fp-lib-table": "3d35ef70b8ebaa008c3e6a8178bd1a80bfd61bb4219e9996224bb9f812c7ee45",
+    "layout-model.json": "c20b4f705c6f7a96b53fc51057903a37d4898f4293c51e1540a3d2f79ac321b0",
+    "pin-map.csv": "08bc9993ff16ebb622d30df7bfcdfac5a7937e313d3d5bd98eafe959857a1966",
+    "placement-bottom.svg": "820126bf044d97ad19048af670470cb81b378f2a07fdf8a4b78ab8a61317407c",
+    "placement-top.svg": "9cae4ef4146147f9d62f1564602696b1d7fc2c2634c4b90931f9e42bdfcd820d",
+    "README.md": "302544451faa37a3d1a9e68a0ec676f11e56064915a397404ad5bccdbd265708",
+    "servo-power-re200-lf.kicad_pcb": "73281e58cf68ef7d1e7f9c32f692f835c79e44f150857145677307b99f76e624",
+    "servo-power-re200-lf.kicad_pro": "bb3f64c2153ab325297f1f6c6b9deb58b980ca14fe9afe360bd4a57059c649cf",
+    "wiring-control.svg": "8b4022ec04f53637e83e20888fc34f52ba960f905961b4fd94370bad9cb16776",
+    "wiring-load.svg": "f42888b14ee8f219dcc1d85ea3fd355804760fb96be33f612d7abb9c2f07cf4b",
+    "wiring.csv": "878006e890a3d5334c0c898c3ad180e66ac737c145b631fa0bb8def77fd9f398",
+    "HexaRoam_Perfboard.pretty/CP_Radial_D10.0mm_P5.08mm_HandFormed.kicad_mod": "008d487e85c77a08a0cff0897348aa0dad0a549394a98d34e8c86a6b94f2ddd6",
+    "HexaRoam_Perfboard.pretty/C_Disc_D5.0mm_P2.54mm_HandFormed.kicad_mod": "22bde64a57a4836f2063e13cc07a191ac04dbb808f4e9b0505d95b24cd701ed7",
+    "HexaRoam_Perfboard.pretty/Fuseholder_ESKA503400_P22.86mm_HandFormed.kicad_mod": "3534afd6dcb27571e446c7034f9ba7ad21e9e6548fc8808c6ff7717679f4dd4f"
+  }
+}

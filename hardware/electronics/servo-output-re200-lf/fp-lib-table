@@ -1,0 +1,1 @@
+(fp_lib_table (lib (name "HexaRoam_Perfboard")(type "KiCad")(uri "${KIPRJMOD}/HexaRoam_Perfboard.pretty")(options "")(descr "Hand-formed capacitors on existing RE200-LF")))

@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-27",
+  "revision": "P1 - UNBUILT",
+  "tool": "KiCad 10.0.7 pcbnew / independent exported-netlist comparison",
+  "components": 13,
+  "physical_pins": 96,
+  "source_schematic_pins": 96,
+  "pico_ground_aliases_added": 0,
+  "insulated_wires": 61,
+  "copper_tracks": 0,
+  "checks": [
+    "KiCad reload: 13 footprints / 96 pads; unique component/pad UUIDs",
+    "All physical pads on the 2.54-mm grid; no occupied-hole overlap",
+    "Every native pad position, net, drill and back-copper support matches the layout model (native THT front rings are virtual)",
+    "Component envelope rectangles inside the board and pairwise separated",
+    "Source schematic: every one of the 96 root-sheet pins mapped; all seven physical Pico ground pins represented",
+    "Pico USB-left orientation, socket numbering, supply connector polarity and diode K/A",
+    "Wire graph: every net connected without a short/cycle, maximum three wire ends per pad",
+    "SVG documents parse; top/bottom coordinates share one physical hole map"
+  ],
+  "limits": [
+    "Unbuilt: actual board and connector fit must be verified",
+    "No automatic copper routing or claim of passed PCB DRC; manual wires remain unrouted in KiCad",
+    "Wire lines specify endpoints, not mechanically qualified paths; insulated crossings only",
+    "J1 requires two 1.3-mm holes; M1..M4 are optional mounting reserves",
+    "Print at Actual size and check the 50-mm bar plus hole registration before use"
+  ],
+  "sha256": {
+    "pico-baseboard-re200-lf.kicad_pcb": "661c37e5a7c1a006e70a461a3db36ca9eec866e7e35157aabbd74b61f92ea2ab",
+    "layout-model.json": "fceb4742abf899c9b50d16d21ca86cfd916d19cad4f49bdd268aa6aa558ea0c3",
+    "pin-map.csv": "7083eb52ea92c7c7a9119ff89d05e58cd9208747cb9da5427165e6e40a58630f",
+    "wiring.csv": "ddc2c6d7639d03d6ba965f5e1ab3e771147741a2ed6fb42006116d514608c0bb",
+    "assembly-guide.pdf": "e4db6947008eb1daf3a16251a6625321dc0661822fb109d98b31b21a4043dc73",
+    "placement-bottom.svg": "165cf24e4d8cf28bdb679156afd9c335cbb813f9ec952709800fbda489686d93",
+    "placement-top.svg": "69fa026641844024418fbacf1fa891a4717a23a6710ddb379952b75966b304fa",
+    "wiring-ground-power.svg": "874a0c9e1e04391d691c33c79d0f2eabd139a38fadcd3d7bf80b163c9a30c00f",
+    "wiring-other.svg": "28a04f15bf874d0d9e0fa5505d12e0a36c1f0311234eff6f90a4b48c4b5941fe",
+    "wiring-port-a.svg": "8a204ef23253172c21bd2551127be0f9a23bb00532c3513e3bfa082bdf126ec2",
+    "wiring-port-b.svg": "c71764464a3044f6075fa6cab30bb3c7a894c8b07c1b9bb8936e9f144226c605",
+    "wiring-port-c.svg": "c59625295080513b6498f659d405ab3a5ca972c0687eb4449cc2cbf66c5b70f2"
+  }
+}

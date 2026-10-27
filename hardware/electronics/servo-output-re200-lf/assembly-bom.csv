@@ -1,0 +1,75 @@
+Reference,Quantity,Value,Population,Notes,Footprint
+J101,1,SIGNAL INPUT,Fit first,"Keyed 2x6 IDC; odd signals, even GND; key notch toward small columns",Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical
+J102,1,SERVO POWER IN,Fit first,"Reference Phoenix 1715721, 5.08mm; enlarge two holes to 1.3mm; current sizing for six servos remains open","TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal"
+C100,1,470uF / 35V,Fit first,"Existing: 470uF/35V, D10 x H20mm, leads 5.00mm gently formed to 5.08mm; observe polarity",HexaRoam_Perfboard:CP_Radial_D10.0mm_P5.08mm_HandFormed
+TP101,1,SERVO 0 SIGNAL,Fit first,,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm
+TP102,1,LOCAL GND,Fit first,,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm
+R101,1,4.7k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R102,1,1k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R103,1,4.7k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R104,1,1k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R105,1,100k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R106,1,180,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R107,1,100k,Fit first,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q101,1,BC547B,Fit first,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q102,1,BC547B,Fit first,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C101,1,100nF,Fit first,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J110,1,SERVO 0,Fit first,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+R111,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R112,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R113,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R114,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R115,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R116,1,180,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R117,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q103,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q104,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C102,1,100nF,DNP / future,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J111,1,SERVO 1,DNP / future,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+R121,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R122,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R123,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R124,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R125,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R126,1,180,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R127,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q105,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q106,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C103,1,100nF,DNP / future,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J112,1,SERVO 2,DNP / future,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+R131,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R132,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R133,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R134,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R135,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R136,1,180,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R137,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q107,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q108,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C104,1,100nF,DNP / future,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J113,1,SERVO 3,DNP / future,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+R141,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R142,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R143,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R144,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R145,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R146,1,180,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R147,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q109,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q110,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C105,1,100nF,DNP / future,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J114,1,SERVO 4,DNP / future,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+R151,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R152,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R153,1,4.7k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R154,1,1k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R155,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R156,1,180,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+R157,1,100k,DNP / future,"Metal film >=0.25W, body fits DIN0207 6.3x2.5mm, P10.16mm",Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal
+Q111,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+Q112,1,BC547B,DNP / future,"Purchasing reference Diotec BC547B / Reichelt BC 547B DIO; 1=C,2=B,3=E; 2.54mm lead row; verify exact supplied package",Package_TO_SOT_THT:TO-92_Inline_Wide
+C106,1,100nF,DNP / future,100nF ceramic reference envelope <=5x2.5mm; lead pitch formed to 2.54mm,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed
+J115,1,SERVO 5,DNP / future,1 signal / 2 positive / 3 GND; verify cable orientation,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+BASE,1,Roth RE200-LF,Fit first,61x38 single-sided solder pads,
+WIRE,1,Insulated logic and reinforced load wire,Fit first,32 initial wires; load conductors sized from measured single-servo current; later power sizing pending,
+M1..M4,4,Optional M3 spacers/screws/washers,Optional,Mounting positions are reserves; drill only after mechanical review,

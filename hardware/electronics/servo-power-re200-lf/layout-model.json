@@ -1,0 +1,2722 @@
+{
+  "revision": "P1 - UNBUILT",
+  "board": {
+    "manufacturer": "Roth Elektronik",
+    "part": "RE200-LF",
+    "width_mm": 160.15,
+    "height_mm": 100.2,
+    "pitch_mm": 2.54,
+    "columns": 61,
+    "rows": 38,
+    "first_hole_mm": [
+      3.89,
+      3.07
+    ],
+    "view": "component side; copper underneath",
+    "pcb_editor_origin_mm": [
+      50,
+      50
+    ]
+  },
+  "parts": [
+    {
+      "ref": "J201",
+      "value": "SERVO PSU IN",
+      "footprint": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "x_mm": 11.51,
+      "y_mm": 15.77,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        8.969999999999999,
+        9.969999999999999,
+        10.16,
+        9.8
+      ],
+      "kind": "power",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "SW201",
+      "value": "5A / 12V DC min.",
+      "footprint": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "x_mm": 62.31,
+      "y_mm": 10.69,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        59.77,
+        4.89,
+        10.16,
+        9.8
+      ],
+      "kind": "interface",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "J202",
+      "value": "POWER OUT",
+      "footprint": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "x_mm": 133.42999999999998,
+      "y_mm": 13.23,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        130.89,
+        7.430000000000001,
+        10.16,
+        9.8
+      ],
+      "kind": "power",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R208",
+      "value": "2.2 / HS25 25W 1%",
+      "footprint": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "x_mm": 133.42999999999998,
+      "y_mm": 33.55,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        130.89,
+        27.749999999999996,
+        10.16,
+        9.8
+      ],
+      "kind": "interface",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "F201",
+      "value": "T2.5A provisional",
+      "footprint": "HexaRoam_Perfboard:Fuseholder_ESKA503400_P22.86mm_HandFormed",
+      "x_mm": 26.75,
+      "y_mm": 18.31,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        27.18,
+        13.809999999999999,
+        22,
+        9
+      ],
+      "kind": "fuse",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "D201",
+      "value": "SR540",
+      "footprint": "Diode_THT:D_DO-201AD_P15.24mm_Horizontal",
+      "x_mm": 90.25,
+      "y_mm": 18.31,
+      "rotation_deg": 180,
+      "bounds_mm": [
+        77.88,
+        15.709999999999999,
+        9.5,
+        5.2
+      ],
+      "kind": "D",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "D202",
+      "value": "1N5822",
+      "footprint": "Diode_THT:D_DO-201AD_P15.24mm_Horizontal",
+      "x_mm": 120.73,
+      "y_mm": 38.63,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        118.13000000000001,
+        41.5,
+        5.2,
+        9.5
+      ],
+      "kind": "D",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "C201",
+      "value": "1000uF / 25V",
+      "footprint": "HexaRoam_Perfboard:CP_Radial_D10.0mm_P5.08mm_HandFormed",
+      "x_mm": 97.87,
+      "y_mm": 23.39,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        95.41000000000001,
+        18.39,
+        10,
+        10
+      ],
+      "kind": "bulk",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "C202",
+      "value": "100nF / >=25V",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 97.87,
+      "y_mm": 33.55,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        96.62,
+        32.3,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "C203",
+      "value": "100nF / >=25V",
+      "footprint": "HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed",
+      "x_mm": 85.17,
+      "y_mm": 41.17,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        83.92,
+        39.92,
+        5.04,
+        2.5
+      ],
+      "kind": "C",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "U202",
+      "value": "LM393 DIP",
+      "footprint": "Package_DIP:DIP-8_W7.62mm",
+      "x_mm": 75.01,
+      "y_mm": 46.25,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        75.81,
+        44.75,
+        6,
+        10.7
+      ],
+      "kind": "IC",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ]
+    },
+    {
+      "ref": "U201",
+      "value": "TL431CZ (ST)",
+      "footprint": "Package_TO_SOT_THT:TO-92_Inline_Wide",
+      "x_mm": 52.15,
+      "y_mm": 58.95,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        52.089999999999996,
+        56.35,
+        5.2,
+        5.2
+      ],
+      "kind": "reference",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "Q201",
+      "value": "IRLZ44NPBF",
+      "footprint": "Package_TO_SOT_THT:TO-220-3_Vertical",
+      "x_mm": 105.49,
+      "y_mm": 48.79,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        102.94999999999999,
+        44.21,
+        10.16,
+        5.7
+      ],
+      "kind": "MOSFET",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "ref": "R201",
+      "value": "330 / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 57.230000000000004,
+      "y_mm": 41.17,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        55.980000000000004,
+        43.1,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R202",
+      "value": "13.7k / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 67.39,
+      "y_mm": 64.03,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        66.14,
+        65.96,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R203",
+      "value": "10k / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 67.39,
+      "y_mm": 84.35,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        66.14,
+        86.27999999999999,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R204",
+      "value": "270k / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 75.01,
+      "y_mm": 66.57,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        76.94,
+        65.32,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R205",
+      "value": "2.2k / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 75.01,
+      "y_mm": 28.47,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        73.76,
+        30.4,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R206",
+      "value": "100 / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 90.25,
+      "y_mm": 48.79,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        92.17999999999999,
+        47.54,
+        6.3,
+        2.5
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "R207",
+      "value": "100k / 1%",
+      "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "x_mm": 105.49,
+      "y_mm": 61.49,
+      "rotation_deg": 270,
+      "bounds_mm": [
+        104.24,
+        63.42000000000001,
+        2.5,
+        6.3
+      ],
+      "kind": "R",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "ref": "TP201",
+      "value": "SERVO VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 105.49,
+      "y_mm": 13.23,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        104.39,
+        12.13,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP202",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 25.93,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        24.83,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP203",
+      "value": "VREF",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 47.07,
+      "y_mm": 64.03,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        45.97,
+        62.93,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP204",
+      "value": "SENSE",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 72.47,
+      "y_mm": 76.72999999999999,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        71.37,
+        75.63,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP205",
+      "value": "GATE",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 100.41,
+      "y_mm": 56.410000000000004,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        99.31,
+        55.31,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "TP206",
+      "value": "DRAIN",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 125.81,
+      "y_mm": 61.49,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        124.71000000000001,
+        60.39,
+        2.2,
+        2.2
+      ],
+      "kind": "TP",
+      "channel": null,
+      "dnp": false,
+      "anchor": false,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BV",
+      "value": "/SERVO_VS",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 20.85,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        19.75,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": null,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BG",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 31.01,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        29.91,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": null,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "BD",
+      "value": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 115.65,
+      "y_mm": 51.33,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        114.55000000000001,
+        50.23,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": null,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    },
+    {
+      "ref": "GS",
+      "value": "GND",
+      "footprint": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
+      "x_mm": 110.57000000000001,
+      "y_mm": 58.95,
+      "rotation_deg": 0,
+      "bounds_mm": [
+        109.47000000000001,
+        57.85,
+        2.2,
+        2.2
+      ],
+      "kind": "anchor",
+      "channel": null,
+      "dnp": false,
+      "anchor": true,
+      "pins": [
+        "1"
+      ]
+    }
+  ],
+  "pads": [
+    {
+      "ref": "J201",
+      "pin": "1",
+      "hole": "C04-R06",
+      "column": 4,
+      "row": 6,
+      "x_mm": 11.51,
+      "y_mm": 15.77,
+      "net": "/ONE-SERVO protected supply/PSU_POS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J201",
+      "pin": "2",
+      "hole": "C06-R06",
+      "column": 6,
+      "row": 6,
+      "x_mm": 16.59,
+      "y_mm": 15.77,
+      "net": "GND",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "SW201",
+      "pin": "1",
+      "hole": "C24-R04",
+      "column": 24,
+      "row": 4,
+      "x_mm": 62.31,
+      "y_mm": 10.69,
+      "net": "/ONE-SERVO protected supply/FUSED_POS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "SW201",
+      "pin": "2",
+      "hole": "C26-R04",
+      "column": 26,
+      "row": 4,
+      "x_mm": 67.39,
+      "y_mm": 10.69,
+      "net": "/ONE-SERVO protected supply/SWITCHED_POS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J202",
+      "pin": "1",
+      "hole": "C52-R05",
+      "column": 52,
+      "row": 5,
+      "x_mm": 133.43,
+      "y_mm": 13.23,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "J202",
+      "pin": "2",
+      "hole": "C54-R05",
+      "column": 54,
+      "row": 5,
+      "x_mm": 138.51,
+      "y_mm": 13.23,
+      "net": "GND",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R208",
+      "pin": "1",
+      "hole": "C52-R13",
+      "column": 52,
+      "row": 13,
+      "x_mm": 133.43,
+      "y_mm": 33.55,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R208",
+      "pin": "2",
+      "hole": "C54-R13",
+      "column": 54,
+      "row": 13,
+      "x_mm": 138.51,
+      "y_mm": 33.55,
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "F201",
+      "pin": "1",
+      "hole": "C10-R07",
+      "column": 10,
+      "row": 7,
+      "x_mm": 26.75,
+      "y_mm": 18.31,
+      "net": "/ONE-SERVO protected supply/PSU_POS",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "F201",
+      "pin": "2",
+      "hole": "C19-R07",
+      "column": 19,
+      "row": 7,
+      "x_mm": 49.61,
+      "y_mm": 18.31,
+      "net": "/ONE-SERVO protected supply/FUSED_POS",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "D201",
+      "pin": "1",
+      "hole": "C35-R07",
+      "column": 35,
+      "row": 7,
+      "x_mm": 90.25,
+      "y_mm": 18.31,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "D201",
+      "pin": "2",
+      "hole": "C29-R07",
+      "column": 29,
+      "row": 7,
+      "x_mm": 75.01,
+      "y_mm": 18.31,
+      "net": "/ONE-SERVO protected supply/SWITCHED_POS",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "D202",
+      "pin": "1",
+      "hole": "C47-R15",
+      "column": 47,
+      "row": 15,
+      "x_mm": 120.73,
+      "y_mm": 38.63,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "D202",
+      "pin": "2",
+      "hole": "C47-R21",
+      "column": 47,
+      "row": 21,
+      "x_mm": 120.73,
+      "y_mm": 53.87,
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "drill_mm": 1.5,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C201",
+      "pin": "1",
+      "hole": "C38-R09",
+      "column": 38,
+      "row": 9,
+      "x_mm": 97.87,
+      "y_mm": 23.39,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C201",
+      "pin": "2",
+      "hole": "C40-R09",
+      "column": 40,
+      "row": 9,
+      "x_mm": 102.95,
+      "y_mm": 23.39,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C202",
+      "pin": "1",
+      "hole": "C38-R13",
+      "column": 38,
+      "row": 13,
+      "x_mm": 97.87,
+      "y_mm": 33.55,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C202",
+      "pin": "2",
+      "hole": "C39-R13",
+      "column": 39,
+      "row": 13,
+      "x_mm": 100.41,
+      "y_mm": 33.55,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C203",
+      "pin": "1",
+      "hole": "C33-R16",
+      "column": 33,
+      "row": 16,
+      "x_mm": 85.17,
+      "y_mm": 41.17,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "C203",
+      "pin": "2",
+      "hole": "C34-R16",
+      "column": 34,
+      "row": 16,
+      "x_mm": 87.71,
+      "y_mm": 41.17,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "1",
+      "hole": "C29-R18",
+      "column": 29,
+      "row": 18,
+      "x_mm": 75.01,
+      "y_mm": 46.25,
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "2",
+      "hole": "C29-R19",
+      "column": 29,
+      "row": 19,
+      "x_mm": 75.01,
+      "y_mm": 48.79,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "3",
+      "hole": "C29-R20",
+      "column": 29,
+      "row": 20,
+      "x_mm": 75.01,
+      "y_mm": 51.33,
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "4",
+      "hole": "C29-R21",
+      "column": 29,
+      "row": 21,
+      "x_mm": 75.01,
+      "y_mm": 53.87,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "5",
+      "hole": "C32-R21",
+      "column": 32,
+      "row": 21,
+      "x_mm": 82.63,
+      "y_mm": 53.87,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "6",
+      "hole": "C32-R20",
+      "column": 32,
+      "row": 20,
+      "x_mm": 82.63,
+      "y_mm": 51.33,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "7",
+      "hole": "C32-R19",
+      "column": 32,
+      "row": 19,
+      "x_mm": 82.63,
+      "y_mm": 48.79,
+      "net": "",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U202",
+      "pin": "8",
+      "hole": "C32-R18",
+      "column": 32,
+      "row": 18,
+      "x_mm": 82.63,
+      "y_mm": 46.25,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U201",
+      "pin": "1",
+      "hole": "C20-R23",
+      "column": 20,
+      "row": 23,
+      "x_mm": 52.15,
+      "y_mm": 58.95,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U201",
+      "pin": "2",
+      "hole": "C21-R23",
+      "column": 21,
+      "row": 23,
+      "x_mm": 54.69,
+      "y_mm": 58.95,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "U201",
+      "pin": "3",
+      "hole": "C22-R23",
+      "column": 22,
+      "row": 23,
+      "x_mm": 57.23,
+      "y_mm": 58.95,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "Q201",
+      "pin": "1",
+      "hole": "C41-R19",
+      "column": 41,
+      "row": 19,
+      "x_mm": 105.49,
+      "y_mm": 48.79,
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "Q201",
+      "pin": "2",
+      "hole": "C42-R19",
+      "column": 42,
+      "row": 19,
+      "x_mm": 108.03,
+      "y_mm": 48.79,
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "Q201",
+      "pin": "3",
+      "hole": "C43-R19",
+      "column": 43,
+      "row": 19,
+      "x_mm": 110.57,
+      "y_mm": 48.79,
+      "net": "GND",
+      "drill_mm": 1.3,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R201",
+      "pin": "1",
+      "hole": "C22-R16",
+      "column": 22,
+      "row": 16,
+      "x_mm": 57.23,
+      "y_mm": 41.17,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R201",
+      "pin": "2",
+      "hole": "C22-R20",
+      "column": 22,
+      "row": 20,
+      "x_mm": 57.23,
+      "y_mm": 51.33,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R202",
+      "pin": "1",
+      "hole": "C26-R25",
+      "column": 26,
+      "row": 25,
+      "x_mm": 67.39,
+      "y_mm": 64.03,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R202",
+      "pin": "2",
+      "hole": "C26-R29",
+      "column": 26,
+      "row": 29,
+      "x_mm": 67.39,
+      "y_mm": 74.19,
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R203",
+      "pin": "1",
+      "hole": "C26-R33",
+      "column": 26,
+      "row": 33,
+      "x_mm": 67.39,
+      "y_mm": 84.35,
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R203",
+      "pin": "2",
+      "hole": "C26-R37",
+      "column": 26,
+      "row": 37,
+      "x_mm": 67.39,
+      "y_mm": 94.51,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R204",
+      "pin": "1",
+      "hole": "C29-R26",
+      "column": 29,
+      "row": 26,
+      "x_mm": 75.01,
+      "y_mm": 66.57,
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R204",
+      "pin": "2",
+      "hole": "C33-R26",
+      "column": 33,
+      "row": 26,
+      "x_mm": 85.17,
+      "y_mm": 66.57,
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R205",
+      "pin": "1",
+      "hole": "C29-R11",
+      "column": 29,
+      "row": 11,
+      "x_mm": 75.01,
+      "y_mm": 28.47,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R205",
+      "pin": "2",
+      "hole": "C29-R15",
+      "column": 29,
+      "row": 15,
+      "x_mm": 75.01,
+      "y_mm": 38.63,
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R206",
+      "pin": "1",
+      "hole": "C35-R19",
+      "column": 35,
+      "row": 19,
+      "x_mm": 90.25,
+      "y_mm": 48.79,
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R206",
+      "pin": "2",
+      "hole": "C39-R19",
+      "column": 39,
+      "row": 19,
+      "x_mm": 100.41,
+      "y_mm": 48.79,
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R207",
+      "pin": "1",
+      "hole": "C41-R24",
+      "column": 41,
+      "row": 24,
+      "x_mm": 105.49,
+      "y_mm": 61.49,
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "R207",
+      "pin": "2",
+      "hole": "C41-R28",
+      "column": 41,
+      "row": 28,
+      "x_mm": 105.49,
+      "y_mm": 71.65,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP201",
+      "pin": "1",
+      "hole": "C41-R05",
+      "column": 41,
+      "row": 5,
+      "x_mm": 105.49,
+      "y_mm": 13.23,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP202",
+      "pin": "1",
+      "hole": "C43-R10",
+      "column": 43,
+      "row": 10,
+      "x_mm": 110.57,
+      "y_mm": 25.93,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP203",
+      "pin": "1",
+      "hole": "C18-R25",
+      "column": 18,
+      "row": 25,
+      "x_mm": 47.07,
+      "y_mm": 64.03,
+      "net": "/ONE-SERVO protected supply/VREF",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP204",
+      "pin": "1",
+      "hole": "C28-R30",
+      "column": 28,
+      "row": 30,
+      "x_mm": 72.47,
+      "y_mm": 76.73,
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP205",
+      "pin": "1",
+      "hole": "C39-R22",
+      "column": 39,
+      "row": 22,
+      "x_mm": 100.41,
+      "y_mm": 56.41,
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "TP206",
+      "pin": "1",
+      "hole": "C49-R24",
+      "column": 49,
+      "row": 24,
+      "x_mm": 125.81,
+      "y_mm": 61.49,
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": false,
+      "channel": null
+    },
+    {
+      "ref": "BV",
+      "pin": "1",
+      "hole": "C43-R08",
+      "column": 43,
+      "row": 8,
+      "x_mm": 110.57,
+      "y_mm": 20.85,
+      "net": "/SERVO_VS",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": null
+    },
+    {
+      "ref": "BG",
+      "pin": "1",
+      "hole": "C43-R12",
+      "column": 43,
+      "row": 12,
+      "x_mm": 110.57,
+      "y_mm": 31.01,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": null
+    },
+    {
+      "ref": "BD",
+      "pin": "1",
+      "hole": "C45-R20",
+      "column": 45,
+      "row": 20,
+      "x_mm": 115.65,
+      "y_mm": 51.33,
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": null
+    },
+    {
+      "ref": "GS",
+      "pin": "1",
+      "hole": "C43-R23",
+      "column": 43,
+      "row": 23,
+      "x_mm": 110.57,
+      "y_mm": 58.95,
+      "net": "GND",
+      "drill_mm": 1.0,
+      "dnp": false,
+      "anchor": true,
+      "channel": null
+    }
+  ],
+  "wires": [
+    {
+      "id": "W001",
+      "net": "/ONE-SERVO protected supply/PSU_POS",
+      "group": "load",
+      "from_ref": "J201",
+      "from_pin": "1",
+      "from_hole": "C04-R06",
+      "to_ref": "F201",
+      "to_pin": "1",
+      "to_hole": "C10-R07",
+      "straight_mm": 15.5,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          11.51,
+          15.77
+        ],
+        [
+          26.75,
+          18.31
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W002",
+      "net": "/ONE-SERVO protected supply/FUSED_POS",
+      "group": "load",
+      "from_ref": "F201",
+      "from_pin": "2",
+      "from_hole": "C19-R07",
+      "to_ref": "SW201",
+      "to_pin": "1",
+      "to_hole": "C24-R04",
+      "straight_mm": 14.8,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          49.61,
+          18.31
+        ],
+        [
+          62.31,
+          10.69
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W003",
+      "net": "/ONE-SERVO protected supply/SWITCHED_POS",
+      "group": "load",
+      "from_ref": "SW201",
+      "from_pin": "2",
+      "from_hole": "C26-R04",
+      "to_ref": "D201",
+      "to_pin": "2",
+      "to_hole": "C29-R07",
+      "straight_mm": 10.8,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          67.39,
+          10.69
+        ],
+        [
+          75.01,
+          18.31
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W004",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "D201",
+      "from_pin": "1",
+      "from_hole": "C35-R07",
+      "to_ref": "BV",
+      "to_pin": "1",
+      "to_hole": "C43-R08",
+      "straight_mm": 20.5,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          90.25,
+          18.31
+        ],
+        [
+          110.57,
+          20.85
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W005",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "BV",
+      "from_pin": "1",
+      "from_hole": "C43-R08",
+      "to_ref": "J202",
+      "to_pin": "1",
+      "to_hole": "C52-R05",
+      "straight_mm": 24.1,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          110.57,
+          20.85
+        ],
+        [
+          133.43,
+          13.23
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W006",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "BV",
+      "from_pin": "1",
+      "from_hole": "C43-R08",
+      "to_ref": "R208",
+      "to_pin": "1",
+      "to_hole": "C52-R13",
+      "straight_mm": 26.2,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          110.57,
+          20.85
+        ],
+        [
+          133.43,
+          33.55
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W007",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "R208",
+      "from_pin": "1",
+      "from_hole": "C52-R13",
+      "to_ref": "C201",
+      "to_pin": "1",
+      "to_hole": "C38-R09",
+      "straight_mm": 37.0,
+      "cut_hint_mm": 60,
+      "points_mm": [
+        [
+          133.43,
+          33.55
+        ],
+        [
+          97.87,
+          23.39
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W008",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "D202",
+      "from_pin": "1",
+      "from_hole": "C47-R15",
+      "to_ref": "R208",
+      "to_pin": "1",
+      "to_hole": "C52-R13",
+      "straight_mm": 13.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          120.73,
+          38.63
+        ],
+        [
+          133.43,
+          33.55
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W009",
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "group": "load",
+      "from_ref": "D202",
+      "from_pin": "2",
+      "from_hole": "C47-R21",
+      "to_ref": "BD",
+      "to_pin": "1",
+      "to_hole": "C45-R20",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          120.73,
+          53.87
+        ],
+        [
+          115.65,
+          51.33
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W010",
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "group": "load",
+      "from_ref": "BD",
+      "from_pin": "1",
+      "from_hole": "C45-R20",
+      "to_ref": "R208",
+      "to_pin": "2",
+      "to_hole": "C54-R13",
+      "straight_mm": 29.0,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          115.65,
+          51.33
+        ],
+        [
+          138.51,
+          33.55
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W011",
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "group": "load",
+      "from_ref": "BD",
+      "from_pin": "1",
+      "from_hole": "C45-R20",
+      "to_ref": "Q201",
+      "to_pin": "2",
+      "to_hole": "C42-R19",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          115.65,
+          51.33
+        ],
+        [
+          108.03,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W012",
+      "net": "GND",
+      "group": "load",
+      "from_ref": "J201",
+      "from_pin": "2",
+      "from_hole": "C06-R06",
+      "to_ref": "BG",
+      "to_pin": "1",
+      "to_hole": "C43-R12",
+      "straight_mm": 95.2,
+      "cut_hint_mm": 120,
+      "points_mm": [
+        [
+          16.59,
+          15.77
+        ],
+        [
+          110.57,
+          31.01
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W013",
+      "net": "GND",
+      "group": "load",
+      "from_ref": "BG",
+      "from_pin": "1",
+      "from_hole": "C43-R12",
+      "to_ref": "J202",
+      "to_pin": "2",
+      "to_hole": "C54-R05",
+      "straight_mm": 33.1,
+      "cut_hint_mm": 55,
+      "points_mm": [
+        [
+          110.57,
+          31.01
+        ],
+        [
+          138.51,
+          13.23
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W014",
+      "net": "GND",
+      "group": "load",
+      "from_ref": "BG",
+      "from_pin": "1",
+      "from_hole": "C43-R12",
+      "to_ref": "C201",
+      "to_pin": "2",
+      "to_hole": "C40-R09",
+      "straight_mm": 10.8,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          110.57,
+          31.01
+        ],
+        [
+          102.95,
+          23.39
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W015",
+      "net": "GND",
+      "group": "load",
+      "from_ref": "C201",
+      "from_pin": "2",
+      "from_hole": "C40-R09",
+      "to_ref": "Q201",
+      "to_pin": "3",
+      "to_hole": "C43-R19",
+      "straight_mm": 26.5,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          102.95,
+          23.39
+        ],
+        [
+          110.57,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W016",
+      "net": "/SERVO_VS",
+      "group": "load",
+      "from_ref": "C202",
+      "from_pin": "1",
+      "from_hole": "C38-R13",
+      "to_ref": "C201",
+      "to_pin": "1",
+      "to_hole": "C38-R09",
+      "straight_mm": 10.2,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          97.87,
+          33.55
+        ],
+        [
+          97.87,
+          23.39
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W017",
+      "net": "GND",
+      "group": "load",
+      "from_ref": "C202",
+      "from_pin": "2",
+      "from_hole": "C39-R13",
+      "to_ref": "C201",
+      "to_pin": "2",
+      "to_hole": "C40-R09",
+      "straight_mm": 10.5,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          100.41,
+          33.55
+        ],
+        [
+          102.95,
+          23.39
+        ]
+      ],
+      "dnp": false,
+      "role": "load"
+    },
+    {
+      "id": "W018",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "Q201",
+      "from_pin": "3",
+      "from_hole": "C43-R19",
+      "to_ref": "GS",
+      "to_pin": "1",
+      "to_hole": "C43-R23",
+      "straight_mm": 10.2,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          110.57,
+          48.79
+        ],
+        [
+          110.57,
+          58.95
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W019",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "R207",
+      "from_pin": "2",
+      "from_hole": "C41-R28",
+      "to_ref": "Q201",
+      "to_pin": "3",
+      "to_hole": "C43-R19",
+      "straight_mm": 23.4,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          105.49,
+          71.65
+        ],
+        [
+          110.57,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W020",
+      "net": "/ONE-SERVO protected supply/DUMP_DRAIN",
+      "group": "control",
+      "from_ref": "D202",
+      "from_pin": "2",
+      "from_hole": "C47-R21",
+      "to_ref": "TP206",
+      "to_pin": "1",
+      "to_hole": "C49-R24",
+      "straight_mm": 9.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          120.73,
+          53.87
+        ],
+        [
+          125.81,
+          61.49
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W021",
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "group": "control",
+      "from_ref": "Q201",
+      "from_pin": "1",
+      "from_hole": "C41-R19",
+      "to_ref": "R206",
+      "to_pin": "2",
+      "to_hole": "C39-R19",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          105.49,
+          48.79
+        ],
+        [
+          100.41,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W022",
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "group": "control",
+      "from_ref": "R206",
+      "from_pin": "2",
+      "from_hole": "C39-R19",
+      "to_ref": "TP205",
+      "to_pin": "1",
+      "to_hole": "C39-R22",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          100.41,
+          48.79
+        ],
+        [
+          100.41,
+          56.41
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W023",
+      "net": "/ONE-SERVO protected supply/DUMP_GATE",
+      "group": "control",
+      "from_ref": "TP205",
+      "from_pin": "1",
+      "from_hole": "C39-R22",
+      "to_ref": "R207",
+      "to_pin": "1",
+      "to_hole": "C41-R24",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          100.41,
+          56.41
+        ],
+        [
+          105.49,
+          61.49
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W024",
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "group": "control",
+      "from_ref": "R204",
+      "from_pin": "2",
+      "from_hole": "C33-R26",
+      "to_ref": "R206",
+      "to_pin": "1",
+      "to_hole": "C35-R19",
+      "straight_mm": 18.5,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          85.17,
+          66.57
+        ],
+        [
+          90.25,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W025",
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "group": "control",
+      "from_ref": "R206",
+      "from_pin": "1",
+      "from_hole": "C35-R19",
+      "to_ref": "U202",
+      "to_pin": "1",
+      "to_hole": "C29-R18",
+      "straight_mm": 15.5,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          90.25,
+          48.79
+        ],
+        [
+          75.01,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W026",
+      "net": "/ONE-SERVO protected supply/DUMP_OUT",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "1",
+      "from_hole": "C29-R18",
+      "to_ref": "R205",
+      "to_pin": "2",
+      "to_hole": "C29-R15",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          75.01,
+          46.25
+        ],
+        [
+          75.01,
+          38.63
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W027",
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "group": "control",
+      "from_ref": "R202",
+      "from_pin": "2",
+      "from_hole": "C26-R29",
+      "to_ref": "TP204",
+      "to_pin": "1",
+      "to_hole": "C28-R30",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          67.39,
+          74.19
+        ],
+        [
+          72.47,
+          76.73
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W028",
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "group": "control",
+      "from_ref": "TP204",
+      "from_pin": "1",
+      "from_hole": "C28-R30",
+      "to_ref": "R203",
+      "to_pin": "1",
+      "to_hole": "C26-R33",
+      "straight_mm": 9.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          72.47,
+          76.73
+        ],
+        [
+          67.39,
+          84.35
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W029",
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "group": "control",
+      "from_ref": "TP204",
+      "from_pin": "1",
+      "from_hole": "C28-R30",
+      "to_ref": "R204",
+      "to_pin": "1",
+      "to_hole": "C29-R26",
+      "straight_mm": 10.5,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          72.47,
+          76.73
+        ],
+        [
+          75.01,
+          66.57
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W030",
+      "net": "/ONE-SERVO protected supply/SENSE",
+      "group": "control",
+      "from_ref": "R204",
+      "from_pin": "1",
+      "from_hole": "C29-R26",
+      "to_ref": "U202",
+      "to_pin": "3",
+      "to_hole": "C29-R20",
+      "straight_mm": 15.2,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          75.01,
+          66.57
+        ],
+        [
+          75.01,
+          51.33
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W031",
+      "net": "/ONE-SERVO protected supply/VREF",
+      "group": "control",
+      "from_ref": "R201",
+      "from_pin": "2",
+      "from_hole": "C22-R20",
+      "to_ref": "U201",
+      "to_pin": "3",
+      "to_hole": "C22-R23",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          57.23,
+          51.33
+        ],
+        [
+          57.23,
+          58.95
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W032",
+      "net": "/ONE-SERVO protected supply/VREF",
+      "group": "control",
+      "from_ref": "U201",
+      "from_pin": "3",
+      "from_hole": "C22-R23",
+      "to_ref": "U201",
+      "to_pin": "1",
+      "to_hole": "C20-R23",
+      "straight_mm": 5.1,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          57.23,
+          58.95
+        ],
+        [
+          52.15,
+          58.95
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W033",
+      "net": "/ONE-SERVO protected supply/VREF",
+      "group": "control",
+      "from_ref": "U201",
+      "from_pin": "1",
+      "from_hole": "C20-R23",
+      "to_ref": "TP203",
+      "to_pin": "1",
+      "to_hole": "C18-R25",
+      "straight_mm": 7.2,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          52.15,
+          58.95
+        ],
+        [
+          47.07,
+          64.03
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W034",
+      "net": "/ONE-SERVO protected supply/VREF",
+      "group": "control",
+      "from_ref": "R201",
+      "from_pin": "2",
+      "from_hole": "C22-R20",
+      "to_ref": "U202",
+      "to_pin": "2",
+      "to_hole": "C29-R19",
+      "straight_mm": 18.0,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          57.23,
+          51.33
+        ],
+        [
+          75.01,
+          48.79
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W035",
+      "net": "/ONE-SERVO protected supply/VREF",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "2",
+      "from_hole": "C29-R19",
+      "to_ref": "U202",
+      "to_pin": "6",
+      "to_hole": "C32-R20",
+      "straight_mm": 8.0,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          75.01,
+          48.79
+        ],
+        [
+          82.63,
+          51.33
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W036",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "C201",
+      "from_pin": "1",
+      "from_hole": "C38-R09",
+      "to_ref": "TP201",
+      "to_pin": "1",
+      "to_hole": "C41-R05",
+      "straight_mm": 12.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          97.87,
+          23.39
+        ],
+        [
+          105.49,
+          13.23
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W037",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "C202",
+      "from_pin": "1",
+      "from_hole": "C38-R13",
+      "to_ref": "C203",
+      "to_pin": "1",
+      "to_hole": "C33-R16",
+      "straight_mm": 14.8,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          97.87,
+          33.55
+        ],
+        [
+          85.17,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W038",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "C203",
+      "from_pin": "1",
+      "from_hole": "C33-R16",
+      "to_ref": "U202",
+      "to_pin": "8",
+      "to_hole": "C32-R18",
+      "straight_mm": 5.7,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          85.17,
+          41.17
+        ],
+        [
+          82.63,
+          46.25
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W039",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "C203",
+      "from_pin": "1",
+      "from_hole": "C33-R16",
+      "to_ref": "R205",
+      "to_pin": "1",
+      "to_hole": "C29-R11",
+      "straight_mm": 16.3,
+      "cut_hint_mm": 40,
+      "points_mm": [
+        [
+          85.17,
+          41.17
+        ],
+        [
+          75.01,
+          28.47
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W040",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "R205",
+      "from_pin": "1",
+      "from_hole": "C29-R11",
+      "to_ref": "R201",
+      "to_pin": "1",
+      "to_hole": "C22-R16",
+      "straight_mm": 21.8,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          75.01,
+          28.47
+        ],
+        [
+          57.23,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W041",
+      "net": "/SERVO_VS",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "8",
+      "from_hole": "C32-R18",
+      "to_ref": "R202",
+      "to_pin": "1",
+      "to_hole": "C26-R25",
+      "straight_mm": 23.4,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          82.63,
+          46.25
+        ],
+        [
+          67.39,
+          64.03
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W042",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "GS",
+      "from_pin": "1",
+      "from_hole": "C43-R23",
+      "to_ref": "U202",
+      "to_pin": "5",
+      "to_hole": "C32-R21",
+      "straight_mm": 28.4,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          110.57,
+          58.95
+        ],
+        [
+          82.63,
+          53.87
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W043",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "5",
+      "from_hole": "C32-R21",
+      "to_ref": "U202",
+      "to_pin": "4",
+      "to_hole": "C29-R21",
+      "straight_mm": 7.6,
+      "cut_hint_mm": 30,
+      "points_mm": [
+        [
+          82.63,
+          53.87
+        ],
+        [
+          75.01,
+          53.87
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W044",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "5",
+      "from_hole": "C32-R21",
+      "to_ref": "C203",
+      "to_pin": "2",
+      "to_hole": "C34-R16",
+      "straight_mm": 13.7,
+      "cut_hint_mm": 35,
+      "points_mm": [
+        [
+          82.63,
+          53.87
+        ],
+        [
+          87.71,
+          41.17
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W045",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "U202",
+      "from_pin": "4",
+      "from_hole": "C29-R21",
+      "to_ref": "U201",
+      "to_pin": "2",
+      "to_hole": "C21-R23",
+      "straight_mm": 20.9,
+      "cut_hint_mm": 45,
+      "points_mm": [
+        [
+          75.01,
+          53.87
+        ],
+        [
+          54.69,
+          58.95
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W046",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "C203",
+      "from_pin": "2",
+      "from_hole": "C34-R16",
+      "to_ref": "TP202",
+      "to_pin": "1",
+      "to_hole": "C43-R10",
+      "straight_mm": 27.5,
+      "cut_hint_mm": 50,
+      "points_mm": [
+        [
+          87.71,
+          41.17
+        ],
+        [
+          110.57,
+          25.93
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    },
+    {
+      "id": "W047",
+      "net": "GND",
+      "group": "control",
+      "from_ref": "U201",
+      "from_pin": "2",
+      "from_hole": "C21-R23",
+      "to_ref": "R203",
+      "to_pin": "2",
+      "to_hole": "C26-R37",
+      "straight_mm": 37.8,
+      "cut_hint_mm": 60,
+      "points_mm": [
+        [
+          54.69,
+          58.95
+        ],
+        [
+          67.39,
+          94.51
+        ]
+      ],
+      "dnp": false,
+      "role": "logic"
+    }
+  ],
+  "mounts": [
+    {
+      "name": "M1",
+      "hole": "C03-R03",
+      "x_mm": 8.97,
+      "y_mm": 8.15,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M2",
+      "hole": "C59-R03",
+      "x_mm": 151.20999999999998,
+      "y_mm": 8.15,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M3",
+      "hole": "C03-R36",
+      "x_mm": 8.97,
+      "y_mm": 91.97,
+      "drill_mm": 3.2,
+      "optional": true
+    },
+    {
+      "name": "M4",
+      "hole": "C59-R36",
+      "x_mm": 151.20999999999998,
+      "y_mm": 91.97,
+      "drill_mm": 3.2,
+      "optional": true
+    }
+  ],
+  "source_netlist_sha256": "6d27045af173cd9b527741a453b711a667b40619b7db6a3bae338f510932625b",
+  "source_schematic_sha256": "1b3a3c0fe14a78eb84c7930958283bc9607c05b77b91a0071b69b6ce21b7eed0",
+  "owner_capacitor": {
+    "ref": "C201",
+    "diameter_mm": 10,
+    "height_mm": 20,
+    "lead_pitch_mm": 5,
+    "formed_pitch_mm": 5.08
+  },
+  "notes": [
+    "26 schematic components plus 4 existing-pad wire junctions",
+    "SW201 and R208 footprints are cable interfaces; actual switch and chassis resistor are external",
+    "One servo only; unbuilt and electrically/thermally unqualified",
+    "Native THT front rings are virtual; actual RE200-LF is single-sided",
+    "All crossing wires must be insulated; lines denote endpoints, not fixed mechanical routes"
+  ]
+}

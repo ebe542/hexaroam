@@ -1,0 +1,4 @@
+# KiCad per-user state and generated local backups
+*.kicad_prl
+~*.lck
+*-backups/

@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-27",
+  "revision": "P1 - UNBUILT",
+  "schematic_components": 71,
+  "initial_components": 16,
+  "reserved_dnp_components": 55,
+  "existing_pad_wire_junctions": 12,
+  "physical_source_pins": 168,
+  "total_layout_pads": 180,
+  "full_wires": 142,
+  "initial_wires": 32,
+  "copper_tracks": 0,
+  "checks": [
+    "KiCad reload: all 83 footprints / 180 pads, source refs and DNP states correct",
+    "All 168 schematic pins agree with current output-sheet netlist",
+    "No occupied-hole collisions; body envelopes separated and inside RE200-LF",
+    "Independent full and initial wire graphs complete, acyclic, maximum 3 wire ends per pad",
+    "All servo power and return paths use dedicated load wires to J102; no motor current through IDC or small-component leads",
+    "C100 dimensions from owner: 10mm diameter, 20mm height, 5.00mm leads formed to 5.08mm",
+    "BC547 wide lead layout C/B/E = 1/2/3; servo headers signal/positive/ground = 1/2/3",
+    "IDC input pinout preserved; power terminal polarity and 1.3mm hole requirement checked",
+    "No copper tracks: native unconnected/DNP markings are expected for hand wiring"
+  ],
+  "limits": [
+    "Unbuilt: actual component fit, currents, voltages, signal loading and timing not hardware verified",
+    "One-servo commissioning only; six-servo power rating is not established",
+    "Wire guide lines indicate endpoints, not a qualified insulated-wire routing path",
+    "Native THT front copper rings are virtual; actual RE200-LF is single-sided",
+    "Only first-build wires are approved for initial assembly; DNP power branches require a later power-sizing review"
+  ],
+  "sha256": {
+    "servo-output-re200-lf.kicad_pcb": "69a54b8870ed19a54df50f36d34bf2f33751f9368340c5cc9487489be11b12d4",
+    "layout-model.json": "b5e4ec615f6970c8393cafc5855a25c920545efadcfda5b6bc66b4d5b50dac75",
+    "pin-map.csv": "513640426573e0fa8712c0f0f25cd8fa35c602bc4ac84377e16bfc3299d88ce5",
+    "wiring.csv": "d6cfb0532879ceafcf5a09cc7250906004cf769182b5c53e333d1e1c9df8f015",
+    "assembly-guide.pdf": "2184456209ff2e5df79275122e5c0913c06e42b17a558acf1d4b23189cc4ab67",
+    "placement-bottom.svg": "5f3b8188e2e423800a6ef416d4e255f2f6a17d4d60c8b2d24a12c9d2656965b4",
+    "placement-top.svg": "00bbdeba91b27c4ec27c2020c8093f87baff036fa2029b9cea4784e24f9e550a",
+    "wiring-channel-0.svg": "4f4936e728043c0948a6db9912ad27fac7dab3a4491629779fae867fe567367b",
+    "wiring-channel-1.svg": "3d23851dc5509d323ef8fa675a5bc055c7e8011fa2c35e8b664ff46ea34035e2",
+    "wiring-channel-2.svg": "2840bfa78da1ac4c8fb2f28abe50bbc682ceab61d1fd8f78545c64d3fa08841d",
+    "wiring-channel-3.svg": "fe2c216f701b6789f14aa60a4321a6fbd97c6e6c539d7fdeae4430a2f5c0313d",
+    "wiring-channel-4.svg": "99ec45f2a774470de01618fd4941e758eb800152f33de649529938c38b7b5089",
+    "wiring-channel-5.svg": "ec2eafea68ec623505f59fcda2bea96a58f5707a226f0f94b379913df6253508",
+    "wiring-expansion-power-1.svg": "8c0a9f2ed900ca7fcf94c3aa95410804b2609eb53c5e1d1f590ee948f2fdc8d2",
+    "wiring-expansion-power-2.svg": "32c42fefa23d84d38d7f74ae2f05c11f919d387710755035554f0def76a3a6f3",
+    "wiring-initial-power.svg": "e6ed65769fe650269e81a744e2c49b05e834d62034caf5340ccf897a4942d2b6",
+    "README.md": "bb6e6ebe73b35c90fa3bdd78df7349781142530cef61573048e52ee6ebbc324e",
+    "assembly-bom.csv": "71dac97acfd5bc1029a3579f5ea8fe54376812d7fd7150f3444906b5bb75446b",
+    "wiring-initial.csv": "a0d684306dd3fdc3cc4aa70e58ecebd66807137c72b086e554353eccce9c3310"
+  },
+  "reference_checks": [
+    "Diotec BC546..549 primary PDF (2026-03-30): numeric C/B/E assignment and lead forms visually checked; local copy archived",
+    "C100 owner measurements applied: D10mm/H20mm/P5.00mm; template P5.08mm lead forming"
+  ]
+}

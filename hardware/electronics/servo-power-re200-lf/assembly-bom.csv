@@ -1,0 +1,32 @@
+reference,quantity,value,footprint,notes
+C201,1,1000uF / 25V,HexaRoam_Perfboard:CP_Radial_D10.0mm_P5.08mm_HandFormed,"Owner: D10 x H20 mm, approximate P5.00 formed to P5.08"
+C202,1,100nF / >=25V,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed,
+C203,1,100nF / >=25V,HexaRoam_Perfboard:C_Disc_D5.0mm_P2.54mm_HandFormed,
+D201,1,SR540,Diode_THT:D_DO-201AD_P15.24mm_Horizontal,
+D202,1,1N5822,Diode_THT:D_DO-201AD_P15.24mm_Horizontal,
+F201,1,T2.5A provisional,HexaRoam_Perfboard:Fuseholder_ESKA503400_P22.86mm_HandFormed,ESKA 503.400 holder + 503.310 cover; provisional T2.5A 5x20 fuse; formed 22.60 -> 22.86 mm
+J201,1,SERVO PSU IN,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",Reference Phoenix 1715721 / MKDS 1.5/2-5.08
+J202,1,POWER OUT,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",Reference Phoenix 1715721 / MKDS 1.5/2-5.08
+Q201,1,IRLZ44NPBF,Package_TO_SOT_THT:TO-220-3_Vertical,
+R201,1,330 / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R202,1,13.7k / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R203,1,10k / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R204,1,270k / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R205,1,2.2k / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R206,1,100 / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R207,1,100k / 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,
+R208,1,2.2 / HS25 25W 1%,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",Actual part off-board: ARCOL HS25 2.2 ohm with heatsink; footprint is cable terminal only
+SW201,1,5A / 12V DC min.,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",Actual part off-board: APEM 3631NF/2; footprint is cable terminal only
+TP201,1,SERVO VS,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+TP202,1,GND,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+TP203,1,VREF,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+TP204,1,SENSE,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+TP205,1,GATE,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+TP206,1,DRAIN,TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm,
+U201,1,TL431CZ (ST),Package_TO_SOT_THT:TO-92_Inline_Wide,
+U202,1,LM393 DIP,Package_DIP:DIP-8_W7.62mm,
+MECH1,1,Roth RE200-LF 100x160 mm,,Single-sided 38x61 grid
+MECH2,2,Phoenix 1715721 2-pole terminal,,Additional SW201/R208 cable interfaces; actual external parts already listed separately
+MECH3,1,DIP8 socket optional,,Check actual height/body
+MECH4,1,"Insulated wire, harness terminals, mounting support",,Size for measured currents; not a fixed kit
+MECH5,1,External heatsink and insulated mounting as needed,,R208 mandatory cooling; Q201 heating requires verification
