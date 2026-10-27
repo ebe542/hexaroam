@@ -2,7 +2,23 @@ name: Rust CI
 
 on:
   push:
+    paths:
+      - "firmware/**"
+      - "software/**"
+      - "simulation/**"
+      - "tools/**"
+      - "configs/**"
+      - "rustfmt.toml"
+      - ".github/workflows/rust.yml"
   pull_request:
+    paths:
+      - "firmware/**"
+      - "software/**"
+      - "simulation/**"
+      - "tools/**"
+      - "configs/**"
+      - "rustfmt.toml"
+      - ".github/workflows/rust.yml"
   workflow_dispatch:
 
 permissions:
