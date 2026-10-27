@@ -67,6 +67,13 @@ path = "hardware_tests/restart_active_dma.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "servo_bank_angles"
+path = "hardware_tests/servo_bank_angles.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
