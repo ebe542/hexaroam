@@ -101,3 +101,11 @@ The library remains independent of GPIOs and the Pico HAL. A signal-plan adapter
 2026-10-26: The owner reported 14 passing ServoSignalOutput tests and full verification with 169 passed, 0 failed, 0 skipped, and 0 filtered out. The adapter validates fixed GPIO mapping and capacity, converts a complete pulse batch to one SignalPlan, and forwards backend errors without partial acceptance. A bank-to-adapter test confirms that plan validation failure does not commit angle commands. The control package now has 53 tests.
 
 SignalPlanOutput keeps the backend interface independent of the Pico. SwitchingOutput implements it, and bank.service delegates through the adapter to DMA servicing. The preceding bank revision passed CI. A separate Pico angle-command demo and CI for this adapter revision remain pending; prior pulse-only hardware tests do not establish this new integrated angle path.
+
+## Pico angle-command integration
+
+2026-10-27: The owner reported 169 passing unit tests and a successful signal check for servo_bank_angles, then green CI. The manual program exercises initial complete angle commands, partial updates retaining omitted targets, and whole-batch rejection of an out-of-range angle through the bank, adapter, and PIO/DMA backend. Calibrations remain synthetic and no servo is attached.
+
+## Forced DMA-abort timeout and retry
+
+2026-10-27: The owner reported 169 passing unit tests and successful signal/UART checks for restart_abort_timeout. A zero polling budget deterministically produces DmaAbortTimeout after the real abort request. The test confirms retained transfer ownership and persistent fault with Low output, followed by successful recovery using the normal restart budget. DMA may stop asynchronously after the request. A physically stuck channel and elapsed timeout duration are not simulated or measured. CI for this timeout revision has not yet been reported.

@@ -268,9 +268,10 @@ impl<
     /// Validation failure preserves the previous pending plan.
     /// DMA abort timeout preserves transfer ownership and fault state.
     /// Success means the restart was initiated, not verified at the pins.
-    pub fn restart<const PLAN_CAPACITY: usize>(
+    fn restart_inner<const PLAN_CAPACITY: usize>(
         &mut self,
         plan: &SignalPlan<PLAN_CAPACITY>,
+        abort_poll_budget: usize,
     ) -> Result<(), OutputRestartError> {
         if !self.is_faulted() {
             return Err(OutputRestartError::NotFaulted);
@@ -299,7 +300,7 @@ impl<
             self.transfer
                 .as_mut()
                 .expect("DMA transfer must be present"),
-            DMA_ABORT_POLL_BUDGET,
+            abort_poll_budget,
         )
         .map_err(|_| OutputRestartError::DmaAbortTimeout)?;
 
@@ -476,6 +477,32 @@ impl<
         }
 
         panic!("Expected full FIFO and active DMA were not observed");
+    }
+
+    /// Explicitly restarts faulted output with a complete signal plan.
+    pub fn restart<const PLAN_CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<(), OutputRestartError> {
+        self.restart_inner(plan, DMA_ABORT_POLL_BUDGET)
+    }
+
+    /// Hardware test only: requests DMA abort without polling completion.
+    ///
+    /// A valid restart request deterministically returns DmaAbortTimeout.
+    /// DMA may nevertheless stop asynchronously after the abort request.
+    #[cfg(feature = "hardware-tests")]
+    pub fn restart_with_zero_abort_budget<const PLAN_CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<(), OutputRestartError> {
+        self.restart_inner(plan, 0)
+    }
+
+    /// Hardware test only: confirms the transfer remains owned.
+    #[cfg(feature = "hardware-tests")]
+    pub fn has_dma_transfer(&self) -> bool {
+        self.transfer.is_some()
     }
 }
 

@@ -1,6 +1,6 @@
 # Servo control
 
-`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting complete pulse batches. It depends on the local servo-signal library for its signal-plan adapter and has no Pico HAL dependency. The current PIO/DMA demo still uses pulse widths directly; the bank and adapter have not yet been exercised together on the Pico.
+`hexaroam-servo-control` is a hardware-independent no_std library. It provides Angle, two-point calibration, calibrated Servo commands through PulseOutput, and ServoBank for validating and submitting complete pulse batches. It depends on the local servo-signal library for its signal-plan adapter and has no Pico HAL dependency. The current PIO/DMA demo still uses pulse widths directly; the bank and adapter are exercised together by the separate servo_bank_angles hardware test.
 
 ## Angle representation
 
@@ -100,7 +100,7 @@ These are host tests with a recording backend. No new Pico behavior, physical se
 
 ## Next step
 
-Connect the tested bank and adapter to a separate Pico angle-command demo. Keep the single-state-machine PIO/DMA backend and synthetic calibration explicit. Actual servo commissioning and measured joint calibration remain separate hardware steps.
+Use the separate Pico angle-command hardware test for the integrated bank and adapter path; keep the standard application fixed-plan until the next application change is agreed. Keep the single-state-machine PIO/DMA backend and synthetic calibration explicit. Actual servo commissioning and measured joint calibration remain separate hardware steps.
 
 ## Signal-plan output adapter
 
@@ -118,4 +118,4 @@ The main loop calls `bank.service()`, which delegates through PulseBankOutput, S
 
 On 2026-10-26 the owner reported all 14 adapter tests passing and full verification with 169 passed, 0 failed, 0 skipped, and 0 filtered out. The tests cover configuration rejection, complete pulse counts, ServoId-to-GPIO mapping, merging equal pulse endings, invalid pulses and period boundaries, backend error forwarding without replacement or retry, servicing, and preservation of bank commands after adapter-level validation failure. The control package now contains 53 host tests.
 
-SwitchingOutput implements SignalPlanOutput by forwarding submission and servicing to its existing methods. The owner reported the full verification task successful; the new bank-to-adapter angle path has not yet been manually exercised on the Pico. CI for this adapter revision has not yet been reported.
+SwitchingOutput implements SignalPlanOutput by forwarding submission and servicing to its existing methods. The owner reported the full verification task successful; the owner subsequently confirmed a successful servo_bank_angles signal check and green CI for the angle-test revision on 2026-10-27. See the [hardware procedure](../pico/hardware_tests/README.md#servo-bank-angle-test).

@@ -188,10 +188,18 @@ On 2026-10-17 the owner reported 149 passing unit tests and successful execution
 
 `dma_is_active` and `force_fault_with_active_dma` exist only with the `hardware-tests` feature. The hook is deliberate fault injection, not underflow detection. See the [hardware-test guide](../pico/hardware_tests/README.md#controlled-restart-tests).
 
-An intentionally forced DMA-abort timeout, exact restart latency, brief-glitch exclusion, and 18-channel operation remain unverified. Manual programs are excluded from the 149 unit-test count. CI for this recovery revision has not yet been reported.
+The forced timeout return path is covered by the later zero-budget test below. Exact restart latency, brief-glitch exclusion, and 18-channel operation remain unverified. Manual programs are excluded from the 149 unit-test count. CI for this recovery revision has not yet been reported.
 
 ## SignalPlanOutput integration
 
 SwitchingOutput implements the hardware-independent SignalPlanOutput trait from servo-signal. Trait calls forward explicitly to the existing submit_plan and service methods, preserving complete-plan validation, Busy/Faulted behavior, buffer ownership, and polling-based DMA handover. This adds no new hardware behavior by itself and does not expose restart through the trait.
 
-The ServoSignalOutput adapter can therefore own SwitchingOutput while ServoBank owns the adapter. A main-loop bank.service call reaches this driver's service method without exposing GPIO or PIO types to the bank. On 2026-10-26 the owner reported full verification with 169 passing tests after the trait integration. The new angle-command demo and adapter revision CI remain pending. See the [adapter guide](../servo-control/README.md#signal-plan-output-adapter).
+The ServoSignalOutput adapter can therefore own SwitchingOutput while ServoBank owns the adapter. A main-loop bank.service call reaches this driver's service method without exposing GPIO or PIO types to the bank. On 2026-10-26 the owner reported full verification with 169 passing tests after the trait integration. The owner subsequently confirmed the servo_bank_angles signal check and green CI for the angle-test revision. See the [adapter guide](../servo-control/README.md#signal-plan-output-adapter).
+
+## Exhausted abort-budget verification
+
+The production restart method uses the existing 100,000-attempt polling budget. A hardware-tests-only method, restart_with_zero_abort_budget, delegates to the same restart path with a zero budget. This still validates the replacement and requests a real DMA abort, but deterministically returns DmaAbortTimeout without polling completion. has_dma_transfer lets the manual test check that transfer ownership remains bound after that return.
+
+On timeout, the validated replacement may already occupy the pending slot. The driver does not recover the DMA source, clear the FIFO, or restart PIO. service continues to return while faulted, and ordinary submissions remain Faulted. A later normal restart validates its supplied replacement again and confirms DMA inactivity before recovering resources. The hardware may have completed the earlier abort in the meantime; timeout means completion was not confirmed within the allowed polling attempts, not that DMA is necessarily still active.
+
+On 2026-10-27 the owner reported 169 passing unit tests and successful signal and UART checks for restart_abort_timeout. The program confirms the timeout result, fault persistence, retained transfer, Low interval, and successful normal retry. It does not emulate a physically stuck channel or establish real-time timeout duration. See the [manual procedure](../pico/hardware_tests/README.md#forced-abort-timeout-test). CI for this revision has not yet been reported.

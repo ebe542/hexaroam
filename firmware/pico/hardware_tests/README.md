@@ -52,6 +52,8 @@ Transfer the selected UF2 using BOOTSEL and the RPI-RP2 drive as described in th
 | faulted_signal_output | Run normally for approximately 5 s, prepare a replacement, and stop DMA servicing. On underflow, assert Faulted instead of Busy, clear hardware IRQ flag 0, and assert that the driver remains faulted and rejects further plans. Resume service calls; outputs stay Low. LED phases become 100 ms after the assertions pass. |
 | restart_signal_output | Run initial GP0/GP1 pulses for 5 s, induce real underflow, remain Low for 2 s, then restart with 2-ms/1-ms pulses. Reject restart while healthy and invalid period/output requests while faulted. LED phases are 100 ms while faulted, 500 ms otherwise. |
 | restart_active_dma | After 5 s, inject a fault with PIO disabled and outputs Low; confirm a full FIFO and active DMA. Remain Low for 2 s with DMA still active, then restart with 2-ms/1-ms pulses. The successful restart must abort the still-active transfer. |
+| restart_abort_timeout | After 5 s, inject a fault with active DMA, request restart with zero abort polling attempts, and assert DmaAbortTimeout. Keep outputs Low and the transfer owned for 2 s, then retry with the normal budget and observe 2-ms/1-ms pulses. UART reports the forced timeout and successful retry. |
+| servo_bank_angles | Exercise calibrated complete and partial angle commands every 2 s. Observe GP0/GP1 widths 1500/1500, 1000/2000, 1500/2000, 1500/1000, unchanged after an invalid batch, then 1500/1500 us. Rising edges should remain synchronous. |
 | uart_diagnostics | Receive three startup lines (INFO, DEBUG, ERROR) and then INFO Pico alive about once per second. The LED toggles with each alive message. Output is queued in a 128-byte logger and serviced with a 16-byte budget per loop. |
 | uart_panic | Receive the buffered startup message. After approximately 5 s, the LED turns on and a deliberate panic prints its message and source location directly through UART1. The LED stays on and normal execution stops. |
 
@@ -61,7 +63,7 @@ In the original underflow and switching tests, fast blinking means the program o
 
 support/mod.rs initializes board clocks, GPIO ownership, and the hardware timer, and supplies UART1 and its peripheral clock to the UART tests. fixed_plan reuses the normal servo_demo. The underflow, switching, and fault-state tests share support/output.rs for the fixed two-output plan, static storage, and nonblocking LED indicator; each test keeps its own execution sequence.
 
-The Pico hardware-tests feature forwards to servo-pio/hardware-tests. That feature exposes start_with_missing_final_counter and its truncation mode, plus dma_is_active and force_fault_with_active_dma for the active-DMA recovery experiment. Normal start_fixed continues to transfer complete plans. The missing-entry test requires no driver fault injection: it deliberately pauses service calls. No production source edits are needed to select or repeat these experiments.
+The Pico hardware-tests feature forwards to servo-pio/hardware-tests. That feature exposes start_with_missing_final_counter and its truncation mode, plus dma_is_active and force_fault_with_active_dma for active-DMA fault injection, and restart_with_zero_abort_budget and has_dma_transfer for timeout-path verification. Normal start_fixed continues to transfer complete plans. The missing-entry test requires no driver fault injection: it deliberately pauses service calls. No production source edits are needed to select or repeat these experiments.
 
 ## Reported verification
 
@@ -81,7 +83,7 @@ On 2026-10-17, the owner reported all requested checks passing and faulted_signa
 
 The electrical Low response still comes from PIO. The driver observes it when is_faulted, submit_plan, or service reads the reserved flag; detection is not an asynchronous CPU interrupt. A flag cleared before observation cannot be discovered through that flag. The test does not perform recovery.
 
-The original underflow, switching, and persistent-fault tests use panic_halt without UART assertion output. fixed_plan, uart_panic, and both restart tests select the UART panic handler. The restart programs initialize UART1 and log state transitions; fixed_plan shares the normal demo logging. A failed assertion stops CPU progress and LED updates; the last LED level alone does not identify the failing assertion. PIO/DMA may continue until their data supply runs out. Observe a continuing blink pattern, not merely a particular static LED level.
+The original underflow, switching, and persistent-fault tests use panic_halt without UART assertion output. fixed_plan, uart_panic, all restart tests, and servo_bank_angles select the UART panic handler. The restart programs initialize UART1 and log state transitions; fixed_plan shares the normal demo logging. A failed assertion stops CPU progress and LED updates; the last LED level alone does not identify the failing assertion. PIO/DMA may continue until their data supply runs out. Observe a continuing blink pattern, not merely a particular static LED level.
 
 ## UART verification record
 
@@ -99,4 +101,20 @@ Expected phases are initial 1-ms/2-ms pulses for approximately five seconds, bot
 
 `restart_active_dma` injects its fault instead of waiting for underflow. The hardware-tests hook disables PIO execution, forces Low, sets flag 0, safely retires the previous DMA transfer, and starts a full six-word transfer with no consuming state machine. The four-word FIFO must fill while DMA remains active. Assertions confirm active DMA after injection, after rejected restart requests, throughout the Low interval, and immediately before successful restart. This distinguishes the test from recovery after a transfer that may already have completed.
 
-On 2026-10-17 the owner reported 149 passing unit tests and successful manual execution of both tests, including the signal restart and expected LED behavior. The active-DMA test's successful execution also confirms its DMA-status assertions passed. The manual programs are not included in the unit-test total. The abort-timeout path has not been intentionally forced; exact latency and short-glitch exclusion remain unverified. CI for this recovery revision has not yet been reported.
+On 2026-10-17 the owner reported 149 passing unit tests and successful manual execution of both tests, including the signal restart and expected LED behavior. The active-DMA test's successful execution also confirms its DMA-status assertions passed. The manual programs are not included in the unit-test total. The timeout return path was subsequently tested with zero polling attempts as recorded below; exact latency and short-glitch exclusion remain unverified. CI for this recovery revision has not yet been reported.
+
+## Forced abort-timeout test
+
+`restart_abort_timeout` follows the active-DMA fault setup. A feature-gated wrapper calls the same restart implementation with zero permitted status polls. Plan validation and the real channel abort request still occur; the helper then returns Timeout without confirming completion. The test asserts DmaAbortTimeout, persistent driver fault, retained transfer ownership, and rejection of ordinary plan submissions.
+
+For the next two seconds, service calls must not restart output and the transfer must remain owned. DMA may already have stopped asynchronously; BUSY is deliberately not required to remain set after the abort request. A normal restart with a fresh complete replacement must then succeed. Expected signals are five seconds of initial pulses, a Low interval, and restarted GP0/GP1 pulses of 2 ms/1 ms. The LED indicates fault and running phases, and UART reports the timeout and successful retry.
+
+On 2026-10-27 the owner reported 169 passing unit tests, successful signal checks, and expected UART output for this program. This verifies the exhausted-budget return path and subsequent recovery, not a physically stuck DMA channel or the elapsed duration of a real abort timeout. The manual program does not add to unit-test counts. CI for this timeout revision has not yet been reported.
+
+## Servo-bank angle test
+
+`servo_bank_angles` exercises ServoBank -> ServoSignalOutput -> SwitchingOutput -> DMA/PIO on unloaded GP0/GP1. Both synthetic calibrations map -45/0/+45 degrees to 1000/1500/2000 us. The driver starts with a matching center plan; the bank then submits its initial complete center request. Every later angle change passes through the bank and adapter. The main loop calls bank.service and services the UART logger without blocking delays.
+
+At two-second intervals, the program sends complete opposite-angle targets, changes only servo 0, changes only servo 1, rejects a batch containing +46 degrees, and resets both servos to center before repeating. Assertions check retained command values after partial and rejected requests. UART messages describe accepted or rejected commands, not physical activation acknowledgements.
+
+On 2026-10-27 the owner reported 169 passing unit tests, a successful signal check, and subsequently green CI for the angle-test revision. This confirms the integrated command-to-signal path with synthetic calibration. Exact timing, brief-glitch exclusion, actual servo positions, and measured mechanical calibration remain unverified.
