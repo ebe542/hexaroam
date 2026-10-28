@@ -44,13 +44,39 @@ Eighteen calibrations occupy 384 bytes including both envelopes and CRCs. The ma
 
 `encode_slot()` builds a local candidate, fills unused bytes with `0xFF`, and leaves the caller's buffer unchanged on error. `decode_slot()` reports a completely erased slot as `SlotError::Empty`. Other slots must pass identifier, length, outer CRC and inner-record validation. Padding is ignored when decoding; that does not make a partially programmed slot free for reuse.
 
-`JournalRecord` returns the sequence and optional calibrations. An empty or partial calibration record remains valid journal content, so a later reader must not resurrect an older complete configuration after intentional invalidation. The slot codec can represent `u64::MAX`; preventing sequence wraparound belongs to the future journal writer.
+`JournalRecord` returns the sequence and optional calibrations. An empty or partial calibration record remains valid journal content, so a later reader must not resurrect an older complete configuration after intentional invalidation. The slot codec can represent `u64::MAX`; the journal writer rejects sequence wraparound.
 
-These functions encode and validate bytes only. They neither program flash pages nor establish an atomic write-completion mechanism. Newest-record selection, duplicate-sequence handling, free-slot selection and recovery across sectors are not implemented yet.
+These functions encode and validate bytes only. They neither program flash pages nor establish an atomic write-completion mechanism. Newest-record selection and duplicate-sequence detection are implemented below. Slot selection and sector switching are implemented by the storage-independent writer below; actual flash operations remain future work.
+
+## Journal search
+
+`find_latest()` accepts a slice of fixed-size slot images and returns `Result<Option<LocatedRecord<N>>, ScanError>`. It examines all supplied slots and selects the valid record with the highest sequence number, regardless of physical address or sector. `LocatedRecord` includes the slot index and decoded record. Slot images are read-only; no storage driver is involved.
+
+Erased and invalid slots are skipped. No valid record returns `Ok(None)`, which must not authorize normal operation. A found record returns `Ok(Some(...))`; the later startup layer still needs to require every configured calibration to be present. A newer empty or partial configuration remains authoritative and must not be replaced by an older complete one.
+
+Any duplicate sequence number among valid records returns `ScanError::DuplicateSequence`, including duplicates older than the newest record. Invalid records do not participate in duplicate detection. `u64::MAX` can be selected without incrementing it; the writer rejects further appends after that sequence.
+
+The current search re-decodes previous slots for duplicate detection rather than allocating a sequence-number table. Its work is quadratic in the slot count; the planned journal has only sixteen slots. CRC adapters must start an independent computation on every call.
+
+Host tests cover both sector/address orders, missing and invalid records, duplicate sequences, partial/empty invalidation, corrupted sequence numbers, invalid inner records, maximum sequence and a simulated incomplete header write. Write-management tests below simulate selected interrupted operations. Actual interrupted flash-program/erase recovery still requires hardware checks.
+
+## Journal storage and append
+
+`JournalStorage` abstracts reading a complete slot, programming an erased slot and erasing one sector. Geometry is two sectors with eight 512-byte slots each. Backend errors may leave a slot partially programmed or a sector partially erased. The real backend is responsible for the platform execution conditions; this trait alone does not make flash writes safe.
+
+`append()` reads all sixteen slots before selecting a destination. A read error aborts the operation; it is not treated as an invalid record. The newest valid record determines the active sector and next sequence. With no valid record, initialization uses sector0 and sequence1; no claim of globally unique numbering after complete data loss is made. Duplicate valid sequences and sequence overflow prevent writes. The candidate is encoded before any erase/program call, so an oversized record cannot trigger a sector erase.
+
+Within the active sector, the writer chooses the slot after the last occupied slot. Any byte other than `0xFF`, including padding-only changes, marks a slot occupied. Erased holes before the last occupied slot are not reused. If the active sector is full, the writer switches to the other sector and erases it only if it is not completely erased. The sector containing the latest valid record is retained; it is only reclaimed when a later switch needs it.
+
+After programming, the writer reads back and compares all 512 bytes, including padding, against the encoded candidate. Only an exact match returns `LocatedRecord`. Read/write/erase errors are returned as `JournalError::Storage`; a mismatch returns `VerificationFailed`. Every retry starts from a fresh storage scan, so a partial failed write is not blindly overwritten. An error is not a rollback guarantee: a complete record may already be present if writing succeeded but readback failed. Future UART/service callers must treat that outcome as uncertain and reload before assuming which state is durable.
+
+The implementation currently holds an 8-KiB journal image plus two 512-byte buffers in `append()`. Nested encoding and decoding use additional stack space; this is not a measured total stack bound. Embedded stack use must be reviewed before Pico integration.
+
+The sixteen writer tests cover first append, sequence progression, occupied-slot skipping, active-sector selection, partial invalidation, both sector-switch directions, avoiding unnecessary erases, duplicate/overflow rejection, scan/readback errors, a partial write and retry, a partial erase failure, full-buffer readback mismatch including padding, oversized records and the final available sequence. These are simulations, not an exhaustive power-loss campaign or hardware verification. Startup/service-mode enforcement, real flash reservation and Pico multicore/interrupt/DMA coordination are not implemented here.
 
 ## Verification and remaining work
 
-The owner reported 36 passing host tests: five CRC/adapter tests, eighteen calibration-format tests and thirteen journal-slot tests. Envelope fixtures are constructed independently of the corresponding envelope encoder. The subsequent full runner reported 208 passing tests and all 13 checks passing. These are owner-reported local results; CI for the slot-format change is pending. No embedded storage operations have been implemented or tested.
+On 2026-10-28 the owner reported 66 passing storage tests: five CRC/adapter tests, eighteen calibration-format tests, thirteen journal-slot tests, fourteen journal-search tests and sixteen writer tests. The full local runner subsequently reported 238 passing tests and all 13 checks passing. Envelope fixtures are constructed independently of the corresponding envelope encoder. The previously committed slot-format revision passed CI; the search and write-management changes are being prepared together, with CI pending for that combined revision. No embedded storage operations have been implemented or tested.
 
 From the repository root:
 
@@ -59,4 +85,4 @@ cargo fmt --manifest-path firmware/servo-storage/Cargo.toml
 cargo test --manifest-path firmware/servo-storage/Cargo.toml --lib --locked
 ```
 
-Next steps are journal scanning, append/sector management, interrupted-write behavior and a separate Pico flash driver. Two 4-KiB sectors with eight 512-byte slots each are planned; no flash region is reserved yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
+Next steps are additional recovery scenarios as needed and a separate Pico flash driver. Two 4-KiB sectors with eight 512-byte slots each are planned; no flash region is reserved yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.

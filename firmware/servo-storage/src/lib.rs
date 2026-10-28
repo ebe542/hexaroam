@@ -15,3 +15,15 @@ mod journal_slot;
 pub use journal_slot::{
     JournalRecord, SLOT_SIZE, SlotError, decode_slot, encode_slot,
 };
+
+mod journal_scan;
+
+pub use journal_scan::{LocatedRecord, ScanError, find_latest};
+
+mod storage;
+
+pub use storage::{JournalStorage, SECTOR_COUNT, SLOT_COUNT, SLOTS_PER_SECTOR};
+
+mod journal;
+
+pub use journal::{JournalError, append};
