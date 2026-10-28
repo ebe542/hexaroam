@@ -201,4 +201,4 @@ On 2026-10-17 the owner reported 149 passing unit tests and successful execution
 
 ## Calibration storage format
 
-The [servo-storage library](servo-storage/README.md) provides hardware-independent binary calibration encoding/decoding and an interchangeable CRC-32 interface. The owner reported 23 passing host tests. This implements the data format only; flash journal, reserved storage, UART configuration and startup enforcement remain future work.
+The [servo-storage library](servo-storage/README.md) provides hardware-independent calibration encoding/decoding, an interchangeable CRC-32 interface, and a 512-byte journal-slot envelope with a CRC-protected sequence number. The owner reported 36 passing storage tests, followed by 208 passing tests and all 13 checks passing in the full local runner. CI for the slot-format change is pending. Newest-record selection, flash journal management, reserved storage, UART configuration and startup enforcement remain future work; no flash writes are performed.

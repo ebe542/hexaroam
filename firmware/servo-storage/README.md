@@ -27,9 +27,30 @@ Angles are hundredths of a degree; pulse widths are microseconds. Eighteen entri
 
 `Checksum` allows interchangeable implementations. Each call starts a complete independent CRC-32/ISO-HDLC calculation: polynomial `0x04C11DB7`, initial value `0xFFFFFFFF`, reflected input/output, final XOR `0xFFFFFFFF`. The stored result is little endian. `SoftwareCrc32` is provided; a Pico hardware adapter is not yet implemented.
 
+## Journal slot representation
+
+`encode_slot()` and `decode_slot()` wrap the existing calibration record in a fixed 512-byte slot. All multibyte fields remain little endian and are serialized explicitly, without Rust structure padding.
+
+| Offset | Field | Size |
+| --- | --- | --- |
+| 0 | Journal identifier/version: `4A 01` hexadecimal | 2 bytes |
+| 2 | Length of embedded calibration record, including its header and CRC | 2 bytes, `u16` |
+| 4 | Sequence number | 8 bytes, `u64` |
+| 12 | Embedded calibration record | Variable |
+| 12 + embedded length | Journal CRC over journal header and embedded record | 4 bytes |
+| After journal CRC | Padding | Remaining bytes |
+
+Eighteen calibrations occupy 384 bytes including both envelopes and CRCs. The maximum embedded record length is 496 bytes. The outer CRC protects the sequence number as well as the complete inner record; the inner format remains independently usable.
+
+`encode_slot()` builds a local candidate, fills unused bytes with `0xFF`, and leaves the caller's buffer unchanged on error. `decode_slot()` reports a completely erased slot as `SlotError::Empty`. Other slots must pass identifier, length, outer CRC and inner-record validation. Padding is ignored when decoding; that does not make a partially programmed slot free for reuse.
+
+`JournalRecord` returns the sequence and optional calibrations. An empty or partial calibration record remains valid journal content, so a later reader must not resurrect an older complete configuration after intentional invalidation. The slot codec can represent `u64::MAX`; preventing sequence wraparound belongs to the future journal writer.
+
+These functions encode and validate bytes only. They neither program flash pages nor establish an atomic write-completion mechanism. Newest-record selection, duplicate-sequence handling, free-slot selection and recovery across sectors are not implemented yet.
+
 ## Verification and remaining work
 
-The owner reported 23 passing host tests: five CRC/adapter tests and eighteen format tests. Fixtures are constructed independently of the encoder. No embedded storage operations have been implemented or tested.
+The owner reported 36 passing host tests: five CRC/adapter tests, eighteen calibration-format tests and thirteen journal-slot tests. Envelope fixtures are constructed independently of the corresponding envelope encoder. The subsequent full runner reported 208 passing tests and all 13 checks passing. These are owner-reported local results; CI for the slot-format change is pending. No embedded storage operations have been implemented or tested.
 
 From the repository root:
 
@@ -38,4 +59,4 @@ cargo fmt --manifest-path firmware/servo-storage/Cargo.toml
 cargo test --manifest-path firmware/servo-storage/Cargo.toml --lib --locked
 ```
 
-Next steps are the append-only journal, interrupted-write behavior and a separate Pico flash driver. Two 4-KiB sectors and 512-byte slots are planned; no flash region is reserved yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
+Next steps are journal scanning, append/sector management, interrupted-write behavior and a separate Pico flash driver. Two 4-KiB sectors with eight 512-byte slots each are planned; no flash region is reserved yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
