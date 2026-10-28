@@ -72,11 +72,11 @@ After programming, the writer reads back and compares all 512 bytes, including p
 
 The implementation currently holds an 8-KiB journal image plus two 512-byte buffers in `append()`. Nested encoding and decoding use additional stack space; this is not a measured total stack bound. Embedded stack use must be reviewed before Pico integration.
 
-The sixteen writer tests cover first append, sequence progression, occupied-slot skipping, active-sector selection, partial invalidation, both sector-switch directions, avoiding unnecessary erases, duplicate/overflow rejection, scan/readback errors, a partial write and retry, a partial erase failure, full-buffer readback mismatch including padding, oversized records and the final available sequence. These are simulations, not an exhaustive power-loss campaign or hardware verification. Startup/service-mode enforcement, real flash reservation and Pico multicore/interrupt/DMA coordination are not implemented here.
+The sixteen writer tests cover first append, sequence progression, occupied-slot skipping, active-sector selection, partial invalidation, both sector-switch directions, avoiding unnecessary erases, duplicate/overflow rejection, scan/readback errors, a partial write and retry, a partial erase failure, full-buffer readback mismatch including padding, oversized records and the final available sequence. These are simulations, not an exhaustive power-loss campaign or hardware verification. Startup/service-mode enforcement and Pico multicore/interrupt/DMA coordination are not implemented here. The Pico linker reservation is documented below.
 
 ## Verification and remaining work
 
-On 2026-10-28 the owner reported 66 passing storage tests: five CRC/adapter tests, eighteen calibration-format tests, thirteen journal-slot tests, fourteen journal-search tests and sixteen writer tests. The full local runner subsequently reported 238 passing tests and all 13 checks passing. Envelope fixtures are constructed independently of the corresponding envelope encoder. The previously committed slot-format revision passed CI; the search and write-management changes are being prepared together, with CI pending for that combined revision. No embedded storage operations have been implemented or tested.
+On 2026-10-28 the owner reported 66 passing storage tests: five CRC/adapter tests, eighteen calibration-format tests, thirteen journal-slot tests, fourteen journal-search tests and sixteen writer tests. The full local runner subsequently reported 238 passing tests and all 13 checks passing. Envelope fixtures are constructed independently of the corresponding envelope encoder. The owner subsequently reported green CI for the combined search/write-management revision. No embedded storage operations have been implemented or tested.
 
 From the repository root:
 
@@ -85,4 +85,18 @@ cargo fmt --manifest-path firmware/servo-storage/Cargo.toml
 cargo test --manifest-path firmware/servo-storage/Cargo.toml --lib --locked
 ```
 
-Next steps are additional recovery scenarios as needed and a separate Pico flash driver. Two 4-KiB sectors with eight 512-byte slots each are planned; no flash region is reserved yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
+Next steps are additional recovery scenarios as needed and a separate Pico flash driver. The Pico linker now reserves two 4-KiB sectors with eight 512-byte slots each; no flash read/write backend is connected yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
+
+## Pico flash reservation
+
+The Pico [memory.x](../pico/memory.x) reserves the final 8 KiB of its 2-MiB flash for the journal. Firmware FLASH length excludes that region; the existing 256-byte BOOT2 area is unchanged.
+
+| Region | Memory-mapped address | Flash-relative offset | Size |
+| --- | --- | --- | --- |
+| Journal sector0 | `0x101FE000` | `0x001FE000` | 4096 bytes |
+| Journal sector1 | `0x101FF000` | `0x001FF000` | 4096 bytes |
+| Journal end, exclusive | `0x10200000` | `0x00200000` | - |
+
+Linker symbols `__calibration_start` and `__calibration_end` expose these boundaries. Assertions check adjacency to firmware, 4-KiB start alignment, two-sector size and the end of flash. No initialized data section is assigned to CALIBRATION. This reserves space against firmware growth at link time; it does not prevent a full-chip erase, programming other firmware, or explicit writes to those addresses.
+
+On 2026-10-28 the owner reported 238 passing tests and all 13 checks passing after the linker change, including the Pico build. Read-only inspection of that debug ELF confirmed both boundary symbols and no load-image or runtime segment overlapping the journal. The highest flash load-image end was `0x10015C50` (exclusive); this is a build-specific observation, not a fixed firmware size. No UF2 upload, persistence check or flash operation was performed for this reservation. CI for the reservation change is pending.
