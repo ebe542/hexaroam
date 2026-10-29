@@ -109,6 +109,13 @@ path = "hardware_tests/flash_program_slot.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "flash_erase_sector"
+path = "hardware_tests/flash_erase_sector.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"

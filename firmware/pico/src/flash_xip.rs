@@ -1,4 +1,4 @@
-//! RAM-resident XIP transitions and journal slot programming.
+//! RAM-resident XIP transitions and journal programming/erase operations.
 
 pub type RomFunction = unsafe extern "C" fn();
 
@@ -69,6 +69,58 @@ pub unsafe extern "C" fn hexaroam_program_slot(
             offset,
             data,
             hexaroam_servo_storage::SLOT_SIZE,
+        );
+        flush();
+        restore();
+    }
+}
+
+pub type RomEraseFunction = unsafe extern "C" fn(
+    offset: u32,
+    count: usize,
+    block_size: u32,
+    block_command: u8,
+);
+
+/// Erases one complete journal sector while executing from RAM.
+///
+/// # Safety
+///
+/// This function and its stack must reside in RAM.
+/// Interrupts must remain masked until XIP has been restored.
+/// No other core, DMA channel or debugger operation may access flash.
+///
+/// connect/exit/erase/flush must point to the corresponding
+/// RP2040 ROM functions. restore must point to a valid, live RAM
+/// copy of the current Boot2.
+///
+/// offset must identify a complete, sector-aligned sector inside
+/// the linker-reserved calibration journal. Its contents must
+/// be expendable; this routine does not select the target sector.
+///
+/// The test assumes the standard Pico flash/pad configuration.
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data.ram_func")]
+#[inline(never)]
+pub unsafe extern "C" fn hexaroam_erase_sector(
+    connect: RomFunction,
+    exit: RomFunction,
+    erase: RomEraseFunction,
+    flush: RomFunction,
+    restore: RomFunction,
+    offset: u32,
+) {
+    // Standard SPI flash command for erasing one 4-KiB sector.
+    const SECTOR_ERASE_COMMAND: u8 = 0x20;
+
+    unsafe {
+        connect();
+        exit();
+        erase(
+            offset,
+            hexaroam_servo_storage::SECTOR_SIZE,
+            hexaroam_servo_storage::SECTOR_SIZE as u32,
+            SECTOR_ERASE_COMMAND,
         );
         flush();
         restore();
