@@ -20,6 +20,9 @@ class InstallTests(unittest.TestCase):
     def run_install(self, results):
         with (
             patch.object(dev, "run_command", side_effect=results) as command,
+            # These tests check task status, not terminal/CI color policy.
+            # Color behavior has its own tests in test_dev.py.
+            patch.object(dev, "color_status", side_effect=lambda text, success: text),
             redirect_stdout(io.StringIO()) as output,
         ):
             code = dev.run_task("install")

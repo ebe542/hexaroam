@@ -37,10 +37,13 @@ class HardwareReportTests(unittest.TestCase):
         }) + "\n")
 
     def disassemble(self, arguments, **options):
-        self.assertEqual(arguments, [
+        self.assertEqual(arguments[:-1], [
             str(self.objdump), "--disassemble", "--demangle",
-            "--section-headers", "--syms", str(self.executable),
+            "--section-headers", "--syms",
         ])
+        # Windows can expand a temporary directory's 8.3 alias to its
+        # long name during resolve(). Compare canonical paths.
+        self.assertEqual(Path(arguments[-1]).resolve(), self.executable.resolve())
         self.assertEqual(options["cwd"], self.directory)
         self.assertFalse(options["shell"])
         self.assertEqual(options["stderr"], subprocess.PIPE)
