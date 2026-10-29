@@ -23,9 +23,14 @@ pub use journal_scan::{LocatedRecord, ScanError, find_latest};
 mod storage;
 
 pub use storage::{
-    JournalRead, JournalStorage, SECTOR_COUNT, SLOT_COUNT, SLOTS_PER_SECTOR,
+    JOURNAL_SIZE, JournalRead, JournalStorage, SECTOR_COUNT, SECTOR_SIZE,
+    SLOT_COUNT, SLOTS_PER_SECTOR,
 };
 
 mod journal;
 
 pub use journal::{JournalError, append, load};
+
+mod journal_layout;
+
+pub use journal_layout::{JournalLayout, LayoutError, StorageRange};

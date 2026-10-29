@@ -5,6 +5,8 @@ use crate::SLOT_SIZE;
 pub const SECTOR_COUNT: usize = 2;
 pub const SLOTS_PER_SECTOR: usize = 8;
 pub const SLOT_COUNT: usize = SECTOR_COUNT * SLOTS_PER_SECTOR;
+pub const SECTOR_SIZE: usize = SLOTS_PER_SECTOR * SLOT_SIZE;
+pub const JOURNAL_SIZE: usize = SECTOR_COUNT * SECTOR_SIZE;
 
 /// Storage operations used by the journal.
 ///

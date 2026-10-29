@@ -2,7 +2,12 @@
 
 use core::ptr;
 
-use hexaroam_servo_storage::{JournalRead, SLOT_COUNT, SLOT_SIZE};
+use hexaroam_servo_storage::{
+    JOURNAL_SIZE, JournalLayout, JournalRead, LayoutError, SLOT_SIZE,
+};
+
+const FLASH_START: usize = 0x1000_0000;
+const FLASH_SIZE: u32 = 2 * 1024 * 1024;
 
 unsafe extern "C" {
     static __calibration_start: u8;
@@ -16,7 +21,7 @@ pub enum FlashReadError {
 }
 
 pub struct FlashJournalReader {
-    start: usize,
+    layout: JournalLayout,
 }
 
 impl FlashJournalReader {
@@ -32,17 +37,20 @@ impl FlashJournalReader {
         let start = ptr::addr_of!(__calibration_start) as usize;
         let end = ptr::addr_of!(__calibration_end) as usize;
 
-        let expected_size = SLOT_COUNT * SLOT_SIZE;
-
-        if start < 0x1000_0000
-            || end > 0x1020_0000
-            || end.checked_sub(start) != Some(expected_size)
-            || start % 4096 != 0
+        if start < FLASH_START
+            || end > FLASH_START + FLASH_SIZE as usize
+            || end.checked_sub(start) != Some(JOURNAL_SIZE)
         {
             return Err(FlashReadError::InvalidLayout);
         }
 
-        Ok(Self { start })
+        // The bounds above ensure this offset fits into u32.
+        let start_offset = (start - FLASH_START) as u32;
+
+        let layout = JournalLayout::new(start_offset, FLASH_SIZE)
+            .map_err(|_| FlashReadError::InvalidLayout)?;
+
+        Ok(Self { layout })
     }
 }
 
@@ -54,22 +62,29 @@ impl JournalRead for FlashJournalReader {
         slot_index: usize,
         output: &mut [u8; SLOT_SIZE],
     ) -> Result<(), Self::Error> {
-        if slot_index >= SLOT_COUNT {
-            return Err(FlashReadError::UnknownSlot(slot_index));
-        }
+        let range = self
+            .layout
+            .slot_range(slot_index)
+            .map_err(|error| match error {
+                LayoutError::UnknownSlot(index) => {
+                    FlashReadError::UnknownSlot(index)
+                }
+                _ => FlashReadError::InvalidLayout,
+            })?;
 
-        let address = self.start + slot_index * SLOT_SIZE;
+        let address = FLASH_START + range.offset as usize;
 
         // SAFETY:
-        // Construction establishes a readable XIP region whose lifetime
-        // excludes flash modification and XIP reconfiguration.
-        // The checked index keeps the complete slot inside that region.
+        // Construction establishes a readable, reserved XIP region
+        // whose lifetime excludes flash modification/reconfiguration.
+        // JournalLayout bounds the complete slot inside that region
+        // and returns exactly SLOT_SIZE bytes.
         // The destination is a separate, writable RAM buffer.
         unsafe {
             ptr::copy_nonoverlapping(
                 address as *const u8,
                 output.as_mut_ptr(),
-                SLOT_SIZE,
+                range.length,
             );
         }
 
