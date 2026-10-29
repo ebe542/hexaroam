@@ -145,4 +145,18 @@ From the repository root, run `python tools/dev.py hardware-build`, then upload 
 
 Read-only inspection of the built debug ELF found execution address `0x20000000`, flash load address `0x1000BC1C`, and inclusion in the startup-copy range `__sdata..__edata`. The symbol occupied 20 bytes: 16 bytes of instructions and a four-byte local literal; no additional function calls were present in the probe. Addresses and instruction size are specific to that build and must be rechecked after changes.
 
-On 2026-10-29 the owner reported `INFO RAM routine OK` from the Pico, followed by 244 passing tests and all 13 checks passing in the full local runner. LED state was not separately reported. This verifies the simple RAM probe with XIP enabled, not the complete XIP-off flash-operation path, ROM-call sequence, Boot2 restoration, multicore exclusion, watchdog behavior or write persistence. CI for the probe revision is pending.
+On 2026-10-29 the owner reported `INFO RAM routine OK` from the Pico, followed by 244 passing tests and all 13 checks passing in the full local runner. LED state was not separately reported. This verifies the simple RAM probe with XIP enabled, not the complete XIP-off flash-operation path, ROM-call sequence, Boot2 restoration, multicore exclusion, watchdog behavior or write persistence. The owner subsequently reported green CI for the RAM-probe revision.
+
+## XIP exit and restoration test
+
+`flash_xip_cycle` exercises the RAM/ROM transition without programming or erasing flash. Before the transition it resolves the RP2040 ROM pointers for connect_internal_flash, flash_exit_xip and flash_flush_cache, and copies the running image's 256-byte Boot2 into aligned stack RAM. It checks ROM/Thumb addresses and RAM placement before constructing the callable Boot2 pointer.
+
+The `.data.ram_func` routine `hexaroam_xip_cycle` receives four function pointers, calls connect, exit, flush and the RAM Boot2 copy, then returns after XIP has been restored. ROM lookups happen before entering the routine. The test masks interrupts around the call and never starts core1, DMA or servo output. No FlashJournalReader instance is created, respecting that reader's lifetime restriction against XIP reconfiguration. The test assumes the standard Pico flash/pad configuration; it is not a general multicore runtime guard.
+
+After returning, it reads the first mapped flash word with a volatile load and compares it with the copied word. It then reports through UART1. Expected one-time output: `INFO XIP cycle OK`, LED high on success. A preparation-address or flash-word mismatch reports an error and leaves the LED low. Unexpected panic uses panic-halt; watchdog recovery was not implemented or tested.
+
+Build from the repository root with `python tools/dev.py hardware-build`. After ELF review, upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_xip_cycle.uf2` in BOOTSEL mode. Use GP20 UART1/TTL RXD, common ground, 3.3-V logic and HTerm at 115200 baud/8N1/no flow control.
+
+Debug ELF inspection found the 38-byte transition routine at `0x20000000`, backed by flash load address `0x1000C104` within the startup `.data` copy. Its instructions contain four indirect calls through the supplied pointers and no extra helper calls or flash literals. These are build-specific observations and must be rechecked when changing the critical path.
+
+On 2026-10-29 the owner reported `INFO XIP cycle OK`, then 244 passing tests and all 13 checks passing in the full local runner. This confirms the no-write XIP transition, return to ordinary flash execution and the checked post-return flash read. LED state was not separately reported. Flash programming, erase, write persistence, failure recovery and operation alongside another core or active DMA remain unverified. CI for this revision is pending.
