@@ -1,5 +1,7 @@
 # Architecture
 
+For the current implementation, start with the [visual architecture maps](architecture/README.md): [software layers](architecture/software-layers.md) and [traits and implementations](architecture/interfaces.md). The design below also describes future robot layers.
+
 ## Design principles
 
 HexaRoam is a learning project. Implement the robot-specific layers directly, using documentation and existing implementations as references. General-purpose development boards and standard components are acceptable. ROS is an optional adapter, not a core dependency.

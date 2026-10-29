@@ -30,7 +30,7 @@ Rust firmware for Raspberry Pi Pico (RP2040) generates synchronous two-channel s
 | tools/ | Calibration and diagnostics |
 | configs/ | Geometry, joint mapping, and calibration |
 
-Start with [architecture](docs/architecture.md) and [milestones](docs/milestones.md).
+Start with the [visual architecture maps](docs/architecture/README.md), [project architecture](docs/architecture.md) and [milestones](docs/milestones.md).
 
 ## Hardware reference
 

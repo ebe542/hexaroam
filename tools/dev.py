@@ -1,6 +1,7 @@
 """Run HexaRoam development tasks with live output and test totals."""
 
 import argparse
+import html
 import json
 import os
 import re
@@ -21,6 +22,18 @@ SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
 LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
 STORAGE_DIR = PROJECT_ROOT / "firmware" / "servo-storage"
 
+DOC_TARGET = "thumbv6m-none-eabi"
+DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
+DOC_OUTPUT_DIR = DOC_TARGET_DIR / DOC_TARGET / "doc"
+DOC_PACKAGES = (
+    (SIGNAL_DIR, "hexaroam-servo-signal"),
+    (CONTROL_DIR, "hexaroam-servo-control"),
+    (SERVO_PIO_DIR, "hexaroam-servo-pio"),
+    (LOGGING_DIR, "hexaroam-logging"),
+    (STORAGE_DIR, "hexaroam-servo-storage"),
+    (PICO_DIR, "hexaroam-pico"),
+)
+
 RUNNER_TEST_COMMAND = [
     sys.executable,
     "-m",
@@ -34,6 +47,15 @@ RUNNER_TEST_COMMAND = [
 ]
 
 TASKS = {
+    "doc": [
+        (directory, [
+            "cargo", "doc", "--locked", "--no-deps",
+            "--document-private-items", "--target", DOC_TARGET,
+            "--target-dir", str(DOC_TARGET_DIR),
+            *(["--bin", name] if directory == PICO_DIR else ["--lib"]),
+        ])
+        for directory, name in DOC_PACKAGES
+    ],
     "install": [
         (
             PICO_DIR,
@@ -327,6 +349,35 @@ def color_status(text: str, success: bool) -> str:
     return f"\x1b[{code}m{text}\x1b[0m"
 
 
+
+def write_doc_index() -> CommandResult:
+    """Publish an overview only when every expected package page exists."""
+    try:
+        links = []
+        for _, name in DOC_PACKAGES:
+            relative = f"{name.replace('-', '_')}/index.html"
+            if not (DOC_OUTPUT_DIR / relative).is_file():
+                raise ValueError(f"Missing generated documentation: {relative}")
+            links.append(f'<li><a href="{relative}">{html.escape(name)}</a></li>')
+        page = (
+            '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            '<title>HexaRoam Rust documentation</title></head><body>'
+            '<h1>HexaRoam Rust documentation</h1>'
+            '<p>Modules, types, traits and implementations, including private items. '
+            'Generated for thumbv6m-none-eabi; hardware-test examples are excluded.</p>'
+            '<ul>' + ''.join(links) + '</ul></body></html>\n'
+        )
+        index = DOC_OUTPUT_DIR / "index.html"
+        index.write_text(page, encoding="utf-8", newline="\n")
+        print(f"Documentation overview: {index}", flush=True)
+        return CommandResult(0, str(index))
+    except (OSError, ValueError) as error:
+        message = f"Documentation overview failed: {error}"
+        print(message, flush=True)
+        return CommandResult(1, message)
+
+
 def run_task(task: str) -> int:
     results = []
     for directory, arguments in TASKS[task]:
@@ -360,6 +411,9 @@ def run_task(task: str) -> int:
                 ]
                 converted = run_command(conversion, directory)
                 results.append((directory, conversion, converted))
+
+    if task == "doc" and all(result.return_code == 0 for _, _, result in results):
+        results.append((PROJECT_ROOT, ["documentation-index"], write_doc_index()))
 
     print("\nSummary", flush=True)
     failures = 0

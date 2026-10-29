@@ -5,6 +5,7 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all six Rust packages |
 | `python tools/dev.py test` | Python runner/parser tests and host tests for servo-signal, servo-control, and servo-pio |
 | `python tools/dev.py fmt` | Format all four Rust packages; modifies source files |
 | `python tools/dev.py check` | Check formatting and run cargo check for all four Rust packages; no unit tests or linked firmware image |
@@ -102,3 +103,23 @@ The command installs rustfmt, clippy and llvm-tools-preview for the active Rust 
 Python 3.10+, Rustup with a working Rust/Cargo toolchain, and host build prerequisites must already be installed and available on PATH. Windows requires the MSVC C++ build tools and Windows SDK; Ubuntu requires the documented build-essential setup. Run as your normal user; the task does not invoke sudo or an OS package manager, modify PATH, install editor extensions, or flash hardware. Downloads require network access. Cargo's bin directory must be on PATH for later UF2 commands.
 
 All three installation steps appear in the summary. Independent steps are attempted even after a failure, and any failure makes the overall task fail. Installation does not count as unit tests. The new tests mock all commands; actual installation and verification are performed by the owner.
+
+## Combined Rust documentation
+
+Run from the repository root:
+
+```bash
+python tools/dev.py doc
+```
+
+The task documents servo-signal, servo-control, servo-pio, logging, servo-storage and the Pico binary using cargo doc --locked --no-deps --document-private-items. All packages use the thumbv6m-none-eabi target, so embedded-only PIO code is included. Cargo/Rustdoc and the embedded target are required; no extra Python package, cargo-modules or Graphviz installation is needed.
+
+After all six commands succeed, an overview links the generated crate pages at:
+
+```text
+target/rustdoc/thumbv6m-none-eabi/doc/index.html
+```
+
+Open this file manually in a browser. The task does not automatically open windows. The shared output contains the project's package documentation, with module navigation, types, trait implementations and implementors. Dependency documentation is omitted; some external links therefore lead outside the generated pages. This is navigable API documentation, not an automatically generated architecture graph. Only compiled library/binary modules for the selected target and default features are included; hardware-test examples and modules used only by those examples are excluded.
+
+Commands run sequentially in their package directories with a shared target directory. Rustdoc output is cumulative. A failed package does not prevent the remaining commands, but suppresses overview generation and fails the task. Missing expected crate pages also fail overview generation. Old generated files may remain after a failure: use only a successful run and regenerate after changes. Generated output is ignored by Git. The task does not execute doctests, host tests, hardware programs or firmware uploads and is separate from verify. Tests mock Cargo; real generation and browser review remain with the owner.
