@@ -185,3 +185,13 @@ The project owner performs implementation, builds, tests, and commits. Setup com
 ## Shared development commands
 
 Use Python 3.10 or newer to run `python tools/dev.py verify` from the repository root. On Ubuntu the interpreter may be named python3. No additional Python packages are needed. This checks formatting for the Rust packages registered in tools/dev.py, runs Python and Rust host unit tests, and builds the Pico firmware. `python tools/dev.py check` only checks Rust formatting and runs cargo check; `python tools/dev.py build` builds the Pico ELF. GitHub Actions uses test and verify. See the [task runner guide](../tools/README.md) for formatting, UF2 conversion, and separate hardware-test builds. Verification of this task split is pending.
+
+## Combined project-tool installation
+
+Once Python 3.10+, Rustup/Rust/Cargo and the operating-system build prerequisites above are installed, run from the repository root:
+
+```bash
+python tools/dev.py install
+```
+
+On Ubuntu use python3 if needed. This installs the project's Rust components (rustfmt, clippy, llvm-tools-preview), the Pico target and the pinned host elf2uf2-rs converter. It uses the active toolchain without updating Rust or changing the default. See the [installation task](../tools/README.md#install-development-tools) for scope and failure handling. Then run `python tools/dev.py verify` and, for the manual firmware programs, `python tools/dev.py hardware-build`. Neither command uploads firmware.

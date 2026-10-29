@@ -27,7 +27,7 @@ From the repository root:
 python tools/dev.py hardware-build
 ```
 
-This builds all registered hardware-test programs and converts each reported ELF executable to UF2. It requires the embedded Rust target and elf2uf2-rs. It does not flash the Pico or evaluate results. Files are generated under:
+This builds all registered hardware-test programs and generates ELF, UF2, linker map (.map) and disassembly (.disasm) for each. It requires the embedded Rust target, elf2uf2-rs and the Rust llvm-tools-preview component (install with `rustup component add llvm-tools-preview`). See the [report-generation procedure](../../../tools/README.md#linker-maps-and-disassembly). It does not flash the Pico or evaluate results. Files are generated under:
 
 ```text
 firmware/pico/target/thumbv6m-none-eabi/debug/examples/

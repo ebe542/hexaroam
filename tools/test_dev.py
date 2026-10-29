@@ -464,6 +464,7 @@ class HardwareBuildTests(RunnerTestCase):
                 "hardware-build": [(Path("pico"), ["cargo", "build"])],
             }),
             patch.object(dev, "run_command", side_effect=results) as command,
+            patch.object(dev, "hardware_reports", return_value=dev.CommandResult(0, "")),
             redirect_stdout(io.StringIO()) as output,
         ):
             code = dev.run_task("hardware-build")
@@ -503,7 +504,7 @@ class HardwareBuildTests(RunnerTestCase):
         ])
         self.assertNotEqual(code, 0)
         self.assertEqual(command.call_count, 3)
-        self.assertIn("1 of 3 checks failed", output)
+        self.assertIn("1 of 5 checks failed", output)
 
     def test_success_without_artifacts_is_rejected(self):
         code, command, _ = self.run_hardware([

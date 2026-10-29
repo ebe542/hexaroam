@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -33,6 +34,18 @@ RUNNER_TEST_COMMAND = [
 ]
 
 TASKS = {
+    "install": [
+        (
+            PICO_DIR,
+            ["rustup", "component", "add", "rustfmt", "clippy", "llvm-tools-preview"],
+        ),
+        (PICO_DIR, ["rustup", "target", "add", "thumbv6m-none-eabi"]),
+        (
+            PICO_DIR,
+            ["cargo", "install", "elf2uf2-rs", "--version", "2.2.0",
+             "--locked", "--target", "host-tuple"],
+        ),
+    ],
     "test": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
@@ -206,6 +219,89 @@ def hardware_artifacts(output: str) -> list[Path]:
     return artifacts
 
 
+def find_objdump(directory: Path) -> Path:
+    """Find LLVM in the active Rust toolchain, including rustup overrides."""
+    result = subprocess.run(
+        ["rustc", "--print", "sysroot"], cwd=directory,
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        shell=False,
+    )
+    if result.returncode != 0:
+        raise ValueError(result.stderr.strip() or "Could not locate Rust sysroot")
+    sysroot = result.stdout.strip()
+    if not sysroot:
+        raise ValueError("Rust reported an empty sysroot")
+    candidates = [
+        path
+        for name in ("llvm-objdump", "llvm-objdump.exe")
+        for path in (Path(sysroot) / "lib" / "rustlib").glob(f"*/bin/{name}")
+        if path.is_file()
+    ]
+    if len(candidates) != 1:
+        raise ValueError(
+            "Could not uniquely locate llvm-objdump in the active toolchain. "
+            "Run: rustup component add llvm-tools-preview"
+        )
+    return candidates[0]
+
+
+def hardware_reports(executable: Path, directory: Path) -> CommandResult:
+    """Relink one example with a map and disassemble that exact ELF."""
+    executable = executable.resolve() if executable.is_absolute() else (
+        directory / executable
+    ).resolve()
+    try:
+        objdump = find_objdump(directory)
+        # A unique linker output forces Cargo to relink even when a previous
+        # map was deleted. Reports replace their final files only on success.
+        with tempfile.TemporaryDirectory(
+            prefix=".reports-", dir=executable.parent,
+        ) as temporary:
+            temporary = Path(temporary)
+            map_file = temporary / "output.map"
+            dump_file = temporary / "output.disasm"
+            build = run_command([
+                "cargo", "rustc", "--locked", "--example", executable.name,
+                "--features", "hardware-tests",
+                "--message-format=json-render-diagnostics", "--",
+                "-C", f"link-arg=-Map={map_file}",
+            ], directory)
+            if build.return_code != 0:
+                return build
+            artifacts = hardware_artifacts(build.output)
+            resolved = [
+                (path if path.is_absolute() else directory / path).resolve()
+                for path in artifacts
+            ]
+            if executable not in resolved:
+                raise ValueError("Map build did not report the expected ELF")
+            if not map_file.is_file() or map_file.stat().st_size == 0:
+                raise ValueError("Linker did not produce a nonempty map file")
+            command = [str(objdump), "--disassemble", "--demangle",
+                       "--section-headers", "--syms", str(executable)]
+            print(f"[{directory.name}] {' '.join(command)} -> "
+                  f"{executable.with_suffix('.disasm')}", flush=True)
+            with dump_file.open("w", encoding="utf-8", newline="\n") as output:
+                result = subprocess.run(
+                    command, cwd=directory, stdout=output,
+                    stderr=subprocess.PIPE, text=True, encoding="utf-8",
+                    errors="replace", shell=False,
+                )
+            if result.stderr:
+                print(result.stderr, end="", flush=True)
+            if result.returncode != 0:
+                return CommandResult(result.returncode, result.stderr)
+            if dump_file.stat().st_size == 0:
+                raise ValueError("llvm-objdump produced an empty disassembly")
+            map_file.replace(executable.with_suffix(".map"))
+            dump_file.replace(executable.with_suffix(".disasm"))
+        return CommandResult(0, "Map and disassembly generated\n")
+    except (OSError, ValueError) as error:
+        message = f"Hardware reports failed: {error}"
+        print(message, flush=True)
+        return CommandResult(1, message + "\n")
+
+
 def test_kind(arguments: list[str]) -> Optional[str]:
     if arguments[:2] == ["cargo", "test"]:
         return "rust"
@@ -251,6 +347,12 @@ def run_task(task: str) -> int:
                 )
                 continue
             for executable in artifacts:
+                reports = hardware_reports(executable, directory)
+                results.append((
+                    directory, ["hardware-reports", str(executable)], reports,
+                ))
+                if reports.return_code != 0:
+                    continue
                 conversion = [
                     "elf2uf2-rs",
                     str(executable),
