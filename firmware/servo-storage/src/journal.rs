@@ -3,9 +3,9 @@
 use hexaroam_servo_control::Calibration;
 
 use crate::{
-    Checksum, JournalRecord, JournalStorage, LocatedRecord, SECTOR_COUNT,
-    SLOT_COUNT, SLOT_SIZE, SLOTS_PER_SECTOR, ScanError, SlotError, encode_slot,
-    find_latest,
+    Checksum, JournalRead, JournalRecord, JournalStorage, LocatedRecord,
+    SECTOR_COUNT, SLOT_COUNT, SLOT_SIZE, SLOTS_PER_SECTOR, ScanError,
+    SlotError, encode_slot, find_latest,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -15,6 +15,25 @@ pub enum JournalError<E> {
     Slot(SlotError),
     SequenceOverflow,
     VerificationFailed,
+}
+
+/// Reads the journal and returns its newest valid record.
+///
+/// Storage read errors abort loading.
+/// A found record does not imply complete calibration.
+pub fn load<const N: usize, S: JournalRead>(
+    storage: &mut S,
+    checksum: &mut impl Checksum,
+) -> Result<Option<LocatedRecord<N>>, JournalError<S::Error>> {
+    let mut slots = [[0xFF; SLOT_SIZE]; SLOT_COUNT];
+
+    for (index, slot) in slots.iter_mut().enumerate() {
+        storage
+            .read_slot(index, slot)
+            .map_err(JournalError::Storage)?;
+    }
+
+    find_latest::<N>(&slots, checksum).map_err(JournalError::Scan)
 }
 
 /// Appends and verifies one complete calibration record.
@@ -126,3 +145,7 @@ pub fn append<const N: usize, S: JournalStorage>(
 #[cfg(test)]
 #[path = "test_journal.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "test_journal_load.rs"]
+mod load_tests;

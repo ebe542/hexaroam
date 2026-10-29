@@ -384,6 +384,7 @@ dependencies = [
  "hexaroam-servo-control",
  "hexaroam-servo-pio",
  "hexaroam-servo-signal",
+ "hexaroam-servo-storage",
  "panic-halt",
  "pio",
  "pio-proc",
@@ -410,6 +411,13 @@ dependencies = [
 [[package]]
 name = "hexaroam-servo-signal"
 version = "0.1.0"
+
+[[package]]
+name = "hexaroam-servo-storage"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-control",
+]
 
 [[package]]
 name = "indexmap"

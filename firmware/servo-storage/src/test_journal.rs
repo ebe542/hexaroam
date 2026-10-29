@@ -6,8 +6,9 @@ use hexaroam_servo_control::{Angle, Calibration};
 
 use super::{JournalError, append};
 use crate::{
-    JournalRecord, JournalStorage, LocatedRecord, SLOT_COUNT, SLOT_SIZE,
-    SLOTS_PER_SECTOR, ScanError, SlotError, SoftwareCrc32, encode_slot,
+    JournalRead, JournalRecord, JournalStorage, LocatedRecord, SLOT_COUNT,
+    SLOT_SIZE, SLOTS_PER_SECTOR, ScanError, SlotError, SoftwareCrc32,
+    encode_slot,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,7 +65,7 @@ impl MemoryStorage {
     }
 }
 
-impl JournalStorage for MemoryStorage {
+impl JournalRead for MemoryStorage {
     type Error = StorageError;
 
     fn read_slot(
@@ -81,7 +82,9 @@ impl JournalStorage for MemoryStorage {
         output.copy_from_slice(&self.slots[slot_index]);
         Ok(())
     }
+}
 
+impl JournalStorage for MemoryStorage {
     fn write_slot(
         &mut self,
         slot_index: usize,

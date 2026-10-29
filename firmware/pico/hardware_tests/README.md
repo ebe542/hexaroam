@@ -118,3 +118,19 @@ On 2026-10-27 the owner reported 169 passing unit tests, successful signal check
 At two-second intervals, the program sends complete opposite-angle targets, changes only servo 0, changes only servo 1, rejects a batch containing +46 degrees, and resets both servos to center before repeating. Assertions check retained command values after partial and rejected requests. UART messages describe accepted or rejected commands, not physical activation acknowledgements.
 
 On 2026-10-27 the owner reported 169 passing unit tests, a successful signal check, and subsequently green CI for the angle-test revision. This confirms the integrated command-to-signal path with synthetic calibration. Exact timing, brief-glitch exclusion, actual servo positions, and measured mechanical calibration remain unverified.
+
+## Read-only calibration journal test
+
+`flash_journal_read` checks the reserved 8-KiB region through FlashJournalReader -> JournalRead -> load -> find_latest for eighteen servo IDs. It also checks that read_slot rejects SLOT_COUNT as out of range. It uses the software CRC adapter and starts no servo output, flash programming or flash erase. Use the established UART1 wiring: GP20 to adapter TTL RXD, shared GND, 3.3-V logic, HTerm at 115200 baud/8N1/no flow control.
+
+From the repository root:
+
+```bash
+python tools/dev.py hardware-build
+```
+
+After the build/conversion succeeds, hold BOOTSEL while connecting the Pico and copy `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_journal_read.uf2` to RPI-RP2. This programs the test firmware; the running test itself does not write the journal. Prepare HTerm before startup because the result is emitted once.
+
+Expected result: `INFO Journal read OK: no valid record` if no slot is valid, or `INFO Journal read OK: valid record found` if an existing record passes validation. Either successful read result sets the LED high. Invalid layout, failed bounds checking or load failure reports an error and leaves the LED low. A high LED indicates test completion, not configuration completeness or robot-operation permission. This test uses panic-halt; an unexpected panic may halt without a UART panic message.
+
+On 2026-10-28 the owner reported `INFO Journal read OK: no valid record`, followed by 244 passing tests and all 13 checks passing. LED state was not separately reported. The region may contain erased or invalid data; absence of a valid record does not distinguish them. A known valid on-flash record and write/erase/persistence behavior remain untested. CI for this read-only integration is pending.

@@ -22,8 +22,10 @@ pub use journal_scan::{LocatedRecord, ScanError, find_latest};
 
 mod storage;
 
-pub use storage::{JournalStorage, SECTOR_COUNT, SLOT_COUNT, SLOTS_PER_SECTOR};
+pub use storage::{
+    JournalRead, JournalStorage, SECTOR_COUNT, SLOT_COUNT, SLOTS_PER_SECTOR,
+};
 
 mod journal;
 
-pub use journal::{JournalError, append};
+pub use journal::{JournalError, append, load};

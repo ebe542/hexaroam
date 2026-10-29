@@ -62,7 +62,7 @@ Host tests cover both sector/address orders, missing and invalid records, duplic
 
 ## Journal storage and append
 
-`JournalStorage` abstracts reading a complete slot, programming an erased slot and erasing one sector. Geometry is two sectors with eight 512-byte slots each. Backend errors may leave a slot partially programmed or a sector partially erased. The real backend is responsible for the platform execution conditions; this trait alone does not make flash writes safe.
+`JournalRead` provides complete-slot reading. `JournalStorage: JournalRead` adds programming an erased slot and erasing one sector; read-only backends need not expose writes. Geometry is two sectors with eight 512-byte slots each. Backend errors may leave a slot partially programmed or a sector partially erased. The real backend is responsible for the platform execution conditions; this trait alone does not make flash writes safe.
 
 `append()` reads all sixteen slots before selecting a destination. A read error aborts the operation; it is not treated as an invalid record. The newest valid record determines the active sector and next sequence. With no valid record, initialization uses sector0 and sequence1; no claim of globally unique numbering after complete data loss is made. Duplicate valid sequences and sequence overflow prevent writes. The candidate is encoded before any erase/program call, so an oversized record cannot trigger a sector erase.
 
@@ -76,7 +76,7 @@ The sixteen writer tests cover first append, sequence progression, occupied-slot
 
 ## Verification and remaining work
 
-On 2026-10-28 the owner reported 66 passing storage tests: five CRC/adapter tests, eighteen calibration-format tests, thirteen journal-slot tests, fourteen journal-search tests and sixteen writer tests. The full local runner subsequently reported 238 passing tests and all 13 checks passing. Envelope fixtures are constructed independently of the corresponding envelope encoder. The owner subsequently reported green CI for the combined search/write-management revision. No embedded storage operations have been implemented or tested.
+On 2026-10-28 the owner reported 66 passing storage tests: five CRC/adapter tests, eighteen calibration-format tests, thirteen journal-slot tests, fourteen journal-search tests and sixteen writer tests. The full local runner subsequently reported 238 passing tests and all 13 checks passing. Envelope fixtures are constructed independently of the corresponding envelope encoder. The owner subsequently reported green CI for the combined search/write-management revision. These results describe the journal-management revision. The subsequent read-only Pico integration is recorded below; embedded writes and erases remain unimplemented.
 
 From the repository root:
 
@@ -85,7 +85,7 @@ cargo fmt --manifest-path firmware/servo-storage/Cargo.toml
 cargo test --manifest-path firmware/servo-storage/Cargo.toml --lib --locked
 ```
 
-Next steps are additional recovery scenarios as needed and a separate Pico flash driver. The Pico linker now reserves two 4-KiB sectors with eight 512-byte slots each; no flash read/write backend is connected yet. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
+Next steps are additional recovery scenarios as needed and a separate Pico flash driver. The Pico linker now reserves two 4-KiB sectors with eight 512-byte slots each; a read-only Pico backend is available; flash programming and erase are not implemented. Service access, persistent invalidation and boot-mode enforcement are not implemented by this library.
 
 ## Pico flash reservation
 
@@ -99,4 +99,14 @@ The Pico [memory.x](../pico/memory.x) reserves the final 8 KiB of its 2-MiB flas
 
 Linker symbols `__calibration_start` and `__calibration_end` expose these boundaries. Assertions check adjacency to firmware, 4-KiB start alignment, two-sector size and the end of flash. No initialized data section is assigned to CALIBRATION. This reserves space against firmware growth at link time; it does not prevent a full-chip erase, programming other firmware, or explicit writes to those addresses.
 
-On 2026-10-28 the owner reported 238 passing tests and all 13 checks passing after the linker change, including the Pico build. Read-only inspection of that debug ELF confirmed both boundary symbols and no load-image or runtime segment overlapping the journal. The highest flash load-image end was `0x10015C50` (exclusive); this is a build-specific observation, not a fixed firmware size. No UF2 upload, persistence check or flash operation was performed for this reservation. CI for the reservation change is pending.
+On 2026-10-28 the owner reported 238 passing tests and all 13 checks passing after the linker change, including the Pico build. Read-only inspection of that debug ELF confirmed both boundary symbols and no load-image or runtime segment overlapping the journal. The highest flash load-image end was `0x10015C50` (exclusive); this is a build-specific observation, not a fixed firmware size. No UF2 upload, persistence check or flash operation was performed for this reservation. The owner subsequently reported green CI for the reservation change.
+
+## Read-only loading and Pico integration
+
+`load()` requires only `JournalRead`, reads all sixteen slots and calls `find_latest()`. A storage read error aborts loading instead of returning an earlier record. Six host tests cover a read-only backend, absent records, latest-record selection, intentional invalidation, corrupt records, duplicate sequences and a read failure after an earlier valid record.
+
+The Pico [FlashJournalReader](../pico/src/flash_journal.rs) obtains addresses from the linker symbols, checks region size/alignment and flash bounds, rejects invalid slot indices, and copies each slot into caller-owned RAM. It implements `JournalRead` only. Its unsafe constructor requires normal readable 2-MiB XIP flash and no flash programming/erase or XIP reconfiguration by any core or handler for the reader's entire lifetime. Address checks do not establish synchronization; a future writer must account for the reader's lifetime.
+
+The standalone [flash_journal_read hardware test](../pico/hardware_tests/flash_journal_read.rs) loads for eighteen configured servos using SoftwareCrc32, checks rejection of index SLOT_COUNT, and reports one result through UART1. It starts no servo output and performs no flash programming or erase. The normal fixed-plan demo is unchanged.
+
+On 2026-10-28 the owner reported 72 passing storage tests, successful hardware-test execution with `INFO Journal read OK: no valid record`, and a full local verification of 244 passing tests and all 13 checks passing. The message confirms completed reading/search with no accepted record; it does not prove that all bytes are erased. LED state was not separately reported. CI for this read-only integration is pending. Loading a known valid flash record, physical read-error handling, persistence, writes and erases have not been hardware-tested.

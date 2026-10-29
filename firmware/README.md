@@ -206,3 +206,7 @@ The [servo-storage library](servo-storage/README.md) provides hardware-independe
 ### Reserved calibration flash
 
 `pico/memory.x` excludes `0x101FE000..0x10200000` from firmware FLASH and exposes the journal boundaries as linker symbols. The two 4-KiB sectors contain no initialized firmware section. The owner reported the full 13-check verification passing after this change; read-only ELF inspection confirmed the boundaries and absence of overlapping segments. No hardware storage operation or upload was performed. See the [storage guide](servo-storage/README.md#pico-flash-reservation) for addresses, limits and the verification record.
+
+### Read-only journal hardware test
+
+The Pico now has a `JournalRead` backend in `pico/src/flash_journal.rs`; writing and erasing are not exposed by this reader. The [flash_journal_read procedure](pico/hardware_tests/README.md#read-only-calibration-journal-test) exercises the linker-reserved region separately from the normal servo demo. On 2026-10-28 the owner received `INFO Journal read OK: no valid record` and subsequently reported 244 passing tests and all 13 checks passing. This confirms the no-valid-record read path, not an erased-region check or persistence/write validation. The storage library has 72 host tests; CI for this integration is pending.

@@ -8,9 +8,8 @@ pub const SLOT_COUNT: usize = SECTOR_COUNT * SLOTS_PER_SECTOR;
 
 /// Storage operations used by the journal.
 ///
-/// Slot indices are global: 0..SLOT_COUNT.
-/// Sector indices are 0..SECTOR_COUNT.
-pub trait JournalStorage {
+/// Read access to calibration journal slots.
+pub trait JournalRead {
     type Error;
 
     /// Reads one complete slot.
@@ -21,10 +20,12 @@ pub trait JournalStorage {
         slot_index: usize,
         output: &mut [u8; SLOT_SIZE],
     ) -> Result<(), Self::Error>;
+}
 
+/// Write access in addition to journal reading.
+pub trait JournalStorage: JournalRead {
     /// Programs one completely erased slot.
     ///
-    /// The caller supplies the entire slot, including padding.
     /// An error may leave the slot partially programmed.
     /// Success must not modify any other slot.
     fn write_slot(
