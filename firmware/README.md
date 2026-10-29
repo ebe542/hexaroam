@@ -221,4 +221,8 @@ The [flash_xip_cycle hardware test](pico/hardware_tests/README.md#xip-exit-and-r
 
 ### Shared journal range validation
 
-The [JournalLayout geometry helper](servo-storage/README.md#checked-journal-geometry) checks the journal extent and produces bounded whole-slot/whole-sector byte ranges. The Pico reader now uses it instead of its own slot arithmetic, while preserving linker-region validation and read-only access. On 2026-10-29 the owner reported 82 storage tests, 254 tests in total, all 13 checks passing and `INFO Journal read OK: no valid record` from the rebuilt hardware test. Flash programming and erase remain unimplemented. CI for this geometry/reader revision is pending.
+The [JournalLayout geometry helper](servo-storage/README.md#checked-journal-geometry) checks the journal extent and produces bounded whole-slot/whole-sector byte ranges. The Pico reader now uses it instead of its own slot arithmetic, while preserving linker-region validation and read-only access. On 2026-10-29 the owner reported 82 storage tests, 254 tests in total, all 13 checks passing and `INFO Journal read OK: no valid record` from the rebuilt hardware test. Flash programming and erase remain unimplemented. The owner subsequently reported green CI for this geometry/reader revision.
+
+### Journal slot programming preparation
+
+The standalone [flash_program_slot test](pico/hardware_tests/README.md#journal-slot-programming-test) writes a test pattern to an erased reserved slot through a RAM routine, restores XIP and checks every byte. On 2026-10-29 the owner received `INFO Journal slot program OK`, followed by `ERROR Journal slot 0 is not erased` after restarting. The owner reported 254 passing tests and all 13 checks passing. The pattern is not a valid calibration record; sector erasure, a Pico JournalStorage writer and runtime exclusion remain future work. CI for this programming revision is pending. The preceding geometry/reader revision passed CI.

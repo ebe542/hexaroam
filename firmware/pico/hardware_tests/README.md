@@ -164,3 +164,15 @@ On 2026-10-29 the owner reported `INFO XIP cycle OK`, then 244 passing tests and
 ## Journal geometry integration recheck
 
 After the Pico reader was changed to use JournalLayout for bounded flash-relative slot ranges, the owner reran flash_journal_read on 2026-10-29 and reported `INFO Journal read OK: no valid record`. The existing out-of-range slot check remains in the test. The full local runner reported 254 passing tests and all 13 checks passing; the storage library now has 82 host tests, including ten geometry tests. LED state was not separately reported. This is a read-only regression check, not a proof of erased contents, successful persistence or a tested erase/program operation. CI for the geometry/reader revision is pending.
+
+## Journal slot programming test
+
+`flash_program_slot` programs a 512-byte test pattern into journal slot 0 only if every target byte is 0xFF. It never erases flash. The pattern is deliberately not a valid calibration record and occupies the slot until a separate erase operation. Repeating the test must refuse to overwrite it.
+
+Build with `python tools/dev.py hardware-build`, then manually upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_program_slot.uf2`. Use the UART1 wiring and terminal settings above. Expected first result: `INFO Journal slot program OK`, with the LED high. Restart without uploading again: expect `ERROR Journal slot 0 is not erased`, with the LED low.
+
+Before disabling XIP, the test validates the linker-reserved region through JournalLayout, checks that slot 0 is erased, resolves the ROM function pointers, and prepares the source buffer and aligned Boot2 copy in RAM. With interrupts masked, the RAM routine connects flash, exits XIP, programs the slot, flushes the cache and restores XIP through Boot2. All 512 bytes are compared after XIP is restored. The standalone test starts no second core, DMA or servo output and creates no FlashJournalReader. It assumes the standard Pico flash/pad configuration; it is not a general runtime exclusion mechanism or watchdog recovery test. Panic uses panic_halt.
+
+On 2026-10-29, read-only inspection of the built debug ELF placed hexaroam_program_slot at 0x20000000, with all 62 bytes inside the startup-copied data section. Manual Thumb instruction review found five indirect function calls, register/stack accesses and the immediate 512-byte length, without extra helper calls or flash literals. No initialized load segment overlapped the reserved journal. An ARM disassembler was not available; this was a manual instruction review, not automated disassembly.
+
+The owner observed `INFO Journal slot program OK`, then `ERROR Journal slot 0 is not erased` after restarting without another upload. The first result confirms the complete readback comparison; the restart result confirms that the slot remains occupied and repeat programming is rejected, not an independent full-byte verification after reset. The owner also reported 254 passing tests and all 13 checks passing. Manual hardware tests do not add to the unit-test count. CI for this programming revision is pending.

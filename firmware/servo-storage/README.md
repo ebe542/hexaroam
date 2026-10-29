@@ -125,4 +125,10 @@ The [XIP transition test](../pico/hardware_tests/README.md#xip-exit-and-restorat
 
 The Pico reader now constructs JournalLayout from the validated linker region and uses slot_range for reads. Only the Pico layer adds XIP base `0x10000000`; the layout retains flash-relative offsets. The existing UnknownSlot error contract and read-only lifetime restrictions are unchanged.
 
-On 2026-10-29 the owner reported 82 passing storage tests, then 254 passing tests and all 13 checks passing in the full local runner. The rebuilt flash_journal_read program again produced `INFO Journal read OK: no valid record`. This confirms the integrated read path with checked geometry; no flash program/erase or persistent-write test was performed. CI for this geometry/reader revision is pending.
+On 2026-10-29 the owner reported 82 passing storage tests, then 254 passing tests and all 13 checks passing in the full local runner. The rebuilt flash_journal_read program again produced `INFO Journal read OK: no valid record`. This confirms the integrated read path with checked geometry; no flash program/erase or persistent-write test was performed. The owner subsequently reported green CI for this geometry/reader revision.
+
+## Pico slot programming preparation
+
+The separate [flash_program_slot hardware test](../pico/hardware_tests/README.md#journal-slot-programming-test) now exercises a RAM-resident ROM programming sequence for one erased 512-byte slot in the reserved journal. The test checks the linker bounds, erased target, RAM buffers and function-pointer addresses before disabling XIP, then compares all 512 bytes after restoration. Its test pattern is not a valid journal record. No erase operation or Pico JournalStorage writer is implemented yet.
+
+On 2026-10-29, the owner observed `INFO Journal slot program OK` and, after a restart, `ERROR Journal slot 0 is not erased`. This verifies one complete immediate readback and rejection of repeat programming after reset. It does not verify a valid calibration record across reset, sector erasure, interrupted programming, or safe integration with running IRQ/core1/DMA users. The owner reported 254 passing tests and all 13 checks passing; CI for this programming revision is pending. The preceding geometry/reader revision passed CI.
