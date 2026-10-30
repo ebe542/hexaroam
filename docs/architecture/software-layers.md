@@ -86,13 +86,13 @@ flowchart TD
     Read -->|"mapped reads with XIP enabled"| Flash
     Append --> Format
     Load --> Format
-    Append -.->|"trait compatible; end-to-end hardware test pending"| Backend
+    Append -->|"append and reload verified in persistence test"| Backend
     Backend -->|"checked program and erase"| RAM
     RAM --> ROM
     ROM -->|"program or erase"| Flash
 ```
 
-The [storage library](../../firmware/servo-storage/README.md) already implements encoding, CRC validation, latest-record selection and append/sector rotation over storage traits. The [Pico reader](../../firmware/pico/src/flash_journal.rs) implements JournalRead. Separate [RAM routines](../../firmware/pico/src/flash_xip.rs) and manual hardware tests exercise slot programming and sector erasure. The [FlashJournalStorage backend](../../firmware/pico/src/flash_journal_storage.rs) now implements JournalRead and JournalStorage around those routines. Its isolated read/program/erase tests passed; exercising load/append with valid persisted records and sector rotation on hardware is the next integration step. FlashJournalReader remains as a separate read-only type, but the flash_journal_read test now uses FlashJournalStorage.
+The [storage library](../../firmware/servo-storage/README.md) already implements encoding, CRC validation, latest-record selection and append/sector rotation over storage traits. The [Pico reader](../../firmware/pico/src/flash_journal.rs) implements JournalRead. Separate [RAM routines](../../firmware/pico/src/flash_xip.rs) and manual hardware tests exercise slot programming and sector erasure. The [FlashJournalStorage backend](../../firmware/pico/src/flash_journal_storage.rs) now implements JournalRead and JournalStorage around those routines. Its isolated read/program/erase tests passed. The separate [flash_journal_persistence test](../../firmware/pico/hardware_tests/flash_journal_persistence.rs) now verifies append/load of a valid synthetic eighteen-servo record and loading it after restart without rewriting. Sector rotation on hardware remains pending. FlashJournalReader remains as a separate read-only type, but the flash_journal_read test now uses FlashJournalStorage.
 
 A missing valid record is `Ok(None)`; that does not authorize normal operation. Loading a complete configuration, startup-mode enforcement, service invalidation and UART configuration transfer still need integration. A FlashJournalReader must not remain alive during program/erase or XIP reconfiguration.
 
