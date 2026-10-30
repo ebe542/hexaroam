@@ -230,3 +230,9 @@ The standalone [flash_program_slot test](pico/hardware_tests/README.md#journal-s
 ### Journal sector erase preparation
 
 The [flash_erase_sector test](pico/hardware_tests/README.md#journal-sector-erase-test) erases reserved journal sector 0 from RAM, checks all 4096 bytes and verifies sector 1 is unchanged. The owner observed `INFO Journal sector erase OK` and `ERROR Journal sector 0 is already erased` after restart on 2026-10-29, with 269 passing tests, all 13 verification checks and all 33 hardware-build checks passing. The 58-byte RAM routine was reviewed using the generated map and disassembly. The test deliberately removes sector 0 contents; it is not the automatic journal writer. Backend integration and runtime exclusion remain future work. CI for this erase revision is pending.
+
+### Pico calibration storage backend
+
+[FlashJournalStorage](pico/src/flash_journal_storage.rs) now implements the existing JournalRead and JournalStorage contracts. It validates reserved ranges, requires program sources in RAM without an additional payload copy, checks erased slots, uses the reviewed RAM/ROM operations and verifies written/erased contents. The caller must uphold its unsafe exclusion contract; normal interrupt masking is internal.
+
+On 2026-10-30 the owner confirmed backend read, program/repeat-rejection and erase hardware tests, followed by 275 passing tests and all 13 checks passing. All 37 hardware-build checks passed. See the [hardware procedures](pico/hardware_tests/README.md#flashjournalstorage-backend-tests) and updated [architecture maps](../docs/architecture/README.md). The normal fixed-plan servo demo is unchanged. Valid-record append/load across restart, sector rotation and service/startup integration remain future work. CI for this backend revision is pending.

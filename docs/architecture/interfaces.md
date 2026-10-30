@@ -52,19 +52,22 @@ classDiagram
         checksum()
     }
     class FlashJournalReader
+    class FlashJournalStorage
     class SoftwareCrc32
     JournalRead <|-- JournalStorage : extends
     JournalRead <|.. FlashJournalReader
+    JournalRead <|.. FlashJournalStorage
+    JournalStorage <|.. FlashJournalStorage
     Checksum <|.. SoftwareCrc32
 ```
 
 | Contract | Implementation and use | Source |
 | --- | --- | --- |
-| JournalRead | FlashJournalReader implements reading; load consumes a JournalRead backend | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal.rs](../../firmware/pico/src/flash_journal.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
-| JournalStorage extends JournalRead | append consumes this contract; no concrete Pico implementation yet | [storage.rs](../../firmware/servo-storage/src/storage.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
+| JournalRead | FlashJournalReader and FlashJournalStorage implement reading; load consumes a JournalRead backend | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal.rs](../../firmware/pico/src/flash_journal.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
+| JournalStorage extends JournalRead | FlashJournalStorage implements the Pico backend; append consumes this contract | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal_storage.rs](../../firmware/pico/src/flash_journal_storage.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
 | Checksum | SoftwareCrc32 implements independent CRC-32/ISO-HDLC calculations; format, slots and journal operations accept the abstraction | [crc32.rs](../../firmware/servo-storage/src/crc32.rs), [format.rs](../../firmware/servo-storage/src/format.rs), [journal_slot.rs](../../firmware/servo-storage/src/journal_slot.rs) |
 
-The RAM programming/erase functions are unsafe free functions. They do not implement JournalStorage. JournalLayout is a concrete geometry helper, not a storage trait. A Pico hardware CRC implementation is not present.
+The RAM programming/erase functions are unsafe free functions. They do not implement JournalStorage themselves; FlashJournalStorage implements the trait and invokes them after validation. JournalLayout is a concrete geometry helper, not a storage trait. A Pico hardware CRC implementation is not present.
 
 ## Logging and panic output
 

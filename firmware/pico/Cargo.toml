@@ -116,6 +116,20 @@ path = "hardware_tests/flash_erase_sector.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "flash_storage_program"
+path = "hardware_tests/flash_storage_program.rs"
+required-features = ["hardware-tests"]
+test = false
+
+[[example]]
+bench = false
+name = "flash_storage_erase"
+path = "hardware_tests/flash_storage_erase.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"

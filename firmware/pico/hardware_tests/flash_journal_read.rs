@@ -13,14 +13,19 @@
 
 mod support;
 
-#[path = "../src/flash_journal.rs"]
-mod flash_journal;
-
 #[path = "../src/uart_logging.rs"]
 mod uart_logging;
 
+// This read-only test intentionally leaves write operations unused.
+#[allow(dead_code)]
+#[path = "../src/flash_journal_storage.rs"]
+mod flash_journal_storage;
+
+#[path = "../src/flash_xip.rs"]
+mod flash_xip;
+
 use embedded_hal::digital::OutputPin;
-use flash_journal::{FlashJournalReader, FlashReadError};
+use flash_journal_storage::{FlashJournalStorage, FlashStorageError};
 use hexaroam_logging::{LogLevel, Logger};
 use hexaroam_servo_storage::{
     JournalRead, SLOT_COUNT, SLOT_SIZE, SoftwareCrc32, load,
@@ -56,22 +61,25 @@ fn main() -> ! {
         .expect("Failed to initialize LED");
 
     // SAFETY:
-    // This standalone Pico test leaves XIP configured normally.
-    // It starts no second core and contains no flash write/erase path.
-    let reader = unsafe { FlashJournalReader::new() };
+    // This standalone Pico test preserves the normal XIP configuration.
+    // It starts neither core1 nor DMA and performs no flash writes/erases.
+    // No independent flash writer or FlashJournalReader exists.
+    let storage = unsafe { FlashJournalStorage::new() };
 
-    let (level, message, success) = match reader {
+    let (level, message, success) = match storage {
         Err(_) => (
             LogLevel::Error,
             "Invalid journal linker layout",
             false,
         ),
-        Ok(mut reader) => {
+        Ok(mut storage) => {
             let mut buffer = [0; SLOT_SIZE];
 
-            let invalid_index_rejected = reader
+            let invalid_index_rejected = storage
                 .read_slot(SLOT_COUNT, &mut buffer)
-                == Err(FlashReadError::UnknownSlot(SLOT_COUNT));
+                == Err(FlashStorageError::UnknownSlot(
+                    SLOT_COUNT,
+                ));
 
             if !invalid_index_rejected {
                 (
@@ -80,7 +88,7 @@ fn main() -> ! {
                     false,
                 )
             } else {
-                match load::<18, _>(&mut reader, &mut SoftwareCrc32) {
+                match load::<18, _>(&mut storage, &mut SoftwareCrc32) {
                     Ok(None) => (
                         LogLevel::Info,
                         "Journal read OK: no valid record",

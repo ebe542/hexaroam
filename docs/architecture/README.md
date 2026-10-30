@@ -2,7 +2,7 @@
 
 Start with [software layers](software-layers.md) to follow a command from an angle to GPIO pulses. Use [traits and implementations](interfaces.md) to find the contracts between layers and their concrete implementations.
 
-These diagrams describe the source reviewed on 2026-10-29. They are maintained manually, render on GitHub through Mermaid, and link to the implementation. They show selected architectural relationships, not every Rust module, function, generic argument or test double. Update them when changing a layer boundary or implementation relationship.
+These diagrams describe the source reviewed through 2026-10-30. They are maintained manually, render on GitHub through Mermaid, and link to the implementation. They show selected architectural relationships, not every Rust module, function, generic argument or test double. Update them when changing a layer boundary or implementation relationship.
 
 | View | Question answered |
 | --- | --- |
