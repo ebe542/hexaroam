@@ -137,6 +137,13 @@ path = "hardware_tests/flash_journal_persistence.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "flash_journal_rotation"
+path = "hardware_tests/flash_journal_rotation.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
