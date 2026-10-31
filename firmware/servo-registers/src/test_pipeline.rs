@@ -37,7 +37,7 @@ fn exchange(
     let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
         .expect("Valid register map");
 
-    let mut response_payload = [0; 4];
+    let mut response_payload = [0; 18 * 4];
     let mut handled = false;
     let mut response_length = None;
 
@@ -245,7 +245,7 @@ fn feed(
 ) -> (usize, Option<usize>) {
     let mut handled = 0;
     let mut response_length = None;
-    let mut response_payload = [0; 4];
+    let mut response_payload = [0; 18 * 4];
 
     for &byte in bytes {
         parser
@@ -518,5 +518,274 @@ fn consecutive_requests_are_processed_in_order() {
     assert_eq!(
         frame.payload,
         &[STATUS_CALIBRATION_VALID]
+    );
+}
+
+/// Writes consecutive targets through the complete request path.
+fn wire_write_targets(
+    parser: &mut StreamParser<'_>,
+    service: &mut RegisterService<FakeOutput>,
+    first: u8,
+    values: &[i32],
+) {
+    let mut payload = [0; 18 * 4];
+
+    for (offset, value) in values.iter().enumerate() {
+        payload[offset * 4..offset * 4 + 4]
+            .copy_from_slice(&value.to_le_bytes());
+    }
+
+    let payload_length = values.len() * 4;
+    let (request, size) = request_bytes(
+        Opcode::Write,
+        0x20 + first,
+        payload_length as u16,
+        &payload[..payload_length],
+    );
+    let mut response = [0xA5; 80];
+
+    assert_eq!(
+        feed(
+            parser,
+            service,
+            &request[..size],
+            &mut response,
+        ),
+        (1, None),
+    );
+    assert_eq!(response, [0xA5; 80]);
+}
+
+/// Checks response header, payload, total length and CRC.
+///
+/// Requested and response indices may differ for canonical errors.
+fn assert_wire_read(
+    parser: &mut StreamParser<'_>,
+    service: &mut RegisterService<FakeOutput>,
+    requested_index: u8,
+    requested_length: u16,
+    response_index: u8,
+    expected_payload: &[u8],
+) {
+    let (request, size) = request_bytes(
+        Opcode::Read,
+        requested_index,
+        requested_length,
+        &[],
+    );
+    let mut response = [0; 80];
+
+    let (handled, length) = feed(
+        parser,
+        service,
+        &request[..size],
+        &mut response,
+    );
+
+    assert_eq!(handled, 1);
+    let length = length.expect("READ response");
+    assert_eq!(length, 4 + expected_payload.len() + 4);
+
+    let frame = decode_frame(
+        &response[..length],
+        FrameKind::Response,
+        &mut checksum,
+    )
+    .expect("Valid response CRC");
+
+    assert_eq!(
+        frame.header,
+        Header {
+            opcode: Opcode::Read,
+            index: response_index,
+            length: expected_payload.len() as u16,
+        },
+    );
+    assert_eq!(frame.payload, expected_payload);
+}
+
+#[test]
+fn all_targets_round_trip_through_wire_frames() {
+    for active in [false, true] {
+        let mut service =
+            RegisterService::new(1, 18, FakeOutput::inactive(), true);
+        let mut parser =
+            StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
+                .expect("Valid register map");
+
+        if active {
+            let (request, size) =
+                request_bytes(Opcode::Set, 3, 1, &[OUTPUT_ENABLE]);
+            let mut response = [0xA5; 12];
+
+            assert_eq!(
+                feed(
+                    &mut parser,
+                    &mut service,
+                    &request[..size],
+                    &mut response,
+                ),
+                (1, None),
+            );
+            assert_eq!(response, [0xA5; 12]);
+        }
+
+        let mut values = [0_i32; 18];
+        let mut expected = [0; 18 * 4];
+
+        for (index, value) in values.iter_mut().enumerate() {
+            *value = -8_500 + index as i32 * 1_000;
+            expected[index * 4..index * 4 + 4]
+                .copy_from_slice(&value.to_le_bytes());
+        }
+
+        wire_write_targets(&mut parser, &mut service, 0, &values);
+
+        assert_wire_read(
+            &mut parser,
+            &mut service,
+            0x20,
+            72,
+            0x20,
+            &expected,
+        );
+        assert_wire_read(
+            &mut parser,
+            &mut service,
+            2,
+            4,
+            2,
+            &(ErrorCode::None as u32).to_le_bytes(),
+        );
+
+        let status = STATUS_CALIBRATION_VALID
+            | if active { STATUS_OUTPUT_ACTIVE } else { 0 };
+
+        assert_eq!(
+            read_byte(&mut parser, &mut service, 1),
+            status,
+        );
+    }
+}
+
+#[test]
+fn partial_wire_write_preserves_other_targets() {
+    let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
+    let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
+        .expect("Valid register map");
+
+    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]);
+    wire_write_targets(
+        &mut parser,
+        &mut service,
+        4,
+        &[-4_500, 1_234],
+    );
+    wire_write_targets(&mut parser, &mut service, 17, &[9_000]);
+
+    let mut values = [100_i32; 18];
+    values[4] = -4_500;
+    values[5] = 1_234;
+    values[17] = 9_000;
+
+    let mut expected = [0; 18 * 4];
+
+    for (index, value) in values.iter().enumerate() {
+        expected[index * 4..index * 4 + 4]
+            .copy_from_slice(&value.to_le_bytes());
+    }
+
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        0x20,
+        72,
+        0x20,
+        &expected,
+    );
+}
+
+#[test]
+fn invalid_wire_batch_preserves_every_target() {
+    let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
+    let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
+        .expect("Valid register map");
+
+    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]);
+
+    // The first two values are valid, but the final value is not.
+    // No part of this CRC-valid request may be accepted.
+    wire_write_targets(
+        &mut parser,
+        &mut service,
+        4,
+        &[-4_500, 1_234, 9_001],
+    );
+
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        2,
+        4,
+        2,
+        &(ErrorCode::InvalidValue as u32).to_le_bytes(),
+    );
+
+    let mut expected = [0; 18 * 4];
+
+    for bytes in expected.chunks_exact_mut(4) {
+        bytes.copy_from_slice(&100_i32.to_le_bytes());
+    }
+
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        0x20,
+        72,
+        0x20,
+        &expected,
+    );
+
+    // Successful readback must not clear the previous error.
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        2,
+        4,
+        2,
+        &(ErrorCode::InvalidValue as u32).to_le_bytes(),
+    );
+    assert_eq!(
+        read_byte(&mut parser, &mut service, 1),
+        STATUS_CALIBRATION_VALID,
+    );
+}
+
+#[test]
+fn target_read_crossing_region_returns_wire_error() {
+    let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
+    let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
+        .expect("Valid register map");
+
+    wire_write_targets(&mut parser, &mut service, 17, &[4_500]);
+
+    // Servo 17 exists, but a second entry would exceed the region.
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        0x31,
+        8,
+        2,
+        &(ErrorCode::OutOfBounds as u32).to_le_bytes(),
+    );
+
+    // The same parser remains usable after the rejected READ.
+    assert_wire_read(
+        &mut parser,
+        &mut service,
+        0x31,
+        4,
+        0x31,
+        &4_500_i32.to_le_bytes(),
     );
 }

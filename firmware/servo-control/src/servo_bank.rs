@@ -56,7 +56,9 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
         }
     }
 
-    /// Returns the last accepted command, not a measured position.
+    /// Returns the last accepted target, prepared or submitted.
+    ///
+    /// This does not report measured position or signal-plan activation.
     pub fn commanded_angle(
         &self,
         id: ServoId,
@@ -69,8 +71,8 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
 
     /// Validates and submits one complete pulse batch.
     ///
-    /// The first nonempty request must initialize all servos.
-    /// Later requests may change a subset.
+    /// Every servo must have a target after applying this request.
+    /// Previously prepared or submitted targets fill omitted entries.
     /// Empty requests succeed without output.
     /// Errors preserve all previously accepted angle commands.
     pub fn set_targets(
@@ -81,8 +83,59 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
             return Ok(());
         }
 
-        // Work on a local candidate until the complete batch is accepted.
-        let mut candidate_angles = self.commanded_angles;
+        let candidate = self.validated_targets(targets)?;
+        let pulses = self.pulse_widths(&candidate)?;
+
+        self.output
+            .submit_pulses(&pulses)
+            .map_err(ServoBankError::Output)?;
+
+        // Commit only after the complete batch was accepted.
+        self.commanded_angles = candidate;
+
+        Ok(())
+    }
+
+    pub fn service(&mut self) {
+        self.output.service();
+    }
+
+    /// Validates and stores targets without submitting signal output.
+    ///
+    /// Partial initialization is allowed.
+    /// Invalid requests preserve all previously accepted targets.
+    ///
+    /// The caller must ensure that signal output is inactive.
+    pub fn prepare_targets(
+        &mut self,
+        targets: &[ServoTarget],
+    ) -> Result<(), ServoBankError<O::Error>> {
+        let candidate = self.validated_targets(targets)?;
+
+        self.commanded_angles = candidate;
+
+        Ok(())
+    }
+
+    /// Submits all previously accepted targets as one pulse batch.
+    ///
+    /// Every servo must have a valid target.
+    /// This does not change the stored targets.
+    /// Success confirms acceptance, not physical activation.
+    pub fn submit_prepared(&mut self) -> Result<(), ServoBankError<O::Error>> {
+        let pulses = self.pulse_widths(&self.commanded_angles)?;
+
+        self.output
+            .submit_pulses(&pulses)
+            .map_err(ServoBankError::Output)
+    }
+
+    /// Builds a validated candidate without changing accepted targets.
+    fn validated_targets(
+        &self,
+        targets: &[ServoTarget],
+    ) -> Result<[Option<Angle>; N], ServoBankError<O::Error>> {
+        let mut candidate = self.commanded_angles;
 
         for (index, target) in targets.iter().enumerate() {
             let calibration = self
@@ -106,34 +159,30 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
                     error,
                 })?;
 
-            candidate_angles[target.id.0] = Some(target.angle);
+            candidate[target.id.0] = Some(target.angle);
         }
 
-        let mut pulse_widths_us = [0_u32; N];
+        Ok(candidate)
+    }
 
-        // Every servo needs a known angle to produce a complete batch.
-        for (index, candidate) in candidate_angles.iter().enumerate() {
+    /// Converts a complete candidate into servo-ID-ordered pulse widths.
+    fn pulse_widths(
+        &self,
+        angles: &[Option<Angle>; N],
+    ) -> Result<[u32; N], ServoBankError<O::Error>> {
+        let mut pulses = [0; N];
+
+        for (index, candidate) in angles.iter().enumerate() {
             let id = ServoId(index);
             let angle =
                 candidate.ok_or(ServoBankError::UninitializedServo(id))?;
 
-            pulse_widths_us[index] = self.calibrations[index]
+            pulses[index] = self.calibrations[index]
                 .pulse_width_us(angle)
                 .map_err(|error| ServoBankError::Calibration { id, error })?;
         }
 
-        self.output
-            .submit_pulses(&pulse_widths_us)
-            .map_err(ServoBankError::Output)?;
-
-        // Commit only after the backend accepted the complete batch.
-        self.commanded_angles = candidate_angles;
-
-        Ok(())
-    }
-
-    pub fn service(&mut self) {
-        self.output.service();
+        Ok(pulses)
     }
 }
 

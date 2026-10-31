@@ -183,4 +183,10 @@ The service now implements READ/WRITE for indices 0x20..0x31, with four-byte lit
 
 Missing calibration rejects both reads and writes. Fault rejects writes but permits reads when calibration is valid. Invalid angles preserve all targets without latching Fault; technical write failures preserve accepted targets and latch Fault. Complete READ data is staged before modifying the response buffer. Calibration validity remains a constructor flag, and only the test backend implements the target contract.
 
-On 2026-10-31 the owner confirmed 56 package tests and 383 tests overall passing, with all 17 verification checks passing. Eight target-register tests were observed failing before implementation. CI for this target-register revision is pending. Actual ServoBank/PIO integration, target-register byte-stream tests and UART transport remain future work.
+On 2026-10-31 the owner confirmed 56 package tests and 383 tests overall passing, with all 17 verification checks passing. Eight target-register tests were observed failing before implementation. The owner subsequently confirmed green CI for this target-register revision. Actual ServoBank/PIO integration and UART transport remain future work.
+
+## Target-register wire verification
+
+Four additional host tests cover full eighteen-target WRITE/READ (72 payload bytes) with inactive and active output, partial writes preserving other targets, atomic rejection when the final angle is invalid, and a region-crossing READ returning a canonical error followed by a valid READ. The same parser instance is retained across requests; response headers, lengths, payloads and CRC are checked. Successful readback preserves LastError, and modifying requests produce no response.
+
+On 2026-10-31 the owner reported 60 register-package tests and 387 tests overall passing, with all 17 verification checks passing. CI for this target-wire-test revision is pending. Tests use FakeOutput, without UART or physical servo output.

@@ -261,4 +261,12 @@ Seven [host integration tests](servo-registers/src/test_pipeline.rs) connect req
 
 ## Target-angle register access
 
-The [register service](servo-registers/README.md#target-angle-registers) now reads and writes consecutive i32 centidegree targets through OutputBackend. The shared test backend supports inactive preparation, active writes and atomic rejection; technical write failures latch Fault. On 2026-10-31 the owner reported 56 package tests, 383 tests overall and all 17 verification checks passing. CI for this target-register revision is pending. The real ServoBank/PIO adapter and normal firmware integration remain future work.
+The [register service](servo-registers/README.md#target-angle-registers) now reads and writes consecutive i32 centidegree targets through OutputBackend. The shared test backend supports inactive preparation, active writes and atomic rejection; technical write failures latch Fault. On 2026-10-31 the owner reported 56 package tests, 383 tests overall and all 17 verification checks passing. The owner subsequently confirmed green CI for this target-register revision. The real ServoBank/PIO adapter and normal firmware integration remain future work.
+
+## Target-register protocol tests
+
+Four additional [byte-stream tests](servo-registers/src/test_pipeline.rs) verify full eighteen-target transfers, partial updates, atomic rejection of invalid batches and READ-boundary error recovery. The owner reported 60 package tests, 387 tests overall and all 17 verification checks passing on 2026-10-31. CI for this target-wire-test revision is pending. Tests retain the parser across requests and use a simulated output backend; ServoBank/PIO and UART integration remain future work.
+
+## Preparing ServoBank targets
+
+ServoBank now supports transactional prepare_targets without output and submit_prepared for a complete calibrated pulse batch. set_targets retains submission-before-commit behavior and can combine new targets with prepared values. The owner reported all 66 servo-control tests passing after observing ten new tests fail at their placeholders. The caller must ensure output is inactive during preparation; driver start/stop, automatic zero initialization and the register-service adapter remain future work. The owner subsequently confirmed 397 tests overall and all 17 verification checks passing for this combined revision; CI is pending. See the [servo-control guide](servo-control/README.md#preparing-targets-without-signal-output).

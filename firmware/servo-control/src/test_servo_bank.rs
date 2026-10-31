@@ -360,3 +360,243 @@ fn empty_request_preserves_initialized_commands_without_output() {
     );
     assert_angles(&bank, Some(0), Some(0));
 }
+
+#[test]
+fn preparation_allows_stepwise_initialization_without_output() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, -4_500)]),
+        Ok(()),
+    );
+    assert_angles(&bank, Some(-4_500), None);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+
+    assert_eq!(
+        bank.prepare_targets(&[target(1, 4_500)]),
+        Ok(()),
+    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn preparation_accepts_complete_batches_and_partial_updates() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(1, 4_500), target(0, -4_500),]),
+        Ok(()),
+    );
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, 0)]),
+        Ok(()),
+    );
+
+    assert_angles(&bank, Some(0), Some(4_500));
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn invalid_preparation_preserves_all_previous_targets() {
+    let cases = [
+        (
+            [target(0, -4_500), target(2, 0)],
+            ServoBankError::UnknownServo(ServoId(2)),
+        ),
+        (
+            [target(0, -4_500), target(0, 4_500)],
+            ServoBankError::DuplicateServo(ServoId(0)),
+        ),
+        (
+            [target(0, -4_500), target(1, 4_501)],
+            ServoBankError::Calibration {
+                id: ServoId(1),
+                error: CalibrationError::AngleOutOfRange,
+            },
+        ),
+    ];
+
+    for (targets, expected) in cases {
+        let mut bank = bank();
+
+        assert_eq!(
+            bank.prepare_targets(&[target(0, 0), target(1, 0)]),
+            Ok(()),
+        );
+        assert_eq!(
+            bank.prepare_targets(&targets),
+            Err(expected),
+        );
+
+        assert_angles(&bank, Some(0), Some(0));
+        assert_eq!(bank.output.calls, 0);
+        assert_eq!(bank.output.accepted, None);
+    }
+}
+
+#[test]
+fn preparation_does_not_call_a_failing_output_backend() {
+    let mut bank = bank();
+    bank.output.error = Some(TestError::Faulted);
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, -4_500), target(1, 4_500),]),
+        Ok(()),
+    );
+
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn empty_preparation_preserves_initial_and_prepared_state() {
+    let mut bank = bank();
+
+    assert_eq!(bank.prepare_targets(&[]), Ok(()));
+    assert_angles(&bank, None, None);
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, 1_234)]),
+        Ok(()),
+    );
+    assert_eq!(bank.prepare_targets(&[]), Ok(()));
+
+    assert_angles(&bank, Some(1_234), None);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn submission_requires_every_servo_to_be_prepared() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.submit_prepared(),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(0)
+        )),
+    );
+    assert_angles(&bank, None, None);
+    assert_eq!(bank.output.calls, 0);
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, 0)]),
+        Ok(()),
+    );
+
+    assert_eq!(
+        bank.submit_prepared(),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(1)
+        )),
+    );
+
+    assert_angles(&bank, Some(0), None);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn submission_uses_prepared_targets_and_individual_calibrations() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(1, 4_500), target(0, -4_500),]),
+        Ok(()),
+    );
+
+    assert_eq!(bank.submit_prepared(), Ok(()));
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_000, 1_800])
+    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+}
+
+#[test]
+fn failed_submission_preserves_prepared_targets_for_retry() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, -4_500), target(1, 4_500),]),
+        Ok(()),
+    );
+
+    bank.output.error = Some(TestError::Busy);
+
+    assert_eq!(
+        bank.submit_prepared(),
+        Err(ServoBankError::Output(TestError::Busy)),
+    );
+
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(bank.output.accepted, None);
+
+    bank.output.error = None;
+
+    assert_eq!(bank.submit_prepared(), Ok(()));
+    assert_eq!(bank.output.calls, 2);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_000, 1_800])
+    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+}
+
+#[test]
+fn set_targets_can_submit_a_partial_update_after_preparation() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, 0), target(1, 0)]),
+        Ok(()),
+    );
+
+    assert_eq!(
+        bank.set_targets(&[target(1, 4_500)]),
+        Ok(()),
+    );
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_800])
+    );
+    assert_angles(&bank, Some(0), Some(4_500));
+}
+
+#[test]
+fn rejected_preparation_does_not_leak_into_later_submission() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, 0), target(1, 0)]),
+        Ok(()),
+    );
+
+    assert_eq!(
+        bank.prepare_targets(&[target(0, -4_500), target(1, 4_501),]),
+        Err(ServoBankError::Calibration {
+            id: ServoId(1),
+            error: CalibrationError::AngleOutOfRange,
+        }),
+    );
+
+    assert_eq!(bank.submit_prepared(), Ok(()));
+
+    assert_eq!(bank.output.calls, 1);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_500])
+    );
+    assert_angles(&bank, Some(0), Some(0));
+}
