@@ -11,12 +11,12 @@ import dev
 
 
 class DocumentationTests(unittest.TestCase):
-    def test_documents_all_six_packages_with_shared_embedded_output(self):
+    def test_documents_all_packages_with_shared_embedded_output(self):
         self.assertEqual({directory for directory, _ in dev.TASKS["doc"]}, {
             dev.SIGNAL_DIR, dev.CONTROL_DIR, dev.SERVO_PIO_DIR,
-            dev.LOGGING_DIR, dev.STORAGE_DIR, dev.PICO_DIR,
+            dev.LOGGING_DIR, dev.STORAGE_DIR, dev.PROTOCOL_DIR, dev.PICO_DIR,
         })
-        self.assertEqual(len(dev.TASKS["doc"]), 6)
+        self.assertEqual(len(dev.TASKS["doc"]), 7)
         for directory, command in dev.TASKS["doc"]:
             self.assertEqual(command[:2], ["cargo", "doc"])
             for flag in ("--locked", "--no-deps", "--document-private-items"):
@@ -37,22 +37,22 @@ class DocumentationTests(unittest.TestCase):
         ):
             code = dev.run_task("doc")
         self.assertEqual(code, 0)
-        self.assertEqual(run.call_count, 6)
+        self.assertEqual(run.call_count, len(dev.TASKS["doc"]))
         index.assert_called_once_with()
-        self.assertIn("0 of 7 checks failed", output.getvalue())
+        self.assertIn(f"0 of {len(dev.TASKS['doc']) + 1} checks failed", output.getvalue())
         self.assertNotIn("\nTotal:", output.getvalue())
 
     def test_failed_package_skips_index_but_processes_remaining_packages(self):
         with (
             patch.object(dev, "run_command", side_effect=[
                 dev.CommandResult(1, "failed"),
-                *[dev.CommandResult(0, "") for _ in range(5)],
+                *[dev.CommandResult(0, "") for _ in range(len(dev.TASKS["doc"]) - 1)],
             ]) as run,
             patch.object(dev, "write_doc_index") as index,
             redirect_stdout(io.StringIO()),
         ):
             self.assertNotEqual(dev.run_task("doc"), 0)
-        self.assertEqual(run.call_count, 6)
+        self.assertEqual(run.call_count, len(dev.TASKS["doc"]))
         index.assert_not_called()
 
     def test_index_failure_fails_task(self):

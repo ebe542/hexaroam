@@ -21,6 +21,7 @@ CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
 SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
 LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
 STORAGE_DIR = PROJECT_ROOT / "firmware" / "servo-storage"
+PROTOCOL_DIR = PROJECT_ROOT / "firmware" / "servo-protocol"
 
 DOC_TARGET = "thumbv6m-none-eabi"
 DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
@@ -31,6 +32,7 @@ DOC_PACKAGES = (
     (SERVO_PIO_DIR, "hexaroam-servo-pio"),
     (LOGGING_DIR, "hexaroam-logging"),
     (STORAGE_DIR, "hexaroam-servo-storage"),
+    (PROTOCOL_DIR, "hexaroam-servo-protocol"),
     (PICO_DIR, "hexaroam-pico"),
 )
 
@@ -75,6 +77,7 @@ TASKS = {
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
         (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
         (STORAGE_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
@@ -83,6 +86,7 @@ TASKS = {
         (SERVO_PIO_DIR, ["cargo", "fmt"]),
         (LOGGING_DIR, ["cargo", "fmt"]),
         (STORAGE_DIR, ["cargo", "fmt"]),
+        (PROTOCOL_DIR, ["cargo", "fmt"]),
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
@@ -98,6 +102,8 @@ TASKS = {
         (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
         (STORAGE_DIR, ["cargo", "fmt", "--check"]),
         (STORAGE_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (PROTOCOL_DIR, ["cargo", "fmt", "--check"]),
+        (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
@@ -112,6 +118,8 @@ TASKS = {
         (LOGGING_DIR, ["cargo", "check", "--locked"]),
         (STORAGE_DIR, ["cargo", "fmt", "--check"]),
         (STORAGE_DIR, ["cargo", "check", "--locked"]),
+        (PROTOCOL_DIR, ["cargo", "fmt", "--check"]),
+        (PROTOCOL_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
         (PICO_DIR, ["cargo", "build", "--locked"]),

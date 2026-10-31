@@ -5,12 +5,12 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
-| `python tools/dev.py doc` | Generate combined HTML documentation for all six Rust packages |
-| `python tools/dev.py test` | Python runner/parser tests and host tests for servo-signal, servo-control, and servo-pio |
-| `python tools/dev.py fmt` | Format all four Rust packages; modifies source files |
-| `python tools/dev.py check` | Check formatting and run cargo check for all four Rust packages; no unit tests or linked firmware image |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all seven Rust packages |
+| `python tools/dev.py test` | Python tooling tests and host tests for all registered Rust libraries |
+| `python tools/dev.py fmt` | Format all registered Rust packages; modifies source files |
+| `python tools/dev.py check` | Check formatting and run cargo check for all registered Rust packages; no unit tests or linked firmware image |
 | `python tools/dev.py build` | Build the Pico ELF firmware; no UF2 conversion |
-| `python tools/dev.py verify` | Full verification: Python tests, four Rust formatting checks, three Rust test groups, and Pico build |
+| `python tools/dev.py verify` | Full verification: Python tests, registered Rust formatting/host tests, and Pico build |
 | `python tools/dev.py hardware-build` | Build all registered Pico hardware tests with ELF, UF2, linker map and disassembly; no execution or upload |
 | `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
@@ -112,9 +112,9 @@ Run from the repository root:
 python tools/dev.py doc
 ```
 
-The task documents servo-signal, servo-control, servo-pio, logging, servo-storage and the Pico binary using cargo doc --locked --no-deps --document-private-items. All packages use the thumbv6m-none-eabi target, so embedded-only PIO code is included. Cargo/Rustdoc and the embedded target are required; no extra Python package, cargo-modules or Graphviz installation is needed.
+The task documents servo-signal, servo-control, servo-pio, logging, servo-storage, servo-protocol and the Pico binary using cargo doc --locked --no-deps --document-private-items. All packages use the thumbv6m-none-eabi target, so embedded-only PIO code is included. Cargo/Rustdoc and the embedded target are required; no extra Python package, cargo-modules or Graphviz installation is needed.
 
-After all six commands succeed, an overview links the generated crate pages at:
+After all seven commands succeed, an overview links the generated crate pages at:
 
 ```text
 target/rustdoc/thumbv6m-none-eabi/doc/index.html
@@ -123,3 +123,7 @@ target/rustdoc/thumbv6m-none-eabi/doc/index.html
 Open this file manually in a browser. The task does not automatically open windows. The shared output contains the project's package documentation, with module navigation, types, trait implementations and implementors. Dependency documentation is omitted; some external links therefore lead outside the generated pages. This is navigable API documentation, not an automatically generated architecture graph. Only compiled library/binary modules for the selected target and default features are included; hardware-test examples and modules used only by those examples are excluded.
 
 Commands run sequentially in their package directories with a shared target directory. Rustdoc output is cumulative. A failed package does not prevent the remaining commands, but suppresses overview generation and fails the task. Missing expected crate pages also fail overview generation. Old generated files may remain after a failure: use only a successful run and regenerate after changes. Generated output is ignored by Git. The task does not execute doctests, host tests, hardware programs or firmware uploads and is separate from verify. Tests mock Cargo; real generation and browser review remain with the owner.
+
+## Protocol package integration
+
+servo-protocol is included in test, fmt, check, verify and the shared doc output. Its 50 owner-reported host tests cover header, validation, complete-frame codec and incremental parsing without UART hardware. The protocol is not added to the normal Pico binary or hardware examples yet. The runner's package-inclusion test and documentation tests are updated for seven packages. The owner reported 326 passing tests and all 15 verification checks passing, plus all 8 documentation checks passing. No tests were run by the assistant; CI for this protocol revision is pending.

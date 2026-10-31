@@ -8,6 +8,7 @@ These diagrams describe the source reviewed through 2026-10-30. They are maintai
 | --- | --- |
 | [Software layers](software-layers.md) | Which layer handles angles, pulse widths, GPIO mapping, timing and hardware? |
 | [Traits and implementations](interfaces.md) | Which type implements a contract, and which type consumes it? |
+| [Register protocol draft](../servo-register-protocol.md) | How will the main board read status and write targets/configuration? |
 | [Project design](../architecture.md) | What is the intended robot architecture, including future work? |
 | [Signal-output design](../servo-output-design.md) | How do frame replacement, DMA ownership and fault handling work? |
 | [Firmware guide](../../firmware/README.md) | Which builds and hardware observations have been reported? |
