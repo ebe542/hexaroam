@@ -30,6 +30,7 @@ OutputBackend provides start, stop and a reliable logical Active/Inactive state.
 - [control.rs](src/control.rs): enable transitions and control-related status.
 - [output.rs](src/output.rs): output backend contract and typed start failures.
 - [test_support.rs](src/test_support.rs): shared backend for host tests only.
+- [test_pipeline.rs](src/test_pipeline.rs): byte-stream parser, service and response-codec integration tests.
 
 From the repository root:
 
@@ -40,6 +41,12 @@ python tools/dev.py verify
 python tools/dev.py doc
 ```
 
-On 2026-10-31 the owner reported 41 passing host tests after the intended failing phases: 14 original service tests, 16 control tests and 11 service/control integration tests. Coverage includes canonical error responses, no reply/output-buffer writes for modifying requests, error retention/explicit clearing, reserved bits, missing calibration, invalid initial targets, actual output state after failures and fault persistence. The owner subsequently confirmed all 17 full verification checks and all 9 shared documentation checks passing. CI for this register-service revision is pending. No tests were executed by the assistant.
+On 2026-10-31 the owner reported 41 passing host tests after the intended failing phases: 14 original service tests, 16 control tests and 11 service/control integration tests. Coverage includes canonical error responses, no reply/output-buffer writes for modifying requests, error retention/explicit clearing, reserved bits, missing calibration, invalid initial targets, actual output state after failures and fault persistence. The owner subsequently confirmed all 17 full verification checks and all 9 shared documentation checks passing. The owner confirmed green CI for this register-service revision. No tests were executed by the assistant.
 
 Target-angle and calibration regions, invalidation, Busy/asynchronous status events, real output/flash backends, UART delivery and the firmware loop remain future work. This package is not included by the normal Pico firmware yet.
+
+## Byte-stream integration tests
+
+Seven host tests connect request encoding, incremental parsing, register handling and response encoding/decoding. They cover status reads, SET without a direct response followed by status readback, canonical LastError responses, CRC-corrupted requests without service side effects, recovery after a corrupted frame, timeout recovery and consecutive SET/CLR/READ requests. Recovery and consecutive-request tests retain the same parser instance. Timeout is an explicit event; these tests do not measure UART timing.
+
+On 2026-10-31 the owner reported all 48 package tests and 375 tests overall passing, with all 17 verification checks passing. CI for this integration-test revision is pending. The assistant did not execute tests.

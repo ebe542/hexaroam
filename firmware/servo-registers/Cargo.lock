@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "hexaroam-servo-control"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-signal",
+]
+
+[[package]]
 name = "hexaroam-servo-protocol"
 version = "0.1.0"
 
@@ -11,4 +18,16 @@ name = "hexaroam-servo-registers"
 version = "0.1.0"
 dependencies = [
  "hexaroam-servo-protocol",
+ "hexaroam-servo-storage",
+]
+
+[[package]]
+name = "hexaroam-servo-signal"
+version = "0.1.0"
+
+[[package]]
+name = "hexaroam-servo-storage"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-control",
 ]

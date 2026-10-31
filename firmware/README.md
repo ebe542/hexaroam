@@ -253,4 +253,8 @@ The [servo-protocol library](servo-protocol/README.md) implements hardware-indep
 
 ## Fixed register service and control
 
-The [servo-registers library](servo-registers/README.md) implements fixed-register READ responses, retained/explicitly cleared LastError, Control WRITE/SET/CLR and backend-derived status. On 2026-10-31 the owner reported 41 passing PC tests, including simulated start/stop errors and persistent Fault. The output contract currently has a test-only backend; normal Pico firmware, target/calibration registers and UART integration remain unchanged or pending. The owner subsequently confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 service tests. CI for this register-service revision is pending.
+The [servo-registers library](servo-registers/README.md) implements fixed-register READ responses, retained/explicitly cleared LastError, Control WRITE/SET/CLR and backend-derived status. On 2026-10-31 the owner reported 41 passing PC tests, including simulated start/stop errors and persistent Fault. The output contract currently has a test-only backend; normal Pico firmware, target/calibration registers and UART integration remain unchanged or pending. The owner subsequently confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 service tests. The owner confirmed green CI for this register-service revision.
+
+## Register protocol integration tests
+
+Seven [host integration tests](servo-registers/src/test_pipeline.rs) connect request bytes, parser, register service and encoded responses, including CRC rejection, resynchronization, timeout recovery and consecutive requests. The owner reported 48 package tests, 375 tests overall and all 17 verification checks passing on 2026-10-31. CI for this integration-test revision is pending. These tests use a simulated output backend and do not exercise UART or change the normal Pico firmware.

@@ -19,3 +19,6 @@ pub use control::{
 
 #[cfg(test)]
 mod test_support;
+
+#[cfg(test)]
+mod test_pipeline;
