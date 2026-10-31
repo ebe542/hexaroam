@@ -14,9 +14,10 @@ class DocumentationTests(unittest.TestCase):
     def test_documents_all_packages_with_shared_embedded_output(self):
         self.assertEqual({directory for directory, _ in dev.TASKS["doc"]}, {
             dev.SIGNAL_DIR, dev.CONTROL_DIR, dev.SERVO_PIO_DIR,
-            dev.LOGGING_DIR, dev.STORAGE_DIR, dev.PROTOCOL_DIR, dev.PICO_DIR,
+            dev.LOGGING_DIR, dev.STORAGE_DIR, dev.PROTOCOL_DIR,
+            dev.REGISTERS_DIR, dev.PICO_DIR,
         })
-        self.assertEqual(len(dev.TASKS["doc"]), 7)
+        self.assertEqual(len(dev.TASKS["doc"]), 8)
         for directory, command in dev.TASKS["doc"]:
             self.assertEqual(command[:2], ["cargo", "doc"])
             for flag in ("--locked", "--no-deps", "--document-private-items"):

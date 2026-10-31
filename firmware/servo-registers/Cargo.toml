@@ -1,0 +1,8 @@
+[package]
+name = "hexaroam-servo-registers"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+hexaroam-servo-protocol = { path = "../servo-protocol" }

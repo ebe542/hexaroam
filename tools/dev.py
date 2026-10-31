@@ -22,6 +22,7 @@ SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
 LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
 STORAGE_DIR = PROJECT_ROOT / "firmware" / "servo-storage"
 PROTOCOL_DIR = PROJECT_ROOT / "firmware" / "servo-protocol"
+REGISTERS_DIR = PROJECT_ROOT / "firmware" / "servo-registers"
 
 DOC_TARGET = "thumbv6m-none-eabi"
 DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
@@ -33,6 +34,7 @@ DOC_PACKAGES = (
     (LOGGING_DIR, "hexaroam-logging"),
     (STORAGE_DIR, "hexaroam-servo-storage"),
     (PROTOCOL_DIR, "hexaroam-servo-protocol"),
+    (REGISTERS_DIR, "hexaroam-servo-registers"),
     (PICO_DIR, "hexaroam-pico"),
 )
 
@@ -78,6 +80,7 @@ TASKS = {
         (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
         (STORAGE_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
@@ -87,6 +90,7 @@ TASKS = {
         (LOGGING_DIR, ["cargo", "fmt"]),
         (STORAGE_DIR, ["cargo", "fmt"]),
         (PROTOCOL_DIR, ["cargo", "fmt"]),
+        (REGISTERS_DIR, ["cargo", "fmt"]),
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
@@ -104,6 +108,8 @@ TASKS = {
         (STORAGE_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PROTOCOL_DIR, ["cargo", "fmt", "--check"]),
         (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (REGISTERS_DIR, ["cargo", "fmt", "--check"]),
+        (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
@@ -120,6 +126,8 @@ TASKS = {
         (STORAGE_DIR, ["cargo", "check", "--locked"]),
         (PROTOCOL_DIR, ["cargo", "fmt", "--check"]),
         (PROTOCOL_DIR, ["cargo", "check", "--locked"]),
+        (REGISTERS_DIR, ["cargo", "fmt", "--check"]),
+        (REGISTERS_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
         (PICO_DIR, ["cargo", "build", "--locked"]),

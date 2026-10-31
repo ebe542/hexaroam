@@ -105,6 +105,25 @@ A missing valid record is `Ok(None)`; that does not authorize normal operation. 
 | hexaroam-servo-pio | RP2040-specific encoding, output resources, buffers, DMA/PIO and recovery |
 | hexaroam-servo-storage | Calibration serialization, CRC abstraction, journal and storage geometry |
 | hexaroam-logging | Buffered logging and bounded formatting over a byte-output contract |
+| hexaroam-servo-protocol | Header/frame codec, register-map plausibility and stream parsing with CRC/resynchronization |
+| hexaroam-servo-registers | Fixed register dispatch, LastError, control transitions and output-backend contract |
 | hexaroam-pico | Board setup, concrete UART/flash access, normal demo and separately registered hardware tests |
 
-Behavior, navigation, gait generation, inverse kinematics and the command protocol remain future layers. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
+Behavior, navigation, gait generation, inverse kinematics remain future layers. Protocol framing and an initial fixed-register service are host-tested; their UART, hardware backend and normal-firmware integration remain pending. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
+
+## Host-tested register-control path
+
+```mermaid
+flowchart TD
+    Bytes["Bytes supplied by PC tests"] --> Parser["StreamParser: servo-protocol"]
+    Parser --> Request["ParsedFrame: CRC-valid frame and header-validation result"]
+    Request --> Service["RegisterService: servo-registers"]
+    Service --> Control["ControlRegister: enable request and latched fault"]
+    Control --> Backend["OutputBackend contract"]
+    Backend --> Fake["Shared simulated output: host tests only"]
+    Service --> Reply["READ Frame or no response for modifying requests"]
+    Reply --> Codec["Frame encoder: servo-protocol"]
+    Backend -.->|"future adapter"| Hardware["Real servo output"]
+```
+
+The parser/codec and service are tested independently; a complete byte-stream-to-service-to-response integration test is not yet included. The service consumes already checked frames and revalidates access/payload lengths. Status reflects the control component and its backend's current logical output state, not servo positions. Control preserves accepted requests on technical errors while Fault remains latched. There is no real adapter to DMA/PIO yet. The normal Pico fixed-plan demo is unchanged. See the [register-service guide](../../firmware/servo-registers/README.md).

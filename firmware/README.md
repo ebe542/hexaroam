@@ -250,3 +250,7 @@ The rotation hardware test also reports sequence, sector and sector-local slot b
 ## Register-protocol framing
 
 The [servo-protocol library](servo-protocol/README.md) implements hardware-independent header encoding, register-map plausibility checks, CRC-protected complete frames and incremental parsing with resynchronization and timeout events. On 2026-10-31 the owner reported 50 passing host tests after their expected failing phases. It is included in the development runner and combined Rustdoc task; the owner subsequently reported 326 passing tests and all 15 verification checks passing, plus all 8 documentation checks passing. CI for this protocol revision is pending. The register service, UART adapter and firmware-loop integration remain future work. See the [protocol draft](../docs/servo-register-protocol.md).
+
+## Fixed register service and control
+
+The [servo-registers library](servo-registers/README.md) implements fixed-register READ responses, retained/explicitly cleared LastError, Control WRITE/SET/CLR and backend-derived status. On 2026-10-31 the owner reported 41 passing PC tests, including simulated start/stop errors and persistent Fault. The output contract currently has a test-only backend; normal Pico firmware, target/calibration registers and UART integration remain unchanged or pending. The owner subsequently confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 service tests. CI for this register-service revision is pending.

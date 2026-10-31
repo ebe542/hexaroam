@@ -124,3 +124,23 @@ classDiagram
 ## HAL boundary
 
 The private [SignalPlanDmaSource](../../firmware/servo-pio/src/signal_plan_dma_source.rs) implements the HAL's unsafe ReadTarget trait for a checked range in an owned static buffer. The transfer owns this source until completion or confirmed abort. This external trait boundary supports DMA memory safety; it is not an application command interface. Hardware types in servo-pio are compiled for ARM bare-metal targets, which is why the combined Rustdoc task selects thumbv6m-none-eabi.
+
+## Register-service output backend
+
+```mermaid
+classDiagram
+    class OutputBackend {
+        <<trait>>
+        start()
+        stop()
+        state()
+    }
+    class FakeOutput
+    class ControlRegister
+    class RegisterService
+    OutputBackend <|.. FakeOutput
+    ControlRegister ..> OutputBackend : uses
+    RegisterService --> ControlRegister : owns
+```
+
+[OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). Only the shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it at present, in tests. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. No ServoBank, FixedOutput or SwitchingOutput adapter implements this new trait yet. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status plus LastError. These host-tested types are not wired into the normal Pico binary.

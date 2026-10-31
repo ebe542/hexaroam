@@ -5,7 +5,7 @@ Use Python 3.10 or newer; no external Python packages are needed. From the repos
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
-| `python tools/dev.py doc` | Generate combined HTML documentation for all seven Rust packages |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all eight Rust packages |
 | `python tools/dev.py test` | Python tooling tests and host tests for all registered Rust libraries |
 | `python tools/dev.py fmt` | Format all registered Rust packages; modifies source files |
 | `python tools/dev.py check` | Check formatting and run cargo check for all registered Rust packages; no unit tests or linked firmware image |
@@ -112,9 +112,9 @@ Run from the repository root:
 python tools/dev.py doc
 ```
 
-The task documents servo-signal, servo-control, servo-pio, logging, servo-storage, servo-protocol and the Pico binary using cargo doc --locked --no-deps --document-private-items. All packages use the thumbv6m-none-eabi target, so embedded-only PIO code is included. Cargo/Rustdoc and the embedded target are required; no extra Python package, cargo-modules or Graphviz installation is needed.
+The task documents servo-signal, servo-control, servo-pio, logging, servo-storage, servo-protocol, servo-registers and the Pico binary using cargo doc --locked --no-deps --document-private-items. All packages use the thumbv6m-none-eabi target, so embedded-only PIO code is included. Cargo/Rustdoc and the embedded target are required; no extra Python package, cargo-modules or Graphviz installation is needed.
 
-After all seven commands succeed, an overview links the generated crate pages at:
+After all eight commands succeed, an overview links the generated crate pages at:
 
 ```text
 target/rustdoc/thumbv6m-none-eabi/doc/index.html
@@ -127,3 +127,7 @@ Commands run sequentially in their package directories with a shared target dire
 ## Protocol package integration
 
 servo-protocol is included in test, fmt, check, verify and the shared doc output. Its 50 owner-reported host tests cover header, validation, complete-frame codec and incremental parsing without UART hardware. The protocol is not added to the normal Pico binary or hardware examples yet. The runner's package-inclusion test and documentation tests are updated for seven packages. The owner reported 326 passing tests and all 15 verification checks passing, plus all 8 documentation checks passing. No tests were run by the assistant; CI for this protocol revision is pending.
+
+## Register-service integration
+
+servo-registers is included in test/fmt/check/verify and shared Rustdoc output. Its 41 owner-reported host tests exercise fixed registers, ControlRegister and dispatch through a simulated output backend. The documentation task now includes eight Rust packages. Runner inclusion is covered by test_register_tasks.py and the documentation tests are updated accordingly. The owner confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 register-service tests. No tests were run by the assistant; CI for this addition is pending. The normal Pico build and hardware examples do not use this service yet.
