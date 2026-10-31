@@ -175,4 +175,12 @@ These results narrow the earlier design's future-work statements: fixed register
 
 Seven tests in [test_pipeline.rs](../firmware/servo-registers/src/test_pipeline.rs) exercise request bytes through the parser and service to CRC-checked response bytes. Cases cover status, SET followed by status readback, canonical error responses, CRC rejection without service side effects, recovery after corruption, timeout recovery and consecutive requests. Parser state persists across requests in the recovery and consecutive-request tests. Timeout is injected rather than measured.
 
-The owner reported 48 register-package tests and 375 tests overall passing on 2026-10-31, with all 17 verification checks passing. CI for this integration-test revision is pending. UART transport and the normal firmware loop remain future work.
+The owner reported 48 register-package tests and 375 tests overall passing on 2026-10-31, with all 17 verification checks passing. The owner subsequently confirmed green CI for this integration-test revision. UART transport and the normal firmware loop remain future work.
+
+## Implemented target-register subset
+
+The service now implements READ/WRITE for indices 0x20..0x31, with four-byte little-endian i32 centidegree values. Requests may span consecutive servo IDs within the map and configured servo count. SET/CLR are not permitted. Reads return backend-owned accepted targets. Writes are validated and accepted as a complete batch; inactive writes prepare values, while active writes submit them without waiting for physical activation. No target writes reply directly.
+
+Missing calibration rejects both reads and writes. Fault rejects writes but permits reads when calibration is valid. Invalid angles preserve all targets without latching Fault; technical write failures preserve accepted targets and latch Fault. Complete READ data is staged before modifying the response buffer. Calibration validity remains a constructor flag, and only the test backend implements the target contract.
+
+On 2026-10-31 the owner confirmed 56 package tests and 383 tests overall passing, with all 17 verification checks passing. Eight target-register tests were observed failing before implementation. CI for this target-register revision is pending. Actual ServoBank/PIO integration, target-register byte-stream tests and UART transport remain future work.

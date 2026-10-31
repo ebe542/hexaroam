@@ -106,7 +106,7 @@ A missing valid record is `Ok(None)`; that does not authorize normal operation. 
 | hexaroam-servo-storage | Calibration serialization, CRC abstraction, journal and storage geometry |
 | hexaroam-logging | Buffered logging and bounded formatting over a byte-output contract |
 | hexaroam-servo-protocol | Header/frame codec, register-map plausibility and stream parsing with CRC/resynchronization |
-| hexaroam-servo-registers | Fixed register dispatch, LastError, control transitions and output-backend contract |
+| hexaroam-servo-registers | Fixed and target register dispatch, LastError, control transitions and output-backend contract |
 | hexaroam-pico | Board setup, concrete UART/flash access, normal demo and separately registered hardware tests |
 
 Behavior, navigation, gait generation, inverse kinematics remain future layers. Protocol framing and an initial fixed-register service are host-tested; their UART, hardware backend and normal-firmware integration remain pending. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
@@ -118,7 +118,7 @@ flowchart TD
     Bytes["Bytes supplied by PC tests"] --> Parser["StreamParser: servo-protocol"]
     Parser --> Request["ParsedFrame: CRC-valid frame and header-validation result"]
     Request --> Service["RegisterService: servo-registers"]
-    Service --> Control["ControlRegister: enable request and latched fault"]
+    Service --> Control["ControlRegister: enable, target access and latched fault"]
     Control --> Backend["OutputBackend contract"]
     Backend --> Fake["Shared simulated output: host tests only"]
     Service --> Reply["READ Frame or no response for modifying requests"]
@@ -127,3 +127,5 @@ flowchart TD
 ```
 
 Seven host integration tests now connect request bytes, the incremental parser, register handling and encoded READ responses. They cover normal reads/control changes, canonical error responses, CRC rejection, resynchronization, timeout recovery and consecutive requests. The recovery tests retain the same parser instance; actual UART timing is not tested. The service consumes already checked frames and revalidates access/payload lengths. Status reflects the control component and its backend's current logical output state, not servo positions. Control preserves accepted requests on technical errors while Fault remains latched. There is no real adapter to DMA/PIO yet. The normal Pico fixed-plan demo is unchanged. See the [register-service guide](../../firmware/servo-registers/README.md).
+
+Target-register READ/WRITE uses the same backend boundary and the Angle/ServoId/ServoTarget types from servo-control. Eight additional host tests use the simulated backend; the existing seven byte-stream tests still cover fixed/control registers. The real ServoBank adapter and target-register wire integration tests remain separate work. See the [target-register guide](../../firmware/servo-registers/README.md#target-angle-registers).

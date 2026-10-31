@@ -8,7 +8,10 @@ pub use service::{ErrorCode, REGISTER_REGIONS, RegisterService, ServiceError};
 
 mod output;
 
-pub use output::{OutputBackend, OutputStartError, OutputState};
+pub use output::{
+    OutputBackend, OutputStartError, OutputState, TargetReadError,
+    TargetWriteError,
+};
 
 mod control;
 
@@ -22,3 +25,6 @@ mod test_support;
 
 #[cfg(test)]
 mod test_pipeline;
+
+#[cfg(test)]
+mod test_targets;

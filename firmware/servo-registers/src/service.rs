@@ -1,11 +1,12 @@
 use crate::{ControlRegister, OutputBackend};
+use hexaroam_servo_control::{Angle, ServoId, ServoTarget};
 use hexaroam_servo_protocol::{
     Access, Frame, Header, Opcode, ParsedFrame, RegisterRegion,
     ValidationError, validate_header,
 };
 
 /// Initial subset; Control and variable-length regions follow separately.
-pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
+pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
     RegisterRegion {
         first_index: 0,
         entries: 1,
@@ -35,6 +36,12 @@ pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
         entries: 1,
         bytes_per_entry: 1,
         access: Access::ReadOnly,
+    },
+    RegisterRegion {
+        first_index: 0x20,
+        entries: 18,
+        bytes_per_entry: 4,
+        access: Access::ReadWrite,
     },
 ];
 
@@ -130,6 +137,96 @@ impl<O: OutputBackend> RegisterService<O> {
             }
         }
 
+        if failure.is_none() && (0x20..=0x31).contains(&header.index) {
+            let first = usize::from(header.index - 0x20);
+            let count = usize::from(header.length) / 4;
+
+            // Header validation already guarantees a nonempty,
+            // four-byte-aligned range within the target region.
+            if first + count > usize::from(self.servo_count) {
+                failure = Some(ErrorCode::OutOfBounds);
+            } else if header.opcode == Opcode::Read {
+                // Stage the complete response before touching the caller's
+                // buffer. A later read failure must not expose partial data.
+                let mut bytes = [0_u8; 18 * 4];
+
+                for offset in 0..count {
+                    match self
+                        .control
+                        .target(ServoId(first + offset))
+                    {
+                        Ok(angle) => {
+                            let start = offset * 4;
+                            bytes[start..start + 4].copy_from_slice(
+                                &angle.as_centidegrees().to_le_bytes(),
+                            );
+                        }
+                        Err(error) => {
+                            failure = Some(error);
+                            break;
+                        }
+                    }
+                }
+
+                if failure.is_none() {
+                    let length = usize::from(header.length);
+
+                    if output.len() < length {
+                        return Err(ServiceError::ResponseBufferTooSmall);
+                    }
+
+                    output[..length].copy_from_slice(&bytes[..length]);
+
+                    return Ok(Some(Frame {
+                        header: Header {
+                            opcode: Opcode::Read,
+                            index: header.index,
+                            length: header.length,
+                        },
+                        payload: &output[..length],
+                    }));
+                }
+
+                // Use the existing canonical LastError response below.
+            } else {
+                // Access validation permits only WRITE for target registers.
+                let mut targets = [ServoTarget {
+                    id: ServoId(0),
+                    angle: Angle::from_centidegrees(0),
+                }; 18];
+
+                for (offset, target) in targets[..count].iter_mut().enumerate()
+                {
+                    let start = offset * 4;
+                    let centidegrees = i32::from_le_bytes([
+                        payload[start],
+                        payload[start + 1],
+                        payload[start + 2],
+                        payload[start + 3],
+                    ]);
+
+                    *target = ServoTarget {
+                        id: ServoId(first + offset),
+                        angle: Angle::from_centidegrees(centidegrees),
+                    };
+                }
+
+                // Submit once, after decoding the complete request.
+                // Calibration validation and atomic acceptance belong
+                // to the backend, not the register service.
+                if let Err(error) = self
+                    .control
+                    .set_targets(&targets[..count])
+                {
+                    self.last_error = error;
+                }
+
+                // Successful writes preserve any previous LastError.
+                // Target writes never produce a direct response.
+                return Ok(None);
+            }
+        }
+
         if header.opcode != Opcode::Read {
             if let Some(error) = failure {
                 self.last_error = error;
@@ -150,8 +247,8 @@ impl<O: OutputBackend> RegisterService<O> {
                 return Ok(None);
             }
 
-            // The initial map permits only an ordinary WRITE to LastError.
-            // Control-register operations will be implemented separately.
+            // Control and target writes were handled above.
+            // The remaining writable register is LastError.
             if header.opcode != Opcode::Write || header.index != 2 {
                 self.last_error = ErrorCode::UnsupportedAccess;
                 return Ok(None);

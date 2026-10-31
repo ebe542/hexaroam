@@ -257,4 +257,8 @@ The [servo-registers library](servo-registers/README.md) implements fixed-regist
 
 ## Register protocol integration tests
 
-Seven [host integration tests](servo-registers/src/test_pipeline.rs) connect request bytes, parser, register service and encoded responses, including CRC rejection, resynchronization, timeout recovery and consecutive requests. The owner reported 48 package tests, 375 tests overall and all 17 verification checks passing on 2026-10-31. CI for this integration-test revision is pending. These tests use a simulated output backend and do not exercise UART or change the normal Pico firmware.
+Seven [host integration tests](servo-registers/src/test_pipeline.rs) connect request bytes, parser, register service and encoded responses, including CRC rejection, resynchronization, timeout recovery and consecutive requests. The owner reported 48 package tests, 375 tests overall and all 17 verification checks passing on 2026-10-31. The owner subsequently confirmed green CI for this integration-test revision. These tests use a simulated output backend and do not exercise UART or change the normal Pico firmware.
+
+## Target-angle register access
+
+The [register service](servo-registers/README.md#target-angle-registers) now reads and writes consecutive i32 centidegree targets through OutputBackend. The shared test backend supports inactive preparation, active writes and atomic rejection; technical write failures latch Fault. On 2026-10-31 the owner reported 56 package tests, 383 tests overall and all 17 verification checks passing. CI for this target-register revision is pending. The real ServoBank/PIO adapter and normal firmware integration remain future work.

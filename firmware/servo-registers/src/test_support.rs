@@ -1,4 +1,8 @@
-use crate::{OutputBackend, OutputStartError, OutputState};
+use crate::{
+    OutputBackend, OutputStartError, OutputState, TargetReadError,
+    TargetWriteError,
+};
+use hexaroam_servo_control::{Angle, ServoId, ServoTarget};
 
 pub(crate) struct FakeOutput {
     pub(crate) state: OutputState,
@@ -7,6 +11,8 @@ pub(crate) struct FakeOutput {
     pub(crate) start_error: Option<OutputStartError<()>>,
     pub(crate) stop_error: bool,
     pub(crate) state_after_error: OutputState,
+    pub(crate) targets: [Angle; 18],
+    pub(crate) target_error: bool,
 }
 
 impl FakeOutput {
@@ -18,6 +24,8 @@ impl FakeOutput {
             start_error: None,
             stop_error: false,
             state_after_error: OutputState::Inactive,
+            targets: [Angle::from_centidegrees(0); 18],
+            target_error: false,
         }
     }
 }
@@ -54,5 +62,51 @@ impl OutputBackend for FakeOutput {
 
     fn state(&self) -> OutputState {
         self.state
+    }
+
+    fn target(&self, id: ServoId) -> Result<Angle, TargetReadError> {
+        self.targets
+            .get(id.0)
+            .copied()
+            .ok_or(TargetReadError::UnknownServo(id))
+    }
+
+    fn set_targets(
+        &mut self,
+        targets: &[ServoTarget],
+    ) -> Result<(), TargetWriteError<Self::Error>> {
+        let mut candidate = self.targets;
+
+        for (index, target) in targets.iter().enumerate() {
+            if target.id.0 >= candidate.len() {
+                return Err(TargetWriteError::UnknownServo(
+                    target.id,
+                ));
+            }
+
+            if targets[..index]
+                .iter()
+                .any(|previous| previous.id == target.id)
+            {
+                return Err(TargetWriteError::DuplicateServo(
+                    target.id,
+                ));
+            }
+
+            if !(-9_000..=9_000).contains(&target.angle.as_centidegrees()) {
+                return Err(TargetWriteError::InvalidAngle(
+                    target.id,
+                ));
+            }
+
+            candidate[target.id.0] = target.angle;
+        }
+
+        if self.target_error {
+            return Err(TargetWriteError::Backend(()));
+        }
+
+        self.targets = candidate;
+        Ok(())
     }
 }

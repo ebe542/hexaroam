@@ -1,11 +1,14 @@
 //! Control-register transitions independent of protocol dispatch.
 
+use hexaroam_servo_control::{Angle, ServoId, ServoTarget};
 use hexaroam_servo_protocol::Opcode;
 
-use crate::{ErrorCode, OutputBackend, OutputStartError, OutputState};
+use crate::{
+    ErrorCode, OutputBackend, OutputStartError, OutputState, TargetReadError,
+    TargetWriteError,
+};
 
 pub const OUTPUT_ENABLE: u8 = 1 << 0;
-
 pub const STATUS_CALIBRATION_VALID: u8 = 1 << 0;
 pub const STATUS_OUTPUT_ACTIVE: u8 = 1 << 1;
 pub const STATUS_FAULT: u8 = 1 << 3;
@@ -118,6 +121,51 @@ impl<O: OutputBackend> ControlRegister<O> {
         self.enable_requested = enable;
 
         Ok(())
+    }
+
+    /// Reads an accepted target, including while Fault is latched.
+    pub(crate) fn target(&self, id: ServoId) -> Result<Angle, ErrorCode> {
+        if !self.calibration_valid {
+            return Err(ErrorCode::NotConfigured);
+        }
+
+        self.output
+            .target(id)
+            .map_err(|error| match error {
+                TargetReadError::UnknownServo(_) => ErrorCode::OutOfBounds,
+            })
+    }
+
+    /// Prepares or submits a complete target batch.
+    ///
+    /// The backend guarantees unchanged accepted targets on failure.
+    /// Technical errors latch Fault; validation errors do not.
+    pub(crate) fn set_targets(
+        &mut self,
+        targets: &[ServoTarget],
+    ) -> Result<(), ErrorCode> {
+        if self.faulted {
+            return Err(ErrorCode::InvalidState);
+        }
+
+        if !self.calibration_valid {
+            return Err(ErrorCode::NotConfigured);
+        }
+
+        match self.output.set_targets(targets) {
+            Ok(()) => Ok(()),
+            Err(TargetWriteError::UnknownServo(_)) => {
+                Err(ErrorCode::OutOfBounds)
+            }
+            Err(TargetWriteError::DuplicateServo(_))
+            | Err(TargetWriteError::InvalidAngle(_)) => {
+                Err(ErrorCode::InvalidValue)
+            }
+            Err(TargetWriteError::Backend(_)) => {
+                self.faulted = true;
+                Err(ErrorCode::OutputError)
+            }
+        }
     }
 }
 

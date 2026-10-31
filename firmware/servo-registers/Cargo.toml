@@ -5,6 +5,7 @@ edition = "2024"
 license = "MIT"
 
 [dependencies]
+hexaroam-servo-control = { path = "../servo-control" }
 hexaroam-servo-protocol = { path = "../servo-protocol" }
 
 [dev-dependencies]

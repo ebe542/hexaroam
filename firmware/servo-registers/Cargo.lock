@@ -17,6 +17,7 @@ version = "0.1.0"
 name = "hexaroam-servo-registers"
 version = "0.1.0"
 dependencies = [
+ "hexaroam-servo-control",
  "hexaroam-servo-protocol",
  "hexaroam-servo-storage",
 ]

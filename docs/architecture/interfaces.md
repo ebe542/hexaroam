@@ -134,6 +134,8 @@ classDiagram
         start()
         stop()
         state()
+        target(id)
+        set_targets(targets)
     }
     class FakeOutput
     class ControlRegister
@@ -143,4 +145,4 @@ classDiagram
     RegisterService --> ControlRegister : owns
 ```
 
-[OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). Only the shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it at present, in tests. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. No ServoBank, FixedOutput or SwitchingOutput adapter implements this new trait yet. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status plus LastError. These host-tested types are not wired into the normal Pico binary.
+[OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state and target-access contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). Only the shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it at present, in tests. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. No ServoBank, FixedOutput or SwitchingOutput adapter implements this new trait yet. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status, LastError and consecutive target-angle registers. Target values use the existing Angle, ServoId and ServoTarget types from servo-control. Reads return backend-owned accepted targets; batch writes must preserve them on failure. Inactive writes prepare targets, while active writes submit them for later signal-plan activation. These host-tested types are not wired into the normal Pico binary.
