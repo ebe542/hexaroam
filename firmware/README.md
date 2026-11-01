@@ -278,3 +278,7 @@ The optional [SignalPlanLifecycle](servo-signal/src/signal_plan_lifecycle.rs) co
 ## Regular PIO/DMA stop
 
 SwitchingOutput now supports explicit stop with Low outputs, confirmed DMA abort and retained stopped resources. Repeated stop is harmless; servicing stopped output does nothing, pending replacements are discarded and ordinary submissions are rejected. Fault recovery remains explicit. On 2026-11-01 the owner confirmed the [stop hardware procedure](pico/hardware_tests/README.md#regular-output-stop-test), reran both restart_active_dma and restart_abort_timeout successfully, and reported 405 tests and all 17 verification checks passing. The internal hardware-test-only helper was subsequently feature-gated to remove a dead-code warning. Ordinary start after stop, a production SignalPlanLifecycle implementation and stop-specific timeout injection remain future work. CI for this revision is pending.
+
+## Regular PIO/DMA startup after stop
+
+SwitchingOutput now implements SignalPlanLifecycle and can start a complete validated plan from retained stopped resources. Invalid starts preserve stopped output; ordinary start rejects faults and does not clear them. On 2026-11-01 the owner confirmed [start_after_stop](pico/hardware_tests/README.md#regular-start-after-stop-test), including the Low pause and replacement signal widths, and reported 405 tests and all 17 verification checks passing. The preceding stop revision passed CI; CI for this startup revision is pending. The register-service adapter and normal firmware-loop integration remain future work.

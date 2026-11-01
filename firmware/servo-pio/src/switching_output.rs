@@ -74,6 +74,7 @@ impl<
             }
         }
     }
+
     #[cfg(feature = "hardware-tests")]
     fn is_some(&self) -> bool {
         matches!(self, Self::Running(_))
@@ -106,6 +107,18 @@ pub enum OutputRestartError {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum OutputStopError {
+    DmaAbortTimeout,
+}
+
+/// Errors from regular lifecycle operations, distinct from fault recovery.
+#[derive(Debug, PartialEq, Eq)]
+pub enum OutputLifecycleError {
+    AlreadyActive,
+    Faulted,
+    PeriodMismatch,
+    OutputMismatch,
+    InvalidPlan,
+    InsufficientCapacity,
     DmaAbortTimeout,
 }
 
@@ -238,6 +251,106 @@ impl<
             gpio_mask,
             faulted: false,
         })
+    }
+
+    /// Starts stopped, non-faulted output with a complete initial plan.
+    ///
+    /// Invalid plans preserve stopped resources and Low output levels.
+    /// Starting active output is rejected without changing its plan.
+    /// Ordinary startup never clears a latched fault.
+    ///
+    /// The borrowed plan is encoded before returning.
+    /// Success confirms startup, not measured pulse timing.
+    pub fn start_plan<const PLAN_CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<PLAN_CAPACITY>,
+    ) -> Result<(), OutputLifecycleError> {
+        if self.is_faulted() {
+            return Err(OutputLifecycleError::Faulted);
+        }
+
+        if self.state() != SignalOutputState::Inactive {
+            return Err(OutputLifecycleError::AlreadyActive);
+        }
+
+        // Reuse transactional plan preparation without clearing any fault.
+        // Validation/encoding failure preserves the buffer and ready state.
+        self.pending
+            .as_mut()
+            .expect("Pending-plan slot must be present")
+            .prepare_restart(plan)
+            .map_err(|error| match error {
+                SubmissionError::PeriodMismatch => {
+                    OutputLifecycleError::PeriodMismatch
+                }
+                SubmissionError::OutputMismatch => {
+                    OutputLifecycleError::OutputMismatch
+                }
+                SubmissionError::Encoding(
+                    EncodingError::InsufficientCapacity,
+                ) => OutputLifecycleError::InsufficientCapacity,
+                SubmissionError::Encoding(_) => {
+                    OutputLifecycleError::InvalidPlan
+                }
+                SubmissionError::Busy => {
+                    unreachable!("Explicit preparation replaces pending data")
+                }
+            })?;
+
+        // Stop already confirmed DMA shutdown. No abort is needed here.
+        // All recoverable errors were handled before moving owned resources.
+        let resources = core::mem::replace(
+            &mut self.transfer,
+            DmaResources::Transition,
+        );
+
+        let (channel, previous_buffer, mut tx) = match resources {
+            DmaResources::Stopped {
+                channel,
+                buffer,
+                tx,
+            } => (channel, buffer, tx),
+            _ => unreachable!("Startup requires stopped resources"),
+        };
+
+        let pending = self
+            .pending
+            .take()
+            .expect("Prepared startup plan must be present");
+
+        let (start_buffer, ready) = pending.into_parts();
+        debug_assert!(ready);
+
+        // PIO remains disabled and DMA is stopped.
+        // Remove stale FIFO contents before loading the initial entry.
+        self.state_machine.clear_fifos();
+
+        for &word in &start_buffer.words()[..2] {
+            assert!(
+                tx.write(word),
+                "Empty FIFO must accept the initial entry",
+            );
+        }
+
+        let word_count = start_buffer.words().len();
+        let source = SignalPlanDmaSource::new(start_buffer, 2..word_count);
+
+        self.transfer = DmaResources::Running(
+            single_buffer::Config::new(channel, source, tx).start(),
+        );
+
+        // Old source contents must not become a pending replacement.
+        self.pending = Some(PendingSignalPlan::new(
+            previous_buffer,
+            self.period_us,
+            self.gpio_mask,
+        ));
+
+        // Reset to the wrap target and enable PIO only after FIFO,
+        // DMA and buffer ownership are ready. Do not clear fault flags.
+        self.state_machine.restart();
+
+        Ok(())
     }
 
     /// Stops PIO output and confirms DMA shutdown.
@@ -444,15 +557,14 @@ impl<
                 _ => OutputRestartError::InvalidPlan,
             })?;
 
-        // A fault may still own a running transfer, or stop may already
-        // have recovered its resources. Abort only the former.
+        // Fault recovery may own a running transfer or resources already
+        // recovered by stop. Abort only a transfer that is still owned.
         if let Some(transfer) = self.transfer.as_mut() {
             abort_transfer(transfer, abort_poll_budget)
                 .map_err(|_| OutputRestartError::DmaAbortTimeout)?;
         }
 
-        // No fallible operation may occur between extracting these
-        // resources and storing the replacement transfer below.
+        // All recoverable errors precede this ownership transition.
         let resources = core::mem::replace(
             &mut self.transfer,
             DmaResources::Transition,
@@ -746,5 +858,36 @@ impl<
 
     fn service(&mut self) {
         SwitchingOutput::service(self);
+    }
+}
+
+impl<
+    P: PIOExt,
+    SM: StateMachineIndex,
+    CH: ChannelIndex,
+    const N: usize,
+    const WORD_CAPACITY: usize,
+> hexaroam_servo_signal::SignalPlanLifecycle
+    for SwitchingOutput<P, SM, CH, N, WORD_CAPACITY>
+{
+    type LifecycleError = OutputLifecycleError;
+
+    fn start_plan<const CAPACITY: usize>(
+        &mut self,
+        plan: &SignalPlan<CAPACITY>,
+    ) -> Result<(), Self::LifecycleError> {
+        SwitchingOutput::start_plan(self, plan)
+    }
+
+    fn stop(&mut self) -> Result<(), Self::LifecycleError> {
+        SwitchingOutput::stop(self).map_err(|error| match error {
+            OutputStopError::DmaAbortTimeout => {
+                OutputLifecycleError::DmaAbortTimeout
+            }
+        })
+    }
+
+    fn state(&self) -> SignalOutputState {
+        SwitchingOutput::state(self)
     }
 }

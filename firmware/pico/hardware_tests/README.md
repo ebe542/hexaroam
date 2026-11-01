@@ -255,3 +255,19 @@ INFO Stop test OK: output inactive; DMA stopped
 ```
 
 The owner confirmed the expected signals, LED and messages on 2026-11-01, then reran restart_active_dma and restart_abort_timeout successfully. Full verification reported 405 tests passing and all 17 checks passing; manual examples do not add unit-test counts. The stop test does not exercise its DMA-timeout branch or prove that an old pending plan cannot reappear after ordinary startup; that startup path remains to be implemented. CI for this revision is pending.
+
+## Regular start after stop test
+
+[start_after_stop.rs](start_after_stop.rs) is a manual hardware-tests-only example using unloaded GP0/GP1 and UART1 TX on GP20, common GND, a 3.3 V TTL receiver and 115200 baud, 8N1. Build with `python tools/dev.py hardware-build` and upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/start_after_stop.uf2` in BOOTSEL mode.
+
+For five seconds GP0 has a 1 ms High pulse and GP1 a 2 ms High pulse, with a blinking LED. The test queues a 1.5 ms/1.5 ms replacement without servicing it, then stops. Both pins stay Low for two seconds and the LED stays on. Period-mismatched and GPIO-mismatched starts must be rejected while state stays Inactive and no DMA transfer is owned. Ordinary submission while stopped is rejected. A valid start then runs GP0 at 2 ms and GP1 at 1 ms with the LED blinking again. A second start on active output must fail without replacing this plan. The discarded 1.5 ms/1.5 ms plan must not reappear during observation.
+
+Expected UART messages:
+
+```text
+INFO Start test: initial plan running
+INFO Start test: stopped; invalid starts rejected
+INFO Start test OK: replacement plan running
+```
+
+On 2026-11-01 the owner confirmed the stated signal behavior and final success message, then reported 405 tests and all 17 verification checks passing. This is a manual GPIO test without attached servos, not an automated timing measurement or proof that no brief transient can occur. Manual firmware examples do not add unit-test counts. Ordinary startup does not recover latched faults; stop-specific abort-timeout injection remains a separate test gap. CI for this revision is pending.

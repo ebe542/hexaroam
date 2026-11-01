@@ -167,8 +167,10 @@ classDiagram
         stop()
         state()
     }
+    class SwitchingOutput
     SignalPlanOutput <|-- SignalPlanLifecycle : extends
+    SignalPlanLifecycle <|.. SwitchingOutput
     ServoSignalOutput ..> SignalPlanLifecycle : optional backend bound
 ```
 
-[SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. Only a test backend implements this extension so far; SwitchingOutput still supports submission and fault restart, without regular lifecycle stop/start. PulseBankOutput and the register-service OutputBackend are separate contracts; their lifecycle bridge is not implemented yet.
+[SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. SwitchingOutput now implements this extension with regular start after confirmed stop, bounded DMA shutdown and a separate OutputLifecycleError. Ordinary start rejects latched faults; explicit fault recovery remains separate. The owner confirmed the regular stop/start hardware procedures on 2026-11-01. PulseBankOutput and the register-service OutputBackend are separate contracts; their lifecycle bridge is not implemented yet.
