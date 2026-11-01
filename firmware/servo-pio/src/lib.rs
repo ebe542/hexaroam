@@ -40,7 +40,7 @@ mod switching_output;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 pub use switching_output::{
-    OutputRestartError, OutputSubmissionError, SwitchingOutput,
+    OutputRestartError, OutputStopError, OutputSubmissionError, SwitchingOutput,
 };
 
 // Used by the controlled restart implementation in the next step.

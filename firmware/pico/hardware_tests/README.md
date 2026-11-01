@@ -240,3 +240,18 @@ The rotation test now queues `Journal preparation started/complete` and, around 
 The commented boot sequence is rotation to 25 -> restart and append verified marker 26 -> restart and repeat rotation to 25. Marker 26 uses the same fixture formula with lower pulse endpoints offset by 25 microseconds from sequence 1. Both marker states require exact calibration values and the expected slot before proceeding. This is test orchestration, not an application recovery policy. Interrupted marker writes can leave an occupied slot and cause a later erased-slot precheck to fail; interrupted preparation or mid-rotation runs are not automatically recovered. Fixture matching is not authentication. Each repeated full run performs real flash programming/erasure.
 
 On 2026-10-30 the owner confirmed that progress output and the automatic 25 -> 26 -> preparation/rotation-to-25 restart cycle work as described. The updated hardware build passed all 41 checks; the owner subsequently reported 275 passing tests and all 13 verification checks passing. Fresh map/disassembly inspection confirmed the complete 58-byte erase and 62-byte program wrappers in copied RAM, each with five indirect calls and no extra flash accesses. The assistant did not execute builds or tests. This supersedes the earlier no-write sequence-25 startup observation; interrupted-operation and power-loss recovery remain unverified. CI for the combined rotation/progress/repeat revision is pending.
+
+## Regular output stop test
+
+[stop_output.rs](stop_output.rs) is a manual, hardware-tests-only example. Use unloaded GP0/GP1 against Pico GND and UART1 TX on GP20 to a 3.3 V TTL receiver, common GND, 115200 baud, 8N1. No servo is needed.
+
+Build with `python tools/dev.py hardware-build` and copy `firmware/pico/target/thumbv6m-none-eabi/debug/examples/stop_output.uf2` to the Pico in BOOTSEL mode. Initially GP0 has a 1 ms High pulse and GP1 a 2 ms High pulse in a 20 ms period; the LED blinks. After five seconds the test submits a replacement without servicing it, then stops output. It checks Inactive, absence of an owned DMA transfer, no fault, successful repeated stop and Stopped rejection of subsequent plan submission. Continued servicing must not resume output. Both pins stay Low and the LED stays on.
+
+Expected UART messages:
+
+```text
+INFO Stop test: initial plan running
+INFO Stop test OK: output inactive; DMA stopped
+```
+
+The owner confirmed the expected signals, LED and messages on 2026-11-01, then reran restart_active_dma and restart_abort_timeout successfully. Full verification reported 405 tests passing and all 17 checks passing; manual examples do not add unit-test counts. The stop test does not exercise its DMA-timeout branch or prove that an old pending plan cannot reappear after ordinary startup; that startup path remains to be implemented. CI for this revision is pending.

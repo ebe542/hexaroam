@@ -1,6 +1,6 @@
 //! Complete signal-plan replacement using two exclusive buffers.
 
-use hexaroam_servo_signal::SignalPlan;
+use hexaroam_servo_signal::{SignalOutputState, SignalPlan};
 use rp2040_hal::{
     dma::{Channel, ChannelIndex, single_buffer},
     gpio::{DynPinId, Pin, PullNone},
@@ -23,6 +23,63 @@ type PlanTransfer<P, SM, CH, const WORD_CAPACITY: usize> =
         Tx<(P, SM)>,
     >;
 
+/// Owns either a running transfer or all resources recovered after stop.
+enum DmaResources<
+    P: PIOExt,
+    SM: StateMachineIndex,
+    CH: ChannelIndex,
+    const WORD_CAPACITY: usize,
+> {
+    Running(PlanTransfer<P, SM, CH, WORD_CAPACITY>),
+    Stopped {
+        channel: Channel<CH>,
+        buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
+        tx: Tx<(P, SM)>,
+    },
+
+    // Used only while moving owned resources inside a mutable operation.
+    // A successful public operation must not leave this variant behind.
+    Transition,
+}
+
+impl<
+    P: PIOExt,
+    SM: StateMachineIndex,
+    CH: ChannelIndex,
+    const WORD_CAPACITY: usize,
+> DmaResources<P, SM, CH, WORD_CAPACITY>
+{
+    fn as_ref(&self) -> Option<&PlanTransfer<P, SM, CH, WORD_CAPACITY>> {
+        match self {
+            Self::Running(transfer) => Some(transfer),
+            _ => None,
+        }
+    }
+
+    fn as_mut(
+        &mut self,
+    ) -> Option<&mut PlanTransfer<P, SM, CH, WORD_CAPACITY>> {
+        match self {
+            Self::Running(transfer) => Some(transfer),
+            _ => None,
+        }
+    }
+
+    fn take(&mut self) -> Option<PlanTransfer<P, SM, CH, WORD_CAPACITY>> {
+        match core::mem::replace(self, Self::Transition) {
+            Self::Running(transfer) => Some(transfer),
+            other => {
+                *self = other;
+                None
+            }
+        }
+    }
+    #[cfg(feature = "hardware-tests")]
+    fn is_some(&self) -> bool {
+        matches!(self, Self::Running(_))
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum OutputSubmissionError {
     Busy,
@@ -31,6 +88,7 @@ pub enum OutputSubmissionError {
     InvalidPlan,
     InsufficientCapacity,
     Faulted,
+    Stopped,
 }
 use crate::dma_abort::abort_transfer;
 
@@ -45,6 +103,12 @@ pub enum OutputRestartError {
     InsufficientCapacity,
     DmaAbortTimeout,
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum OutputStopError {
+    DmaAbortTimeout,
+}
+
 fn submission_error(error: SubmissionError) -> OutputSubmissionError {
     match error {
         SubmissionError::Busy => OutputSubmissionError::Busy,
@@ -99,7 +163,7 @@ pub struct SwitchingOutput<
 > {
     state_machine: StateMachine<(P, SM), Running>,
     _pins: [Pin<DynPinId, P::PinFunction, PullNone>; N],
-    transfer: Option<PlanTransfer<P, SM, CH, WORD_CAPACITY>>,
+    transfer: DmaResources<P, SM, CH, WORD_CAPACITY>,
     pending: Option<PendingSignalPlan<'static, WORD_CAPACITY>>,
     period_us: u32,
     gpio_mask: u32,
@@ -164,7 +228,7 @@ impl<
         Ok(Self {
             state_machine: state_machine,
             _pins: prepared.pins,
-            transfer: Some(transfer),
+            transfer: DmaResources::Running(transfer),
             pending: Some(PendingSignalPlan::new(
                 second_buffer,
                 period_us,
@@ -174,6 +238,85 @@ impl<
             gpio_mask,
             faulted: false,
         })
+    }
+
+    /// Stops PIO output and confirms DMA shutdown.
+    ///
+    /// Success leaves assigned signal pins Low and discards any pending
+    /// replacement plan. Repeated stop succeeds without restarting output.
+    /// Existing faults remain latched.
+    ///
+    /// On DMA abort timeout, transfer and buffer ownership are retained.
+    /// Inactive must not be reported until shutdown is confirmed.
+    pub fn stop(&mut self) -> Result<(), OutputStopError> {
+        if self.state() == SignalOutputState::Inactive {
+            return Ok(());
+        }
+
+        // Capture an existing hardware fault before changing execution.
+        self.is_faulted();
+
+        // Prevent further edges before waiting for DMA shutdown.
+        self.halt_and_force_low();
+
+        let result = abort_transfer(
+            self.transfer
+                .as_mut()
+                .expect("Running DMA resources must be present"),
+            DMA_ABORT_POLL_BUDGET,
+        );
+
+        if result.is_err() {
+            // DMA may still access its source. Keep the complete transfer
+            // owned and prevent ordinary servicing from restarting it.
+            self.faulted = true;
+            return Err(OutputStopError::DmaAbortTimeout);
+        }
+
+        let transfer = self
+            .transfer
+            .take()
+            .expect("Confirmed DMA transfer must be present");
+
+        // Abort completion was confirmed before recovering resources.
+        let (channel, source, tx) = transfer.wait();
+        let buffer = source.into_buffer();
+
+        // DMA can no longer refill the FIFO.
+        self.state_machine.clear_fifos();
+
+        // Keep the second buffer, but discard its pending replacement.
+        let pending = self
+            .pending
+            .take()
+            .expect("Pending-plan slot must be present");
+
+        let (pending_buffer, _) = pending.into_parts();
+
+        self.pending = Some(PendingSignalPlan::new(
+            pending_buffer,
+            self.period_us,
+            self.gpio_mask,
+        ));
+
+        self.transfer = DmaResources::Stopped {
+            channel,
+            buffer,
+            tx,
+        };
+
+        Ok(())
+    }
+
+    /// Reports whether output has been confirmed stopped.
+    ///
+    /// Active also covers an incomplete stop after a technical error.
+    /// This does not report instantaneous pin levels or servo position.
+    pub fn state(&self) -> SignalOutputState {
+        match &self.transfer {
+            DmaResources::Stopped { .. } => SignalOutputState::Inactive,
+            _ => SignalOutputState::Active,
+        }
     }
 
     /// Latches a detected PIO underflow until an explicit restart.
@@ -197,6 +340,9 @@ impl<
         if self.is_faulted() {
             return Err(OutputSubmissionError::Faulted);
         }
+        if self.state() == SignalOutputState::Inactive {
+            return Err(OutputSubmissionError::Stopped);
+        }
         self.pending
             .as_mut()
             .expect("Pending-plan slot must be present")
@@ -205,6 +351,9 @@ impl<
     }
 
     pub fn service(&mut self) {
+        if self.state() == SignalOutputState::Inactive {
+            return;
+        }
         if self.is_faulted() {
             return;
         }
@@ -259,8 +408,9 @@ impl<
         let word_count = next_buffer.words().len();
         let source = SignalPlanDmaSource::new(next_buffer, 0..word_count);
 
-        self.transfer =
-            Some(single_buffer::Config::new(channel, source, tx).start());
+        self.transfer = DmaResources::Running(
+            single_buffer::Config::new(channel, source, tx).start(),
+        );
     }
 
     /// Explicitly restarts faulted output with a complete signal plan.
@@ -294,25 +444,34 @@ impl<
                 _ => OutputRestartError::InvalidPlan,
             })?;
 
-        // Keep the transfer inside self until the abort is confirmed.
-        // A timeout must not release its source memory.
-        abort_transfer(
-            self.transfer
-                .as_mut()
-                .expect("DMA transfer must be present"),
-            abort_poll_budget,
-        )
-        .map_err(|_| OutputRestartError::DmaAbortTimeout)?;
+        // A fault may still own a running transfer, or stop may already
+        // have recovered its resources. Abort only the former.
+        if let Some(transfer) = self.transfer.as_mut() {
+            abort_transfer(transfer, abort_poll_budget)
+                .map_err(|_| OutputRestartError::DmaAbortTimeout)?;
+        }
 
-        let transfer = self
-            .transfer
-            .take()
-            .expect("DMA transfer must be present");
+        // No fallible operation may occur between extracting these
+        // resources and storing the replacement transfer below.
+        let resources = core::mem::replace(
+            &mut self.transfer,
+            DmaResources::Transition,
+        );
 
-        // The abort confirmed BUSY is clear.
-        // wait() now recovers the resources and applies the HAL's fences.
-        let (channel, source, mut tx) = transfer.wait();
-        let previous_buffer = source.into_buffer();
+        let (channel, previous_buffer, mut tx) = match resources {
+            DmaResources::Running(transfer) => {
+                let (channel, source, tx) = transfer.wait();
+                (channel, source.into_buffer(), tx)
+            }
+            DmaResources::Stopped {
+                channel,
+                buffer,
+                tx,
+            } => (channel, buffer, tx),
+            DmaResources::Transition => {
+                unreachable!("DMA resources must be owned")
+            }
+        };
 
         let pending = self
             .pending
@@ -322,7 +481,8 @@ impl<
         let (restart_buffer, ready) = pending.into_parts();
         debug_assert!(ready);
 
-        // PIO remains in its fault loop and keeps the outputs Low.
+        // PIO is either in its fault loop or explicitly halted.
+        // Assigned outputs remain Low until the explicit restart.
         // DMA has stopped, so no old words can arrive after this clear.
         self.state_machine.clear_fifos();
 
@@ -336,8 +496,9 @@ impl<
         let word_count = restart_buffer.words().len();
         let source = SignalPlanDmaSource::new(restart_buffer, 2..word_count);
 
-        self.transfer =
-            Some(single_buffer::Config::new(channel, source, tx).start());
+        self.transfer = DmaResources::Running(
+            single_buffer::Config::new(channel, source, tx).start(),
+        );
 
         // The previous DMA buffer becomes writable again.
         // Its old payload is not marked as a pending replacement.
@@ -362,11 +523,9 @@ impl<
     /// Hardware test only: reports whether the owned DMA transfer is active.
     #[cfg(feature = "hardware-tests")]
     pub fn dma_is_active(&self) -> bool {
-        !self
-            .transfer
+        self.transfer
             .as_ref()
-            .expect("DMA transfer must be present")
-            .is_done()
+            .is_some_and(|transfer| !transfer.is_done())
     }
 
     /// Hardware test only: stops PIO, forces Low, and blocks DMA on TX.
@@ -375,6 +534,11 @@ impl<
     /// Leaves the driver faulted, with a full FIFO and active DMA.
     #[cfg(feature = "hardware-tests")]
     pub fn force_fault_with_active_dma(&mut self) {
+        assert_eq!(
+            self.state(),
+            SignalOutputState::Active,
+            "Test requires active output",
+        );
         use pio::{
             Instruction, InstructionOperands, MovDestination, MovOperation,
             MovSource, OutDestination,
@@ -461,8 +625,9 @@ impl<
 
         let source = SignalPlanDmaSource::new(buffer, 0..word_count);
 
-        self.transfer =
-            Some(single_buffer::Config::new(channel, source, tx).start());
+        self.transfer = DmaResources::Running(
+            single_buffer::Config::new(channel, source, tx).start(),
+        );
 
         // PIO cannot consume words. A full FIFO must therefore leave
         // the longer DMA transfer blocked and still active.
@@ -503,6 +668,61 @@ impl<
     #[cfg(feature = "hardware-tests")]
     pub fn has_dma_transfer(&self) -> bool {
         self.transfer.is_some()
+    }
+
+    /// Disables this state machine and forces its output latch Low.
+    ///
+    /// DMA may still be running; this method does not release resources.
+    fn halt_and_force_low(&mut self) {
+        use pio::{
+            Instruction, InstructionOperands, MovDestination, MovOperation,
+            MovSource, OutDestination,
+        };
+
+        let register_pointer = match P::id() {
+            0 => pac::PIO0::ptr(),
+            1 => pac::PIO1::ptr(),
+            _ => unreachable!("Unsupported PIO block"),
+        };
+
+        // SAFETY: This driver owns the selected state machine.
+        // The atomic-clear alias changes only its enable bit.
+        let registers = unsafe { &*register_pointer };
+
+        unsafe {
+            core::ptr::write_volatile(
+                registers
+                    .ctrl()
+                    .as_ptr()
+                    .byte_add(0x3000),
+                1_u32 << SM::id(),
+            );
+        }
+
+        // As in the existing fault-injection path, the HAL handle retains
+        // its Running type while hardware execution is disabled.
+        // Only an explicit restart may enable execution again.
+        //
+        // OUT uses the driver's configured 32-bit output mapping.
+        // Only the assigned pins are owned/configured as this PIO output.
+        for operands in [
+            InstructionOperands::MOV {
+                destination: MovDestination::OSR,
+                op: MovOperation::None,
+                source: MovSource::NULL,
+            },
+            InstructionOperands::OUT {
+                destination: OutDestination::PINS,
+                bit_count: 32,
+            },
+        ] {
+            self.state_machine
+                .exec_instruction(Instruction {
+                    operands,
+                    delay: 0,
+                    side_set: None,
+                });
+        }
     }
 }
 
