@@ -271,3 +271,22 @@ INFO Start test OK: replacement plan running
 ```
 
 On 2026-11-01 the owner confirmed the stated signal behavior and final success message, then reported 405 tests and all 17 verification checks passing. This is a manual GPIO test without attached servos, not an automated timing measurement or proof that no brief transient can occur. Manual firmware examples do not add unit-test counts. Ordinary startup does not recover latched faults; stop-specific abort-timeout injection remains a separate test gap. CI for this revision is pending.
+
+## ServoBank lifecycle hardware test
+
+[servo_bank_lifecycle.rs](servo_bank_lifecycle.rs) exercises ServoBank -> PulseBankLifecycle -> ServoSignalOutput -> SignalPlanLifecycle -> SwitchingOutput on unloaded GP0/GP1. Use common Pico GND and UART1 TX on GP20 to a 3.3 V TTL receiver at 115200 baud, 8N1. Synthetic calibration maps -45/0/+45 degrees to 1000/1500/2000 us for both channels. No physical servo calibration or movement is verified.
+
+The current driver constructor starts a bootstrap plan, so brief 1.5 ms pulses can occur during setup. The bank immediately stops it, rejects startup with missing targets, prepares both targets incrementally and verifies atomic rejection of an invalid preparation. This test does not establish inactive-from-boot driver construction.
+
+After setup, expected phases are:
+
+| Phase | Duration | GP0 High | GP1 High | LED |
+| --- | --- | --- | --- | --- |
+| Prepared | 2 s | Low | Low | On |
+| Running | 5 s | 1 ms | 2 ms | Blinking |
+| Stopped, only servo 0 changed | 2 s | Low | Low | On |
+| Started again | Continuous | 1.5 ms | 2 ms | Blinking |
+
+Stop is invoked twice to check idempotency. The second target must remain at +45 degrees when only the first is changed to zero. All lifecycle operations after setup use the bank; servicing must not restart stopped output. Build with `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/servo_bank_lifecycle.uf2` in BOOTSEL mode. The final expected message is `INFO Bank lifecycle OK: updated angles running`.
+
+On 2026-11-01 the owner reported all 47 hardware-build checks passing, confirmed the principal signal sequence and accepted the hardware test as successful after further starts. The test is finite; repeated-cycle endurance testing remains future work. The preceding bank-lifecycle implementation passed CI. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending.

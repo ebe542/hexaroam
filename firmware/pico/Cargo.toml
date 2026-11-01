@@ -158,6 +158,13 @@ path = "hardware_tests/start_after_stop.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "servo_bank_lifecycle"
+path = "hardware_tests/servo_bank_lifecycle.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
