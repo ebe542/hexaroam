@@ -17,7 +17,8 @@ pub use servo::{PulseOutput, Servo, ServoChannel, ServoError};
 mod servo_bank;
 
 pub use servo_bank::{
-    PulseBankOutput, ServoBank, ServoBankError, ServoId, ServoTarget,
+    PulseBankLifecycle, PulseBankOutput, ServoBank, ServoBankError, ServoId,
+    ServoTarget,
 };
 
 mod servo_signal_output;

@@ -682,3 +682,111 @@ fn lifecycle_stop_failure_preserves_backend_state_without_retry() {
     );
     assert_eq!(adapter.output.stop_calls, 2);
 }
+
+#[test]
+fn bank_lifecycle_trait_uses_validation_and_forwards_operations() {
+    let mut adapter = adapter();
+
+    assert_eq!(
+        PulseBankLifecycle::state(&adapter),
+        SignalOutputState::Inactive,
+    );
+
+    assert_eq!(
+        PulseBankLifecycle::start_pulses(&mut adapter, &[1_000]),
+        Err(
+            ServoSignalOutputError::PulseCountMismatch {
+                expected: 2,
+                actual: 1,
+            }
+        ),
+    );
+    assert_eq!(adapter.output.start_calls, 0);
+
+    assert_eq!(
+        PulseBankLifecycle::start_pulses(&mut adapter, &[1_000, 2_000],),
+        Ok(()),
+    );
+    assert_eq!(
+        PulseBankLifecycle::state(&adapter),
+        SignalOutputState::Active,
+    );
+
+    let plan = adapter
+        .output
+        .accepted
+        .as_ref()
+        .unwrap();
+    assert_eq!(plan.period_us, 20_000);
+    assert_eq!(
+        plan.entries.as_slice(),
+        &[
+            entry((1 << 7) | (1 << 2), 1_000),
+            entry(1 << 2, 1_000),
+            entry(0, 18_000),
+        ],
+    );
+
+    assert_eq!(
+        PulseBankLifecycle::stop(&mut adapter),
+        Ok(()),
+    );
+    assert_eq!(
+        PulseBankLifecycle::state(&adapter),
+        SignalOutputState::Inactive,
+    );
+
+    assert_eq!(
+        PulseBankLifecycle::stop(&mut adapter),
+        Ok(()),
+    );
+
+    assert_eq!(adapter.output.start_calls, 1);
+    assert_eq!(adapter.output.stop_calls, 2);
+    assert_eq!(adapter.output.calls, 0);
+}
+
+#[test]
+fn bank_lifecycle_trait_wraps_backend_errors_and_reports_state() {
+    for active_after_error in [false, true] {
+        let mut adapter = adapter();
+        adapter.output.start_error = Some(TestLifecycleError::Faulted);
+        adapter.output.active_after_error = active_after_error;
+
+        assert_eq!(
+            PulseBankLifecycle::start_pulses(&mut adapter, &[1_000, 2_000],),
+            Err(ServoSignalOutputError::Output(
+                TestLifecycleError::Faulted,
+            )),
+        );
+
+        let expected = if active_after_error {
+            SignalOutputState::Active
+        } else {
+            SignalOutputState::Inactive
+        };
+
+        assert_eq!(
+            PulseBankLifecycle::state(&adapter),
+            expected
+        );
+        assert_eq!(adapter.output.start_calls, 1);
+        assert_eq!(adapter.output.accepted, None);
+
+        adapter.output.stop_error = true;
+
+        assert_eq!(
+            PulseBankLifecycle::stop(&mut adapter),
+            Err(ServoSignalOutputError::Output(
+                TestLifecycleError::StopFailed,
+            )),
+        );
+
+        assert_eq!(
+            PulseBankLifecycle::state(&adapter),
+            expected
+        );
+        assert_eq!(adapter.output.stop_calls, 1);
+        assert_eq!(adapter.output.calls, 0);
+    }
+}

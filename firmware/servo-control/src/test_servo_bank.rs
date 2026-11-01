@@ -6,11 +6,25 @@ enum TestError {
     Faulted,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TestLifecycleError {
+    AlreadyActive,
+    Faulted,
+    StopFailed,
+}
+
 #[derive(Default)]
 struct TestOutput {
     calls: usize,
     accepted: Option<[u32; 2]>,
     error: Option<TestError>,
+    start_calls: usize,
+    stop_calls: usize,
+    service_calls: usize,
+    active: bool,
+    start_error: Option<TestLifecycleError>,
+    stop_error: bool,
+    active_after_error: bool,
 }
 
 impl PulseBankOutput for TestOutput {
@@ -35,7 +49,58 @@ impl PulseBankOutput for TestOutput {
         Ok(())
     }
 
-    fn service(&mut self) {}
+    fn service(&mut self) {
+        self.service_calls += 1;
+    }
+}
+
+impl PulseBankLifecycle for TestOutput {
+    type LifecycleError = TestLifecycleError;
+
+    fn start_pulses(
+        &mut self,
+        pulse_widths_us: &[u32],
+    ) -> Result<(), Self::LifecycleError> {
+        self.start_calls += 1;
+
+        if self.active {
+            return Err(TestLifecycleError::AlreadyActive);
+        }
+
+        if let Some(error) = self.start_error {
+            self.active = self.active_after_error;
+            return Err(error);
+        }
+
+        self.accepted = Some(
+            pulse_widths_us
+                .try_into()
+                .expect("Expected a complete two-servo batch"),
+        );
+        self.active = true;
+
+        Ok(())
+    }
+
+    fn stop(&mut self) -> Result<(), Self::LifecycleError> {
+        self.stop_calls += 1;
+
+        if self.stop_error {
+            self.active = self.active_after_error;
+            return Err(TestLifecycleError::StopFailed);
+        }
+
+        self.active = false;
+        Ok(())
+    }
+
+    fn state(&self) -> SignalOutputState {
+        if self.active {
+            SignalOutputState::Active
+        } else {
+            SignalOutputState::Inactive
+        }
+    }
 }
 
 fn angle(centidegrees: i32) -> Angle {
@@ -598,5 +663,228 @@ fn rejected_preparation_does_not_leak_into_later_submission() {
         bank.output.accepted,
         Some([1_500, 1_500])
     );
+    assert_angles(&bank, Some(0), Some(0));
+}
+
+#[test]
+fn lifecycle_state_comes_from_backend_without_starting_output() {
+    for active in [false, true] {
+        let output = TestOutput {
+            active,
+            ..TestOutput::default()
+        };
+
+        let bank = ServoBank::new(
+            [calibration(1_000, 2_000), calibration(1_200, 1_800)],
+            output,
+        );
+
+        let expected = if active {
+            SignalOutputState::Active
+        } else {
+            SignalOutputState::Inactive
+        };
+
+        assert_eq!(bank.state(), expected);
+        assert_angles(&bank, None, None);
+        assert_eq!(bank.output.start_calls, 0);
+        assert_eq!(bank.output.stop_calls, 0);
+        assert_eq!(bank.output.calls, 0);
+    }
+}
+
+#[test]
+fn lifecycle_start_requires_all_targets_before_backend_call() {
+    let mut bank = bank();
+
+    assert_eq!(
+        bank.start_prepared(),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(0)
+        )),
+    );
+    assert_eq!(bank.output.start_calls, 0);
+
+    bank.prepare_targets(&[target(0, 0)])
+        .unwrap();
+
+    assert_eq!(
+        bank.start_prepared(),
+        Err(ServoBankError::UninitializedServo(
+            ServoId(1)
+        )),
+    );
+
+    assert_angles(&bank, Some(0), None);
+    assert_eq!(
+        bank.state(),
+        SignalOutputState::Inactive
+    );
+    assert_eq!(bank.output.start_calls, 0);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(bank.output.accepted, None);
+}
+
+#[test]
+fn lifecycle_start_converts_all_targets_in_servo_id_order() {
+    let mut bank = bank();
+
+    bank.prepare_targets(&[target(1, 4_500), target(0, -4_500)])
+        .unwrap();
+
+    assert_eq!(bank.start_prepared(), Ok(()));
+
+    assert_eq!(bank.state(), SignalOutputState::Active);
+    assert_eq!(bank.output.start_calls, 1);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_000, 1_800])
+    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+}
+
+#[test]
+fn lifecycle_start_error_preserves_targets_and_reports_backend_state() {
+    for active_after_error in [false, true] {
+        let mut bank = bank();
+
+        bank.prepare_targets(&[target(0, -4_500), target(1, 4_500)])
+            .unwrap();
+
+        bank.output.start_error = Some(TestLifecycleError::Faulted);
+        bank.output.active_after_error = active_after_error;
+
+        assert_eq!(
+            bank.start_prepared(),
+            Err(ServoBankError::Output(
+                TestLifecycleError::Faulted,
+            )),
+        );
+
+        let expected = if active_after_error {
+            SignalOutputState::Active
+        } else {
+            SignalOutputState::Inactive
+        };
+
+        assert_eq!(bank.state(), expected);
+        assert_angles(&bank, Some(-4_500), Some(4_500));
+        assert_eq!(bank.output.start_calls, 1);
+        assert_eq!(bank.output.stop_calls, 0);
+        assert_eq!(bank.output.calls, 0);
+        assert_eq!(bank.output.accepted, None);
+    }
+}
+
+#[test]
+fn lifecycle_repeated_start_is_rejected_without_changing_targets() {
+    let mut bank = bank();
+    bank.prepare_targets(&[target(0, 0), target(1, 0)])
+        .unwrap();
+
+    assert_eq!(bank.start_prepared(), Ok(()));
+    let previous = bank.output.accepted;
+
+    assert_eq!(
+        bank.start_prepared(),
+        Err(ServoBankError::Output(
+            TestLifecycleError::AlreadyActive,
+        )),
+    );
+
+    assert_eq!(bank.state(), SignalOutputState::Active);
+    assert_eq!(bank.output.start_calls, 2);
+    assert_eq!(bank.output.accepted, previous);
+    assert_angles(&bank, Some(0), Some(0));
+}
+
+#[test]
+fn lifecycle_stop_preserves_targets_for_another_start() {
+    let mut bank = bank();
+
+    bank.prepare_targets(&[target(0, -4_500), target(1, 4_500)])
+        .unwrap();
+    bank.start_prepared().unwrap();
+
+    assert_eq!(bank.stop(), Ok(()));
+    assert_eq!(
+        bank.state(),
+        SignalOutputState::Inactive
+    );
+    assert_angles(&bank, Some(-4_500), Some(4_500));
+
+    assert_eq!(bank.stop(), Ok(()));
+    assert_eq!(bank.output.stop_calls, 2);
+
+    // Change only one target while stopped.
+    bank.prepare_targets(&[target(0, 0)])
+        .unwrap();
+
+    assert_eq!(bank.start_prepared(), Ok(()));
+    assert_eq!(bank.state(), SignalOutputState::Active);
+    assert_eq!(bank.output.start_calls, 2);
+    assert_eq!(bank.output.calls, 0);
+    assert_eq!(
+        bank.output.accepted,
+        Some([1_500, 1_800])
+    );
+    assert_angles(&bank, Some(0), Some(4_500));
+}
+
+#[test]
+fn lifecycle_stop_error_preserves_targets_without_automatic_retry() {
+    let mut bank = bank();
+    bank.prepare_targets(&[target(0, 0), target(1, 0)])
+        .unwrap();
+    bank.start_prepared().unwrap();
+
+    bank.output.stop_error = true;
+    bank.output.active_after_error = true;
+
+    assert_eq!(
+        bank.stop(),
+        Err(TestLifecycleError::StopFailed)
+    );
+    assert_eq!(bank.state(), SignalOutputState::Active);
+    assert_eq!(bank.output.stop_calls, 1);
+    assert_eq!(bank.output.start_calls, 1);
+    assert_angles(&bank, Some(0), Some(0));
+
+    bank.output.stop_error = false;
+
+    assert_eq!(bank.stop(), Ok(()));
+    assert_eq!(
+        bank.state(),
+        SignalOutputState::Inactive
+    );
+    assert_eq!(bank.output.stop_calls, 2);
+    assert_angles(&bank, Some(0), Some(0));
+}
+
+#[test]
+fn lifecycle_service_does_not_start_or_stop_output() {
+    let mut bank = bank();
+    bank.prepare_targets(&[target(0, 0), target(1, 0)])
+        .unwrap();
+
+    bank.service();
+
+    assert_eq!(
+        bank.state(),
+        SignalOutputState::Inactive
+    );
+    assert_eq!(bank.output.service_calls, 1);
+    assert_eq!(bank.output.start_calls, 0);
+    assert_eq!(bank.output.stop_calls, 0);
+    assert_eq!(bank.output.calls, 0);
+
+    bank.start_prepared().unwrap();
+    bank.service();
+
+    assert_eq!(bank.state(), SignalOutputState::Active);
+    assert_eq!(bank.output.service_calls, 2);
+    assert_eq!(bank.output.start_calls, 1);
+    assert_eq!(bank.output.stop_calls, 0);
     assert_angles(&bank, Some(0), Some(0));
 }

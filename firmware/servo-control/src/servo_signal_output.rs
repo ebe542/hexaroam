@@ -5,7 +5,7 @@ use hexaroam_servo_signal::{
     SignalPlanLifecycle, SignalPlanOutput,
 };
 
-use crate::PulseBankOutput;
+use crate::{PulseBankLifecycle, PulseBankOutput};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ServoSignalOutputInitError {
@@ -157,6 +157,27 @@ impl<O: SignalPlanLifecycle, const N: usize, const PLAN_CAPACITY: usize>
     /// Returns the backend's confirmed logical output state.
     pub fn state(&self) -> SignalOutputState {
         self.output.state()
+    }
+}
+
+impl<O: SignalPlanLifecycle, const N: usize, const PLAN_CAPACITY: usize>
+    PulseBankLifecycle for ServoSignalOutput<O, N, PLAN_CAPACITY>
+{
+    type LifecycleError = ServoSignalOutputError<O::LifecycleError>;
+
+    fn start_pulses(
+        &mut self,
+        pulse_widths_us: &[u32],
+    ) -> Result<(), Self::LifecycleError> {
+        ServoSignalOutput::start_pulses(self, pulse_widths_us)
+    }
+
+    fn stop(&mut self) -> Result<(), Self::LifecycleError> {
+        ServoSignalOutput::stop(self).map_err(ServoSignalOutputError::Output)
+    }
+
+    fn state(&self) -> SignalOutputState {
+        ServoSignalOutput::state(self)
     }
 }
 

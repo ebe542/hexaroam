@@ -1,6 +1,7 @@
 //! Transactional angle commands for a configured servo bank.
 
 use crate::{Angle, Calibration, CalibrationError};
+use hexaroam_servo_signal::SignalOutputState;
 
 pub trait PulseBankOutput {
     type Error;
@@ -17,6 +18,30 @@ pub trait PulseBankOutput {
 
     /// Services the backend without submitting new target values.
     fn service(&mut self);
+}
+
+/// Optional lifecycle support for a complete servo pulse group.
+pub trait PulseBankLifecycle: PulseBankOutput {
+    type LifecycleError;
+
+    /// Starts inactive output with one complete initial pulse batch.
+    ///
+    /// Pulses follow ServoId order and must be consumed or copied
+    /// during this call. Validate the complete batch before startup.
+    /// Active or faulted output must not be restarted implicitly.
+    fn start_pulses(
+        &mut self,
+        pulse_widths_us: &[u32],
+    ) -> Result<(), Self::LifecycleError>;
+
+    /// Stops output without clearing a latched fault.
+    ///
+    /// Success confirms Low signal outputs and completed DMA shutdown.
+    /// Repeated stop succeeds. Errors retain resource ownership.
+    fn stop(&mut self) -> Result<(), Self::LifecycleError>;
+
+    /// Reports the backend's confirmed logical output state.
+    fn state(&self) -> SignalOutputState;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,7 +109,7 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
         }
 
         let candidate = self.validated_targets(targets)?;
-        let pulses = self.pulse_widths(&candidate)?;
+        let pulses = self.pulse_widths::<O::Error>(&candidate)?;
 
         self.output
             .submit_pulses(&pulses)
@@ -123,7 +148,7 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
     /// This does not change the stored targets.
     /// Success confirms acceptance, not physical activation.
     pub fn submit_prepared(&mut self) -> Result<(), ServoBankError<O::Error>> {
-        let pulses = self.pulse_widths(&self.commanded_angles)?;
+        let pulses = self.pulse_widths::<O::Error>(&self.commanded_angles)?;
 
         self.output
             .submit_pulses(&pulses)
@@ -166,10 +191,12 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
     }
 
     /// Converts a complete candidate into servo-ID-ordered pulse widths.
-    fn pulse_widths(
+    ///
+    /// Conversion is independent of submission or lifecycle errors.
+    fn pulse_widths<E>(
         &self,
         angles: &[Option<Angle>; N],
-    ) -> Result<[u32; N], ServoBankError<O::Error>> {
+    ) -> Result<[u32; N], ServoBankError<E>> {
         let mut pulses = [0; N];
 
         for (index, candidate) in angles.iter().enumerate() {
@@ -183,6 +210,33 @@ impl<O: PulseBankOutput, const N: usize> ServoBank<O, N> {
         }
 
         Ok(pulses)
+    }
+}
+
+impl<O: PulseBankLifecycle, const N: usize> ServoBank<O, N> {
+    /// Starts output using every previously accepted target.
+    ///
+    /// Missing or invalid targets prevent the backend call.
+    /// Stored targets remain unchanged on success and failure.
+    pub fn start_prepared(
+        &mut self,
+    ) -> Result<(), ServoBankError<O::LifecycleError>> {
+        let pulses =
+            self.pulse_widths::<O::LifecycleError>(&self.commanded_angles)?;
+
+        self.output
+            .start_pulses(&pulses)
+            .map_err(ServoBankError::Output)
+    }
+
+    /// Stops output while preserving all accepted targets.
+    pub fn stop(&mut self) -> Result<(), O::LifecycleError> {
+        self.output.stop()
+    }
+
+    /// Returns backend state without maintaining a second state.
+    pub fn state(&self) -> SignalOutputState {
+        self.output.state()
     }
 }
 

@@ -282,3 +282,7 @@ SwitchingOutput now supports explicit stop with Low outputs, confirmed DMA abort
 ## Regular PIO/DMA startup after stop
 
 SwitchingOutput now implements SignalPlanLifecycle and can start a complete validated plan from retained stopped resources. Invalid starts preserve stopped output; ordinary start rejects faults and does not clear them. On 2026-11-01 the owner confirmed [start_after_stop](pico/hardware_tests/README.md#regular-start-after-stop-test), including the Low pause and replacement signal widths, and reported 405 tests and all 17 verification checks passing. The preceding stop revision passed CI; CI for this startup revision is pending. The register-service adapter and normal firmware-loop integration remain future work.
+
+## ServoBank lifecycle integration
+
+ServoBank now conditionally exposes start_prepared, stop and state through PulseBankLifecycle. ServoSignalOutput implements the bridge to SignalPlanLifecycle, preserving target values and forwarding backend state/errors. On 2026-11-01 the owner confirmed 84 servo-control tests, 415 tests overall and all 17 verification checks passing after observing eight new tests fail at placeholders. These are PC results; the complete bank-to-PIO lifecycle hardware test and register-service backend adapter remain future work. The prior driver startup revision passed CI; CI for this bank-lifecycle revision is pending. See the [servo-control guide](servo-control/README.md#servobank-lifecycle).

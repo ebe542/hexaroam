@@ -174,3 +174,35 @@ classDiagram
 ```
 
 [SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. SwitchingOutput now implements this extension with regular start after confirmed stop, bounded DMA shutdown and a separate OutputLifecycleError. Ordinary start rejects latched faults; explicit fault recovery remains separate. The owner confirmed the regular stop/start hardware procedures on 2026-11-01. PulseBankOutput and the register-service OutputBackend are separate contracts; their lifecycle bridge is not implemented yet.
+
+## ServoBank lifecycle bridge
+
+```mermaid
+classDiagram
+    class PulseBankOutput {
+        <<trait>>
+    }
+    class PulseBankLifecycle {
+        <<trait>>
+        start_pulses()
+        stop()
+        state()
+    }
+    class ServoBank {
+        start_prepared()
+        stop()
+        state()
+    }
+    class ServoSignalOutput
+    class SignalPlanLifecycle {
+        <<trait>>
+    }
+    class SwitchingOutput
+    PulseBankOutput <|-- PulseBankLifecycle : extends
+    PulseBankLifecycle <|.. ServoSignalOutput
+    ServoBank ..> PulseBankLifecycle : optional backend bound
+    ServoSignalOutput ..> SignalPlanLifecycle : uses
+    SignalPlanLifecycle <|.. SwitchingOutput
+```
+
+[PulseBankLifecycle](../../firmware/servo-control/src/servo_bank.rs) connects complete calibrated startup batches to the lower signal-plan lifecycle. ServoBank validates all prepared targets before starting, preserves them on stop and delegates state without caching it. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) implements the trait for lifecycle-capable signal-plan backends. Startup and stop retain a separate lifecycle error type; stop errors are wrapped at this trait boundary. The register-service OutputBackend adapter remains unimplemented. The bank and bridge have PC coverage; the full combined hardware path is not yet verified.
