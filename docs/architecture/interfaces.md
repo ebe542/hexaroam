@@ -146,3 +146,29 @@ classDiagram
 ```
 
 [OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state and target-access contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). Only the shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it at present, in tests. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. No ServoBank, FixedOutput or SwitchingOutput adapter implements this new trait yet. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status, LastError and consecutive target-angle registers. Target values use the existing Angle, ServoId and ServoTarget types from servo-control. Reads return backend-owned accepted targets; batch writes must preserve them on failure. Inactive writes prepare targets, while active writes submit them for later signal-plan activation. These host-tested types are not wired into the normal Pico binary.
+
+## Optional signal-plan lifecycle
+
+```mermaid
+classDiagram
+    class SignalPlanOutput {
+        <<trait>>
+        submit_plan()
+        service()
+    }
+    class SignalPlanLifecycle {
+        <<trait>>
+        start_plan()
+        stop()
+        state()
+    }
+    class ServoSignalOutput {
+        start_pulses()
+        stop()
+        state()
+    }
+    SignalPlanOutput <|-- SignalPlanLifecycle : extends
+    ServoSignalOutput ..> SignalPlanLifecycle : optional backend bound
+```
+
+[SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. Only a test backend implements this extension so far; SwitchingOutput still supports submission and fault restart, without regular lifecycle stop/start. PulseBankOutput and the register-service OutputBackend are separate contracts; their lifecycle bridge is not implemented yet.

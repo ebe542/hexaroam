@@ -52,3 +52,11 @@ Each package currently has its own Cargo.lock. No shared Cargo workspace is conf
 The interface has no Pico dependency. SwitchingOutput in servo-pio implements it; ServoSignalOutput in servo-control uses it to adapt ServoId-ordered pulse batches to complete GPIO plans. This leaves PIO encoding and DMA ownership inside the hardware driver. See the [adapter guide](../servo-control/README.md#signal-plan-output-adapter).
 
 On 2026-10-26 the owner reported 14 passing adapter tests and a full verification total of 169 tests. Those fourteen tests belong to servo-control; the signal library's existing test count is unchanged. The new angle-command hardware demo remains pending.
+
+## Optional signal-plan lifecycle
+
+[SignalPlanLifecycle](src/signal_plan_lifecycle.rs) extends SignalPlanOutput with start_plan, stop and state, and a separate LifecycleError type. Existing submission-only backends need not implement it. Start takes a complete borrowed initial plan, validates it before enabling output and copies or encodes it before returning. Starting active output is rejected; ordinary start does not clear a latched fault.
+
+Successful stop guarantees all assigned signal pins are Low and DMA no longer accesses output buffers. It discards pending replacements, may shorten a pulse and does not clear Fault. Repeated stop remains inactive. Errors retain resource ownership; state must not report Inactive until stopping is confirmed. SignalOutputState::Active also covers cases where a completed stop has not been confirmed; it is not an instantaneous pin level or mechanical position.
+
+ServoSignalOutput exposes this optional contract through start_pulses, stop and state. On 2026-10-31 the owner confirmed the signal-package check and 74 servo-control tests passing, including eight lifecycle adapter tests, then 405 tests overall and all 17 verification checks passing. These are host tests with a simulated backend. No production PIO/DMA backend implements SignalPlanLifecycle yet, and physical stop/start behavior is not established. CI for this lifecycle-contract revision is pending.

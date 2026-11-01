@@ -77,5 +77,9 @@ mod signal_plan_output;
 
 pub use signal_plan_output::SignalPlanOutput;
 
+mod signal_plan_lifecycle;
+
+pub use signal_plan_lifecycle::{SignalOutputState, SignalPlanLifecycle};
+
 #[cfg(test)]
 mod tests;

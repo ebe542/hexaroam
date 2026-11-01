@@ -1,7 +1,8 @@
 //! Converts complete servo pulse batches into GPIO signal plans.
 
 use hexaroam_servo_signal::{
-    PulseLimits, PulseTarget, SignalPlan, SignalPlanError, SignalPlanOutput,
+    PulseLimits, PulseTarget, SignalOutputState, SignalPlan, SignalPlanError,
+    SignalPlanLifecycle, SignalPlanOutput,
 };
 
 use crate::PulseBankOutput;
@@ -80,17 +81,15 @@ impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
             period_us,
         })
     }
-}
 
-impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
-    PulseBankOutput for ServoSignalOutput<O, N, PLAN_CAPACITY>
-{
-    type Error = ServoSignalOutputError<O::Error>;
-
-    fn submit_pulses(
-        &mut self,
+    /// Builds a complete plan without changing backend state.
+    ///
+    /// The generic error parameter lets submission and lifecycle calls
+    /// share validation while retaining their distinct backend errors.
+    fn build_plan<E>(
+        &self,
         pulse_widths_us: &[u32],
-    ) -> Result<(), Self::Error> {
+    ) -> Result<SignalPlan<PLAN_CAPACITY>, ServoSignalOutputError<E>> {
         if pulse_widths_us.len() != N {
             return Err(
                 ServoSignalOutputError::PulseCountMismatch {
@@ -106,12 +105,21 @@ impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
                 pulse_width_us: pulse_widths_us[index],
             });
 
-        let plan = SignalPlan::<PLAN_CAPACITY>::new(
-            &targets,
-            &self.limits,
-            self.period_us,
-        )
-        .map_err(ServoSignalOutputError::SignalPlan)?;
+        SignalPlan::<PLAN_CAPACITY>::new(&targets, &self.limits, self.period_us)
+            .map_err(ServoSignalOutputError::SignalPlan)
+    }
+}
+
+impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
+    PulseBankOutput for ServoSignalOutput<O, N, PLAN_CAPACITY>
+{
+    type Error = ServoSignalOutputError<O::Error>;
+
+    fn submit_pulses(
+        &mut self,
+        pulse_widths_us: &[u32],
+    ) -> Result<(), Self::Error> {
+        let plan = self.build_plan::<O::Error>(pulse_widths_us)?;
 
         self.output
             .submit_plan(&plan)
@@ -120,6 +128,35 @@ impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
 
     fn service(&mut self) {
         self.output.service();
+    }
+}
+
+impl<O: SignalPlanLifecycle, const N: usize, const PLAN_CAPACITY: usize>
+    ServoSignalOutput<O, N, PLAN_CAPACITY>
+{
+    /// Builds and validates the complete initial plan before startup.
+    ///
+    /// Pulses follow ServoId order and use the configured GPIO mapping.
+    /// Validation errors must not call the lifecycle backend.
+    pub fn start_pulses(
+        &mut self,
+        pulse_widths_us: &[u32],
+    ) -> Result<(), ServoSignalOutputError<O::LifecycleError>> {
+        let plan = self.build_plan::<O::LifecycleError>(pulse_widths_us)?;
+
+        self.output
+            .start_plan(&plan)
+            .map_err(ServoSignalOutputError::Output)
+    }
+
+    /// Stops output through the lifecycle backend without retry.
+    pub fn stop(&mut self) -> Result<(), O::LifecycleError> {
+        self.output.stop()
+    }
+
+    /// Returns the backend's confirmed logical output state.
+    pub fn state(&self) -> SignalOutputState {
+        self.output.state()
     }
 }
 

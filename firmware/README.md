@@ -270,3 +270,7 @@ Four additional [byte-stream tests](servo-registers/src/test_pipeline.rs) verify
 ## Preparing ServoBank targets
 
 ServoBank now supports transactional prepare_targets without output and submit_prepared for a complete calibrated pulse batch. set_targets retains submission-before-commit behavior and can combine new targets with prepared values. The owner reported all 66 servo-control tests passing after observing ten new tests fail at their placeholders. The caller must ensure output is inactive during preparation; driver start/stop, automatic zero initialization and the register-service adapter remain future work. The owner subsequently confirmed 397 tests overall and all 17 verification checks passing for this combined revision; CI is pending. See the [servo-control guide](servo-control/README.md#preparing-targets-without-signal-output).
+
+## Signal-plan lifecycle contract
+
+The optional [SignalPlanLifecycle](servo-signal/src/signal_plan_lifecycle.rs) contract defines start with a complete initial plan, stop with confirmed Low outputs and no DMA buffer access, and logical output state. ServoSignalOutput forwards this contract with shared plan validation. The owner confirmed all 74 servo-control tests, 405 tests overall and all 17 verification checks passing on 2026-10-31 after observing eight new tests fail at placeholders. Only the simulated backend implements this lifecycle; regular PIO/DMA stop/start and the register-service adapter remain future work. No new hardware behavior is claimed. CI for this revision is pending.
