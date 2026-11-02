@@ -290,3 +290,18 @@ After setup, expected phases are:
 Stop is invoked twice to check idempotency. The second target must remain at +45 degrees when only the first is changed to zero. All lifecycle operations after setup use the bank; servicing must not restart stopped output. Build with `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/servo_bank_lifecycle.uf2` in BOOTSEL mode. The final expected message is `INFO Bank lifecycle OK: updated angles running`.
 
 On 2026-11-01 the owner reported all 47 hardware-build checks passing, confirmed the principal signal sequence and accepted the hardware test as successful after further starts. The test is finite; repeated-cycle endurance testing remains future work. The preceding bank-lifecycle implementation passed CI. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending.
+
+## Protocol UART byte-transport loopback
+
+[uart_loopback.rs](uart_loopback.rs) exercises [UartTransport](../src/uart_transport.rs), the real nonblocking ByteTransport implementation. Before starting, connect GP16 (UART0 TX) directly to GP17 (UART0 RX). Debug output remains on UART1 TX/GP20 to a 3.3 V TTL receiver with common GND, 115200 baud, 8N1. UART0 also uses 115200 baud, 8N1. No PC protocol adapter or servo is needed for this loopback.
+
+Build with `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_loopback.uf2` in BOOTSEL mode. The test sends 1024 bytes, covering byte values 0..255 four times, and verifies every received byte in order. It attempts at most one send and one receive per loop iteration and services debug logging without waiting. A two-second overall test deadline catches a missing jumper or stalled transfer; it is not the protocol receive/response timeout. Success sets the LED high and logs:
+
+```text
+INFO UART loopback started
+INFO UART loopback OK
+```
+
+On 2026-11-02 the owner reported both expected messages, confirming successful transmission and matching reception of all 1024 bytes. LED behavior was not separately reported. Full verification subsequently reported 451 tests and all 17 checks passing. This manual program adds no host unit tests and does not exercise framing, register commands, the FrameProcessor, injected UART errors or physical servo output. UART0 stops sending test data after completion. CI for this UART-driver revision is pending.
+
+The GP16/GP17 assignment is for the current test setup. Final servo/communication/measurement pin allocation and schematic changes remain separate decisions; no hardware design files are changed by this example.

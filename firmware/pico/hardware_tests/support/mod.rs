@@ -19,6 +19,7 @@ pub struct Board {
     pub timer: Timer,
     pub uart: pac::UART1,
     pub peripheral_clock: rp_pico::hal::clocks::PeripheralClock,
+    pub protocol_uart: pac::UART0,
 }
 
 pub fn initialize() -> Board {
@@ -63,5 +64,6 @@ pub fn initialize() -> Board {
         timer,
         uart: peripherals.UART1,
         peripheral_clock: clocks.peripheral_clock,
+        protocol_uart: peripherals.UART0,
     }
 }

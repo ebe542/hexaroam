@@ -227,10 +227,12 @@ classDiagram
         service()
         remaining()
     }
+    class UartTransport
     ResponseBuffer ..> ByteTransport : bounded transmit only
+    ByteTransport <|.. UartTransport
 ```
 
-[ByteTransport](../../firmware/servo-protocol/src/transport.rs) defines nonblocking byte operations. [ResponseBuffer](../../firmware/servo-protocol/src/response_buffer.rs) owns one copied encoded response and uses try_write to service its unsent suffix with a byte budget. It does not read, parse frames or access the register service. Only a test transport exists so far; no Pico UART implements this trait yet. This is independent of the logging ByteOutput contract, whose message-drop policy is not used for protocol responses.
+[ByteTransport](../../firmware/servo-protocol/src/transport.rs) defines nonblocking byte operations. [ResponseBuffer](../../firmware/servo-protocol/src/response_buffer.rs) owns one copied encoded response and uses try_write to service its unsent suffix with a byte budget. It does not read, parse frames or access the register service. [UartTransport](../../firmware/pico/src/uart_transport.rs) now implements it over an exclusively owned, enabled HAL UART; UART0 loopback was confirmed on hardware. FrameProcessor integration with that UART remains pending. This is independent of the logging ByteOutput contract, whose message-drop policy is not used for protocol responses.
 
 ## Frame-processing ownership
 
@@ -253,3 +255,5 @@ classDiagram
 ```
 
 [FrameProcessor](../../firmware/servo-registers/src/frame_processor.rs) coordinates the existing contracts without owning UART hardware. It services the register backend on every poll, transmits pending response bytes and processes requests only when response storage is available. Deferred receive timeouts preserve complete buffered requests. Tests use a simulated transport and register backend; the concrete Pico UART is not connected yet.
+
+UartTransport maps empty receive FIFO and full transmit FIFO to nonblocking results. It exposes Overrun, Break, Parity and Framing as receive errors instead of delivering the faulty entry to the parser. The application remains responsible for deciding how to recover an incomplete frame after such errors. The current hardware test does not inject these errors.

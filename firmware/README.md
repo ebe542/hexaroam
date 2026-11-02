@@ -302,3 +302,7 @@ ByteTransport and ResponseBuffer in servo-protocol provide nonblocking byte I/O 
 ## Byte transport with register-frame processing
 
 The combined revision includes ByteTransport, a bounded single-response buffer and FrameProcessor connecting transport bytes to the parser, register service and encoded replies. Output servicing continues during response backpressure; deferred timeouts retain complete requests. The owner reported 62 protocol-package tests, 84 register-package tests, 451 tests overall and all 17 checks passing on 2026-11-02. These are PC results with simulated transport/output; the Pico UART driver and physical end-to-end protocol path remain future work. CI for this combined revision is pending. See the [frame-processing guide](servo-registers/README.md#frame-processing-over-a-byte-transport).
+
+## Protocol UART driver and loopback
+
+The [UART byte transport](pico/src/uart_transport.rs) implements ByteTransport without blocking and reports receive errors explicitly. Shared hardware-test initialization now exposes UART0 separately from UART1 diagnostics. On 2026-11-02 the owner confirmed [uart_loopback](pico/hardware_tests/README.md#protocol-uart-byte-transport-loopback): the two expected messages prove the test verified all 1024 bytes over the GP16/GP17 jumper. Full verification reported 451 tests and all 17 checks passing. The FrameProcessor is not connected to UART yet; the normal Pico firmware is unchanged. CI for this revision is pending.

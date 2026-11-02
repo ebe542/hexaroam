@@ -383,8 +383,10 @@ dependencies = [
  "hexaroam-logging",
  "hexaroam-servo-control",
  "hexaroam-servo-pio",
+ "hexaroam-servo-protocol",
  "hexaroam-servo-signal",
  "hexaroam-servo-storage",
+ "nb 1.1.0",
  "panic-halt",
  "pio",
  "pio-proc",
@@ -407,6 +409,10 @@ dependencies = [
  "pio-proc",
  "rp2040-hal",
 ]
+
+[[package]]
+name = "hexaroam-servo-protocol"
+version = "0.1.0"
 
 [[package]]
 name = "hexaroam-servo-signal"

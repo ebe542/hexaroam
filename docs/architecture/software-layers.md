@@ -159,3 +159,7 @@ servo-protocol now exposes ByteTransport for nonblocking byte I/O and ResponseBu
 ## Integrated frame-processing loop
 
 FrameProcessor in servo-registers owns StreamParser, RegisterService and ResponseBuffer while borrowing ByteTransport per poll. It services output before transport work, retains pending responses under backpressure and drains complete requests before clearing a timed-out incomplete remainder. Newly queued responses transmit on a later poll. The owner reported 84 register-package tests, 62 protocol-package tests, 451 tests overall and all 17 verification checks passing on 2026-11-02. Byte-level tests use a simulated register backend; direct ServoBank integration has separate coverage. Actual UART I/O, clock-based timeout detection and the normal Pico firmware loop remain future work. See the [processor guide](../../firmware/servo-registers/README.md#frame-processing-over-a-byte-transport).
+
+## Concrete protocol UART transport
+
+UartTransport in pico/src implements ByteTransport over an exclusively owned HAL UART. It maps empty/full FIFOs to nonblocking results and reports receive errors without delivering the faulty byte. A separate manual UART0 loopback uses GP16/GP17, with diagnostics on UART1/GP20. The owner confirmed both success messages after 1024 matching bytes and reported 451 tests and all 17 verification checks passing on 2026-11-02. FrameProcessor integration, physical request/response tests and runtime timeout/error policy remain future work. The normal Pico demo and final hardware pin map are unchanged.

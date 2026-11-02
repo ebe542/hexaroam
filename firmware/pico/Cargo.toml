@@ -165,6 +165,13 @@ path = "hardware_tests/servo_bank_lifecycle.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "uart_loopback"
+path = "hardware_tests/uart_loopback.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
@@ -172,8 +179,10 @@ embedded-hal = "1.0"
 hexaroam-logging = { path = "../logging" }
 hexaroam-servo-control = { path = "../servo-control" }
 hexaroam-servo-pio = { path = "../servo-pio" }
+hexaroam-servo-protocol = { path = "../servo-protocol" }
 hexaroam-servo-signal = { path = "../servo-signal" }
 hexaroam-servo-storage = { path = "../servo-storage" }
+nb = "1"
 panic-halt = "1.0"
 pio = "0.2"
 pio-proc = "0.2"
