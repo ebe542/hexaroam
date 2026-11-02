@@ -20,6 +20,10 @@ pub use control::{
     STATUS_OUTPUT_ACTIVE,
 };
 
+mod servo_bank_backend;
+
+pub use servo_bank_backend::ServoBankBackendError;
+
 #[cfg(test)]
 mod test_support;
 
@@ -28,3 +32,6 @@ mod test_pipeline;
 
 #[cfg(test)]
 mod test_targets;
+
+#[cfg(test)]
+mod test_servo_bank_backend;

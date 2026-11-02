@@ -17,6 +17,7 @@ pub enum OutputStartError<E> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetReadError {
     UnknownServo(ServoId),
+    UninitializedServo(ServoId),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -24,6 +25,7 @@ pub enum TargetWriteError<E> {
     UnknownServo(ServoId),
     DuplicateServo(ServoId),
     InvalidAngle(ServoId),
+    UninitializedServo(ServoId),
     Backend(E),
 }
 
@@ -64,4 +66,9 @@ pub trait OutputBackend {
         &mut self,
         targets: &[ServoTarget],
     ) -> Result<(), TargetWriteError<Self::Error>>;
+
+    /// Services ongoing output without submitting new targets.
+    ///
+    /// This must not implicitly start stopped output or recover faults.
+    fn service(&mut self);
 }

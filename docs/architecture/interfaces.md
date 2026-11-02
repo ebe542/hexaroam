@@ -140,12 +140,14 @@ classDiagram
     class FakeOutput
     class ControlRegister
     class RegisterService
+    class ServoBank
     OutputBackend <|.. FakeOutput
+    OutputBackend <|.. ServoBank
     ControlRegister ..> OutputBackend : uses
     RegisterService --> ControlRegister : owns
 ```
 
-[OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state and target-access contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). Only the shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it at present, in tests. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. No ServoBank, FixedOutput or SwitchingOutput adapter implements this new trait yet. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status, LastError and consecutive target-angle registers. Target values use the existing Angle, ServoId and ServoTarget types from servo-control. Reads return backend-owned accepted targets; batch writes must preserve them on failure. Inactive writes prepare targets, while active writes submit them for later signal-plan activation. These host-tested types are not wired into the normal Pico binary.
+[OutputBackend](../../firmware/servo-registers/src/output.rs) is the application-level start/stop/state and target-access contract consumed by [ControlRegister](../../firmware/servo-registers/src/control.rs). The shared [FakeOutput](../../firmware/servo-registers/src/test_support.rs) implements it in tests, and [servo_bank_backend.rs](../../firmware/servo-registers/src/servo_bank_backend.rs) implements it directly for lifecycle-capable ServoBank backends. It must report reliable Active/Inactive state after errors; invalid initial targets must leave output unchanged. ServoBank implements this trait without an additional wrapper; FixedOutput and SwitchingOutput remain lower-level drivers. [RegisterService](../../firmware/servo-registers/src/service.rs) owns ControlRegister and maps it to Control/Status, LastError and consecutive target-angle registers. Target values use the existing Angle, ServoId and ServoTarget types from servo-control. Reads return backend-owned accepted targets; batch writes must preserve them on failure. Inactive writes prepare targets, while active writes submit them for later signal-plan activation. These host-tested types are not wired into the normal Pico binary.
 
 ## Optional signal-plan lifecycle
 
@@ -173,7 +175,7 @@ classDiagram
     ServoSignalOutput ..> SignalPlanLifecycle : optional backend bound
 ```
 
-[SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. SwitchingOutput now implements this extension with regular start after confirmed stop, bounded DMA shutdown and a separate OutputLifecycleError. Ordinary start rejects latched faults; explicit fault recovery remains separate. The owner confirmed the regular stop/start hardware procedures on 2026-11-01. PulseBankOutput and the register-service OutputBackend are separate contracts; their lifecycle bridge is not implemented yet.
+[SignalPlanLifecycle](../../firmware/servo-signal/src/signal_plan_lifecycle.rs) is an optional extension with a separate LifecycleError. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) exposes lifecycle methods only for matching backends, sharing complete plan validation with ordinary submission. State is delegated rather than duplicated. SwitchingOutput now implements this extension with regular start after confirmed stop, bounded DMA shutdown and a separate OutputLifecycleError. Ordinary start rejects latched faults; explicit fault recovery remains separate. The owner confirmed the regular stop/start hardware procedures on 2026-11-01. PulseBankOutput and the register-service OutputBackend remain separate contracts, connected by the direct ServoBank implementation below.
 
 ## ServoBank lifecycle bridge
 
@@ -205,4 +207,8 @@ classDiagram
     SignalPlanLifecycle <|.. SwitchingOutput
 ```
 
-[PulseBankLifecycle](../../firmware/servo-control/src/servo_bank.rs) connects complete calibrated startup batches to the lower signal-plan lifecycle. ServoBank validates all prepared targets before starting, preserves them on stop and delegates state without caching it. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) implements the trait for lifecycle-capable signal-plan backends. Startup and stop retain a separate lifecycle error type; stop errors are wrapped at this trait boundary. The register-service OutputBackend adapter remains unimplemented. The bank and bridge have PC coverage; the full combined hardware path is not yet verified.
+[PulseBankLifecycle](../../firmware/servo-control/src/servo_bank.rs) connects complete calibrated startup batches to the lower signal-plan lifecycle. ServoBank validates all prepared targets before starting, preserves them on stop and delegates state without caching it. [ServoSignalOutput](../../firmware/servo-control/src/servo_signal_output.rs) implements the trait for lifecycle-capable signal-plan backends. Startup and stop retain a separate lifecycle error type; stop errors are wrapped at this trait boundary. ServoBank now also implements the register-service OutputBackend directly. The bank-to-PIO lifecycle hardware test was accepted separately; the path from the register service to real PIO remains unverified.
+
+## Register-service bank ownership
+
+RegisterService owns ControlRegister, which owns its OutputBackend. With ServoBank as that backend, target reads and writes use the existing bank storage and validation; stopped writes prepare targets and active writes submit complete batches. RegisterService::service forwards through every owner to the underlying output service. ServoBankBackendError distinguishes lifecycle failures from submission failures. No additional output state is cached, and uninitialized targets are reported as InvalidState rather than a technical Fault. The current PC tests use a recording pulse backend. UART, journal-driven calibration and asynchronous fault reporting remain separate integration work.

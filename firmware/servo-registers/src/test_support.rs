@@ -109,4 +109,6 @@ impl OutputBackend for FakeOutput {
         self.targets = candidate;
         Ok(())
     }
+
+    fn service(&mut self) {}
 }

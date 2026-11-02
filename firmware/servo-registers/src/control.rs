@@ -133,6 +133,9 @@ impl<O: OutputBackend> ControlRegister<O> {
             .target(id)
             .map_err(|error| match error {
                 TargetReadError::UnknownServo(_) => ErrorCode::OutOfBounds,
+                TargetReadError::UninitializedServo(_) => {
+                    ErrorCode::InvalidState
+                }
             })
     }
 
@@ -165,7 +168,15 @@ impl<O: OutputBackend> ControlRegister<O> {
                 self.faulted = true;
                 Err(ErrorCode::OutputError)
             }
+            Err(TargetWriteError::UninitializedServo(_)) => {
+                Err(ErrorCode::InvalidState)
+            }
         }
+    }
+
+    /// Services the owned output backend.
+    pub(crate) fn service(&mut self) {
+        self.output.service();
     }
 }
 

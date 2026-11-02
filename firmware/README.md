@@ -290,3 +290,7 @@ ServoBank now conditionally exposes start_prepared, stop and state through Pulse
 ## ServoBank lifecycle hardware verification
 
 On 2026-11-01 the owner accepted [servo_bank_lifecycle](pico/hardware_tests/README.md#servobank-lifecycle-hardware-test), confirming the principal Low -> 1/2 ms -> Low -> 1.5/2 ms sequence after all 47 hardware-build checks passed. The example uses unloaded GPIOs and a test-only running bootstrap followed by immediate stop. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending; no endurance-test result is claimed.
+
+## Register service connected to ServoBank
+
+The [direct bank backend](servo-registers/README.md#direct-servobank-backend) implements OutputBackend for ServoBank without another target store or state cache. It supports preparation while stopped, active batch submission, lifecycle operations and service forwarding through RegisterService. Uninitialized targets have an explicit state error. The owner confirmed 72 register-package tests, 427 tests overall and all 17 verification checks passing on 2026-11-01. These are PC integration tests with a recording output; UART, journal-driven calibration and the register-service-to-PIO hardware path remain future work. CI for this revision is pending.

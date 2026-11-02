@@ -5,7 +5,7 @@ use hexaroam_servo_protocol::{
     ValidationError, validate_header,
 };
 
-/// Initial subset; Control and variable-length regions follow separately.
+/// Fixed registers and the current eighteen-servo target region.
 pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
     RegisterRegion {
         first_index: 0,
@@ -307,6 +307,13 @@ impl<O: OutputBackend> RegisterService<O> {
             },
             payload: &output[..width],
         }))
+    }
+
+    /// Services output independently of incoming register requests.
+    ///
+    /// The application loop must call this regularly.
+    pub fn service(&mut self) {
+        self.control.service();
     }
 }
 

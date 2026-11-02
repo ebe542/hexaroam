@@ -23,7 +23,7 @@ ControlRegister owns an OutputBackend. Bit 0 of Control is OUTPUT_ENABLE; other 
 
 WRITE replaces Control, SET applies OR and CLR clears selected bits. The complete request is checked before a backend call. Enable requires calibration and no fault. Backend start validates the prepared initial targets; InvalidTargets rejects the request without a technical fault. Technical start/stop errors latch Fault and preserve the previously accepted Control value. Status reads OutputBackend::state, including after an error, so it may differ from the requested enable state. Repeated enable/disable avoids redundant backend start/stop calls. Disabling remains possible in Fault, but does not clear Fault. Clearing LastError also does not clear Fault.
 
-OutputBackend provides start, stop, a reliable logical Active/Inactive state, target reads and transactional target writes. It does not report mechanical position or servo power. The concrete future adapter must uphold the post-error state contract. The package currently has only a shared test backend, which records calls and simulates failures leaving output either active or inactive. No real output adapter is implemented or exercised here.
+OutputBackend provides start, stop, a reliable logical Active/Inactive state, target reads and transactional target writes. It does not report mechanical position or servo power. The concrete future adapter must uphold the post-error state contract. The package provides both a shared simulated backend and a direct OutputBackend implementation for ServoBank, described below. Hardware integration of the register-service path remains pending.
 
 ## Modules and tests
 
@@ -45,7 +45,7 @@ python tools/dev.py doc
 
 On 2026-10-31 the owner reported 41 passing host tests after the intended failing phases: 14 original service tests, 16 control tests and 11 service/control integration tests. Coverage includes canonical error responses, no reply/output-buffer writes for modifying requests, error retention/explicit clearing, reserved bits, missing calibration, invalid initial targets, actual output state after failures and fault persistence. The owner subsequently confirmed all 17 full verification checks and all 9 shared documentation checks passing. The owner confirmed green CI for this register-service revision. No tests were executed by the assistant.
 
-The calibration region, invalidation, Busy/asynchronous status events, real output/flash backends, UART delivery and the firmware loop remain future work. This package is not included by the normal Pico firmware yet.
+The calibration region, invalidation, Busy/asynchronous status events, flash integration, UART delivery and the firmware loop remain future work. The direct ServoBank output integration is described below. This package is not included by the normal Pico firmware yet.
 
 ## Byte-stream integration tests
 
@@ -59,7 +59,7 @@ Each target occupies one logical index and carries an i32 little-endian value in
 
 ControlRegister rejects reads and writes without calibration and rejects writes while Fault is latched. Reads remain available in Fault when calibration is valid. Inactive writes prepare targets without enabling output; active writes submit a batch through OutputBackend::set_targets. The backend must validate the entire batch and preserve all accepted targets on failure. Success confirms acceptance, not that a new signal plan is already active or a servo has reached its position. Technical write errors latch Fault; invalid angles do not. Successful accesses preserve LastError.
 
-The register service decodes the full batch before one backend call and stages complete READ data before touching the response buffer. TargetReadError and TargetWriteError keep backend errors separate from register error codes. Initial targets are supplied by the backend; the shared test backend initializes them to zero and uses a synthetic -90 to +90 degree range. Actual calibration and a ServoBank/PIO adapter are not integrated yet.
+The register service decodes the full batch before one backend call and stages complete READ data before touching the response buffer. TargetReadError and TargetWriteError keep backend errors separate from register error codes. Initial targets are supplied by the backend; the shared test backend initializes them to zero and uses a synthetic -90 to +90 degree range. Journal-loaded calibration and register-service-to-PIO hardware integration remain pending. The direct ServoBank backend below uses the bank's configured calibrations.
 
 On 2026-10-31 the owner observed the intended failing phase (48 passed, 8 failed), then confirmed 56 package tests passing. The complete verification reported 383 passing tests and all 17 checks passing. The eight new tests cover backend-supplied initial values, inactive preparation, active writes, atomic rejection of invalid angles, malformed requests and bounds, missing calibration, fault latching and short READ buffers. The owner subsequently confirmed green CI for this target-register revision. No tests were executed by the assistant.
 
@@ -68,3 +68,15 @@ On 2026-10-31 the owner observed the intended failing phase (48 passed, 8 failed
 Four additional tests in [test_pipeline.rs](src/test_pipeline.rs) connect target requests to CRC-checked response bytes using the same parser across requests. They cover all eighteen targets (72 payload bytes) with inactive and active output, partial writes preserving neighboring targets, complete rejection of a batch whose final angle is invalid, and canonical errors for a READ crossing the target region followed by a valid READ. Values include negative angles and nonzero centidegrees. Modifying requests produce no response, and successful readback preserves LastError. Test response-payload buffers now hold all eighteen target values.
 
 The owner reported 60 package tests and 387 tests overall passing on 2026-10-31, with all 17 verification checks passing. CI for this target-wire-test revision is pending. These tests use the simulated backend; actual servo signals, UART timing and ServoBank integration are not exercised. No tests were executed by the assistant.
+
+## Direct ServoBank backend
+
+[servo_bank_backend.rs](src/servo_bank_backend.rs) implements OutputBackend directly for ServoBank<O, N> when O implements PulseBankLifecycle. There is no extra wrapper object, target store or cached output state. Startup delegates to start_prepared; missing/invalid targets become InvalidTargets, while lifecycle errors retain their type through ServoBankBackendError::Lifecycle. Stop delegates without changing stored targets. State translates the backend's confirmed logical state.
+
+Target reads distinguish unknown and uninitialized servos. Uninitialized reads/writes map to register InvalidState without latching a technical Fault. Inactive writes call prepare_targets; active writes call set_targets. Domain validation errors retain their meaning, and submission errors are preserved through ServoBankBackendError::Submission. Batch rejection preserves all accepted targets.
+
+RegisterService::service forwards through ControlRegister and OutputBackend to ServoBank::service. The application must call it regularly, independently of incoming register requests, so DMA/PIO servicing remains reachable while the service owns the bank. This is servicing only; no asynchronous backend-fault reporting or automatic recovery policy is introduced. Calibration validity remains supplied at construction and automatic zero-degree initialization is not added.
+
+[test_servo_bank_backend.rs](src/test_servo_bank_backend.rs) uses a real two-servo bank with individual synthetic calibrations and a recording pulse/lifecycle backend. Twelve tests cover missing/unknown targets, inactive partial preparation, calibrated startup, incomplete startup, active updates, atomic rejection, incomplete active writes, lifecycle/submission errors and state, stop retry/restart, register-service operations and service forwarding. Register READ responses are checked directly; UART transport is not exercised.
+
+On 2026-11-01 the owner observed the intended red phase (60 passed, 12 failed), then confirmed all 72 package tests passing. Full verification reported 427 tests and all 17 checks passing. No tests were executed by the assistant. The register-service-to-real-PIO hardware path and UART remain unverified; the preceding ServoBank lifecycle hardware test is a separate result. CI for this backend-integration revision is pending.
