@@ -24,6 +24,12 @@ mod servo_bank_backend;
 
 pub use servo_bank_backend::ServoBankBackendError;
 
+mod frame_processor;
+
+pub use frame_processor::{
+    FrameProcessingError, FrameProcessor, FrameProgress,
+};
+
 #[cfg(test)]
 mod test_support;
 

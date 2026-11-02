@@ -22,3 +22,11 @@ pub use frame::{
 mod stream;
 
 pub use stream::{ParsedFrame, ParserError, StreamParser};
+
+mod transport;
+
+pub use transport::ByteTransport;
+
+mod response_buffer;
+
+pub use response_buffer::{ResponseBuffer, ResponseQueueError};

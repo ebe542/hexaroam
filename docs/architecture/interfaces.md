@@ -212,3 +212,44 @@ classDiagram
 ## Register-service bank ownership
 
 RegisterService owns ControlRegister, which owns its OutputBackend. With ServoBank as that backend, target reads and writes use the existing bank storage and validation; stopped writes prepare targets and active writes submit complete batches. RegisterService::service forwards through every owner to the underlying output service. ServoBankBackendError distinguishes lifecycle failures from submission failures. No additional output state is cached, and uninitialized targets are reported as InvalidState rather than a technical Fault. The current PC tests use a recording pulse backend. UART, journal-driven calibration and asynchronous fault reporting remain separate integration work.
+
+## Protocol byte transport
+
+```mermaid
+classDiagram
+    class ByteTransport {
+        <<trait>>
+        try_read()
+        try_write()
+    }
+    class ResponseBuffer {
+        queue()
+        service()
+        remaining()
+    }
+    ResponseBuffer ..> ByteTransport : bounded transmit only
+```
+
+[ByteTransport](../../firmware/servo-protocol/src/transport.rs) defines nonblocking byte operations. [ResponseBuffer](../../firmware/servo-protocol/src/response_buffer.rs) owns one copied encoded response and uses try_write to service its unsent suffix with a byte budget. It does not read, parse frames or access the register service. Only a test transport exists so far; no Pico UART implements this trait yet. This is independent of the logging ByteOutput contract, whose message-drop policy is not used for protocol responses.
+
+## Frame-processing ownership
+
+```mermaid
+classDiagram
+    class FrameProcessor {
+        poll()
+        on_receive_timeout()
+    }
+    class RegisterService
+    class StreamParser
+    class ResponseBuffer
+    class ByteTransport {
+        <<trait>>
+    }
+    FrameProcessor --> RegisterService : owns and services
+    FrameProcessor --> StreamParser : owns
+    FrameProcessor --> ResponseBuffer : owns
+    FrameProcessor ..> ByteTransport : borrowed per poll
+```
+
+[FrameProcessor](../../firmware/servo-registers/src/frame_processor.rs) coordinates the existing contracts without owning UART hardware. It services the register backend on every poll, transmits pending response bytes and processes requests only when response storage is available. Deferred receive timeouts preserve complete buffered requests. Tests use a simulated transport and register backend; the concrete Pico UART is not connected yet.

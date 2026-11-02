@@ -8,7 +8,9 @@ The servo controller is a subordinate service. One protocol interface handles ta
 
 Firmware is installed through USB. There is no custom firmware-update protocol, mandatory board serial number, authentication scheme or production provisioning workflow. Correct assembly and a calibration set appropriate to that assembly are assumptions. Format validation and CRC do not identify swapped servos or prove mechanical correctness.
 
-The logical register operations are transport-independent. UART initially supplies a byte stream; SPI/I2C adapters would need their own transaction and response-delivery handling. Their electrical timing and addressing are not defined here. Start with UART at the established 115200 baud, 8N1; a different rate can be selected and verified later. No transport driver or main-loop changes are part of this draft.
+The logical register operations are transport-independent. On 2026-11-01 the owner confirmed UART as the protocol transport after comparing its response behavior with SPI. The controller can send a READ response after processing the complete request; the master bounds its wait with a response timeout. Diagnostic logging remains on a separate UART. Start with 115200 baud, 8N1; a different rate can be selected and verified later. Actual response and incomplete-frame timeout values still need to be defined and measured. SPI/I2C transports are outside the current implementation scope. No transport driver or main-loop changes are part of this decision.
+
+Protocol UART pin allocation must be agreed before hardware integration. The current baseboard assigns GP0..GP17 to eighteen servo signals and UART1 TX/RX to GP20/GP21 for diagnostics. Its remaining expansion pins do not provide a spare complete hardware-UART TX/RX pair. In particular GP18/GP19 are UART0 CTS/RTS, not TX/RX. A second hardware UART therefore requires revising servo pin assignments or another explicit design change. No schematic, wiring or firmware pin assignment is changed by this transport decision.
 
 ## Internal memory versus wire representation
 
@@ -194,3 +196,17 @@ On 2026-10-31 the owner reported 60 register-package tests and 387 tests overall
 ## ServoBank register backend
 
 The register backend contract now has a direct implementation for lifecycle-capable ServoBank instances. Accepted target reads come from the bank; inactive writes prepare and active writes submit. Uninitialized targets return InvalidState without latching Fault; incomplete startup returns InvalidTargets through the existing control mapping. RegisterService::service delegates ongoing output work independently of incoming frames. No UART delivery, calibration transfer or journal-loading integration is added. On 2026-11-01 the owner reported 72 package tests and 427 tests overall passing, with all 17 verification checks passing, after twelve new tests failed at placeholders. Tests use a recording pulse backend; physical protocol-driven output remains to be verified. CI for this revision is pending.
+
+## Byte transport and queued READ responses
+
+ByteTransport now defines hardware-independent nonblocking receive and transmit operations. ResponseBuffer stores one copied encoded response and an unsent offset. queue never replaces a pending response; Busy, Empty and TooLarge preserve the current state. Bounded service stops on backpressure or error and retains unsent bytes without replaying accepted bytes. Transport acceptance does not confirm physical transmission. The buffer does not encode or validate framing/CRC.
+
+On 2026-11-02 the owner reported 62 protocol-package tests and 439 tests overall passing, with all 17 verification checks passing, after twelve response-buffer tests failed at placeholders. A real UART transport, frame-processing coordination, actual timeout handling and the main loop are not yet connected. FrameProcessor in servo-registers now coordinates response space by stopping request processing while an encoded response remains pending. CI for this revision is pending.
+
+## Integrated frame processing
+
+FrameProcessor owns the request parser, register service and single response buffer. Each poll services output first and advances existing transmission before receiving more bytes. A READ response is encoded and queued for a later poll; pending transmission prevents another request from being handled. The master must still wait for its READ response before sending further requests. This flow control is not hardware RTS/CTS and does not protect against a sender violating that rule or a physical UART FIFO overrun.
+
+Receive-timeout events are recorded externally and deferred until complete buffered requests have been handled. Only the incomplete parser remainder is then cleared; responses are retained. The caller must account for unread transport data when detecting the event. No timeout duration, physical UART behavior or automatic receive-error reset is specified by this implementation. Transmit errors preserve the unsent suffix for caller-directed recovery.
+
+On 2026-11-02 the owner confirmed 84 register-package tests, 62 protocol-package tests and 451 tests overall passing, with all 17 verification checks passing. Twelve processor tests use a simulated byte transport and register backend; separate tests cover the direct ServoBank backend. The concrete UART adapter and physical end-to-end protocol test remain future work. CI for this combined transport/buffering/processing revision is pending.

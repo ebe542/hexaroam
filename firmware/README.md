@@ -294,3 +294,11 @@ On 2026-11-01 the owner accepted [servo_bank_lifecycle](pico/hardware_tests/READ
 ## Register service connected to ServoBank
 
 The [direct bank backend](servo-registers/README.md#direct-servobank-backend) implements OutputBackend for ServoBank without another target store or state cache. It supports preparation while stopped, active batch submission, lifecycle operations and service forwarding through RegisterService. Uninitialized targets have an explicit state error. The owner confirmed 72 register-package tests, 427 tests overall and all 17 verification checks passing on 2026-11-01. These are PC integration tests with a recording output; UART, journal-driven calibration and the register-service-to-PIO hardware path remain future work. CI for this revision is pending.
+
+## Byte transport and response buffering
+
+ByteTransport and ResponseBuffer in servo-protocol provide nonblocking byte I/O contracts and bounded transmission of one owned encoded response. Backpressure/errors retain the unsent suffix; pending responses cannot be overwritten. On 2026-11-02 the owner reported all 62 protocol tests, 439 tests overall and all 17 verification checks passing after observing twelve new tests fail at placeholders. Only a simulated transport is tested; real UART reception/transmission and the application loop remain future work. CI for this revision is pending. See the [protocol transport guide](servo-protocol/README.md#nonblocking-byte-transport-and-response-buffer).
+
+## Byte transport with register-frame processing
+
+The combined revision includes ByteTransport, a bounded single-response buffer and FrameProcessor connecting transport bytes to the parser, register service and encoded replies. Output servicing continues during response backpressure; deferred timeouts retain complete requests. The owner reported 62 protocol-package tests, 84 register-package tests, 451 tests overall and all 17 checks passing on 2026-11-02. These are PC results with simulated transport/output; the Pico UART driver and physical end-to-end protocol path remain future work. CI for this combined revision is pending. See the [frame-processing guide](servo-registers/README.md#frame-processing-over-a-byte-transport).
