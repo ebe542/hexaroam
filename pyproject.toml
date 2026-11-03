@@ -1,0 +1,18 @@
+[project]
+name = "hexaroam-test-tools"
+version = "0.1.0"
+description = "Development and hardware test tools for HexaRoam"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+hardware = [
+  "pyserial==3.5",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = []

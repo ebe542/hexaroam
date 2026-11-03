@@ -384,6 +384,7 @@ dependencies = [
  "hexaroam-servo-control",
  "hexaroam-servo-pio",
  "hexaroam-servo-protocol",
+ "hexaroam-servo-registers",
  "hexaroam-servo-signal",
  "hexaroam-servo-storage",
  "nb 1.1.0",
@@ -413,6 +414,15 @@ dependencies = [
 [[package]]
 name = "hexaroam-servo-protocol"
 version = "0.1.0"
+
+[[package]]
+name = "hexaroam-servo-registers"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-control",
+ "hexaroam-servo-protocol",
+ "hexaroam-servo-signal",
+]
 
 [[package]]
 name = "hexaroam-servo-signal"

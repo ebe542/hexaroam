@@ -1,6 +1,6 @@
 # Development tools
 
-Use Python 3.10 or newer; no external Python packages are needed. From the repository root:
+Use Python 3.10 or newer. The development runner uses only the standard library; the optional UART hardware runner requires pySerial. From the repository root:
 
 | Command | Task |
 | --- | --- |
@@ -131,3 +131,54 @@ servo-protocol is included in test, fmt, check, verify and the shared doc output
 ## Register-service integration
 
 servo-registers is included in test/fmt/check/verify and shared Rustdoc output. Its 41 owner-reported host tests exercise fixed registers, ControlRegister and dispatch through a simulated output backend. The documentation task now includes eight Rust packages. Runner inclusion is covered by test_register_tasks.py and the documentation tests are updated accordingly. The owner confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 register-service tests. No tests were run by the assistant; CI for this addition is pending. The normal Pico build and hardware examples do not use this service yet.
+
+## UART hardware suites
+
+Run these commands from the repository root. Create a virtual environment once:
+
+```bash
+python -m venv .venv
+```
+
+Activate it in Windows Git Bash:
+
+```bash
+source .venv/Scripts/activate
+```
+
+Or on Ubuntu:
+
+```bash
+source .venv/bin/activate
+```
+
+Install the optional hardware dependencies into the active environment:
+
+```bash
+python -m pip install -e ".[hardware]"
+```
+
+Flash the matching `uart_registers` hardware-test firmware first. Use a 3.3-V TTL adapter: Pico GP16 (TX) to adapter RX, GP17 (RX) to adapter TX, and common GND. Remove the GP16-to-GP17 loopback jumper. Close HTerm or any other application using the serial port before starting the runner.
+
+Run all scenarios (replace the port with your actual device):
+
+```bash
+python tools/uart_test.py --port COM5 --suite uart_registers
+```
+
+On Ubuntu, for example:
+
+```bash
+python tools/uart_test.py --port /dev/ttyUSB0 --suite uart_registers
+```
+
+Bare suite names, with or without `.json`, resolve in `firmware/pico/hardware_tests/suites/`, independently of the working directory. Explicit relative paths resolve from the current working directory. Select a single scenario or supply a different suite path:
+
+```bash
+python tools/uart_test.py --port COM5 --suite uart_registers --case read_status
+python tools/uart_test.py --port COM5 --suite ./other-tests/custom.json
+```
+
+Repeat `--case` to select multiple scenarios. Execution stops at the first failure; the summary distinguishes passed, failed and not-completed scenarios. Exit codes are 0 for success, 1 for a failed hardware check, 2 for configuration or serial errors, and 130 for interruption.
+
+These tests communicate with real hardware and are started manually; `dev.py verify` and CI do not execute them. See the [test vectors and verification record](../docs/uart-register-test-vectors.md).

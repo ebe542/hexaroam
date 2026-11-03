@@ -163,3 +163,7 @@ FrameProcessor in servo-registers owns StreamParser, RegisterService and Respons
 ## Concrete protocol UART transport
 
 UartTransport in pico/src implements ByteTransport over an exclusively owned HAL UART. It maps empty/full FIFOs to nonblocking results and reports receive errors without delivering the faulty byte. A separate manual UART0 loopback uses GP16/GP17, with diagnostics on UART1/GP20. The owner confirmed both success messages after 1024 matching bytes and reported 451 tests and all 17 verification checks passing on 2026-11-02. FrameProcessor integration, physical request/response tests and runtime timeout/error policy remain future work. The normal Pico demo and final hardware pin map are unchanged.
+
+## Physical UART register reads
+
+The uart_registers manual example now connects UartTransport -> FrameProcessor -> RegisterService -> NoServoOutput, with binary replies returned over UART0. On 2026-11-02 the owner confirmed Version=1, Status=0 and ServoCount=0 responses with their exact CRC bytes in HTerm, then reported 451 tests and all 17 verification checks passing. The example has no calibrated servo backend; protocol-driven PIO output and journal integration remain separate work. Damaged-frame and timeout recovery have not yet been verified on this physical link. See the [procedure and wire vectors](../../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).

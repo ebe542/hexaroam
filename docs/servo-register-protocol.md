@@ -214,3 +214,11 @@ On 2026-11-02 the owner confirmed 84 register-package tests, 62 protocol-package
 ## UART transport hardware verification
 
 The concrete Pico UartTransport now implements ByteTransport and reports UART receive errors explicitly. On 2026-11-02 the owner confirmed the standalone UART0 GP16-to-GP17 loopback success message after 1024 matching bytes, with diagnostics on UART1/GP20. Full verification reported 451 tests and all 17 checks passing. This verifies byte transport, not FrameProcessor integration, register traffic, calibrated output or protocol timeout durations. The receive-error mapping exists but was not exercised by deliberate fault injection. CI for this UART-driver revision is pending.
+
+## Physical READ exchange verification
+
+On 2026-11-02 the owner confirmed the three exact HTerm READ responses documented in the [UART hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test): Version=1, Status=0 and ServoCount=0, including their expected CRC bytes. The test uses the concrete UART driver, FrameProcessor and RegisterService with NoServoOutput; it exercises no calibrated servo output. Full verification reported 451 tests and all 17 checks passing. The example uses an initial 100 ms receive-idle timeout but no timeout-recovery or malformed-frame hardware result is claimed yet. CI for this revision is pending.
+
+## Reference test data
+
+The canonical [UART register test vectors](uart-register-test-vectors.md) record the fixture, three hardware-confirmed READ exchanges, byte layout, CRC parameters and an independent standard-library Python reproduction command. Hardware execution instructions remain in the manual-test guide. Future test data should distinguish expected/generated results from owner-confirmed hardware observations.

@@ -306,3 +306,7 @@ The combined revision includes ByteTransport, a bounded single-response buffer a
 ## Protocol UART driver and loopback
 
 The [UART byte transport](pico/src/uart_transport.rs) implements ByteTransport without blocking and reports receive errors explicitly. Shared hardware-test initialization now exposes UART0 separately from UART1 diagnostics. On 2026-11-02 the owner confirmed [uart_loopback](pico/hardware_tests/README.md#protocol-uart-byte-transport-loopback): the two expected messages prove the test verified all 1024 bytes over the GP16/GP17 jumper. Full verification reported 451 tests and all 17 checks passing. The FrameProcessor is not connected to UART yet; the normal Pico firmware is unchanged. CI for this revision is pending.
+
+## UART register hardware verification
+
+The owner confirmed [uart_registers](pico/hardware_tests/README.md#uart-register-requestresponse-test) on 2026-11-02: all three Version/Status/ServoCount READ responses matched their expected bytes and CRC in HTerm. The example connects the real UART transport and FrameProcessor to a register service without servo outputs or calibration. Full verification reported 451 tests and all 17 checks passing. UART0 uses GP16/GP17, while diagnostics stay on UART1/GP20. Error/timeout hardware tests and real protocol-driven servo signals remain future work. CI for this revision is pending.

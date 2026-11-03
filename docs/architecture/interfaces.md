@@ -254,6 +254,6 @@ classDiagram
     FrameProcessor ..> ByteTransport : borrowed per poll
 ```
 
-[FrameProcessor](../../firmware/servo-registers/src/frame_processor.rs) coordinates the existing contracts without owning UART hardware. It services the register backend on every poll, transmits pending response bytes and processes requests only when response storage is available. Deferred receive timeouts preserve complete buffered requests. Tests use a simulated transport and register backend; the concrete Pico UART is not connected yet.
+[FrameProcessor](../../firmware/servo-registers/src/frame_processor.rs) coordinates the existing contracts without owning UART hardware. It services the register backend on every poll, transmits pending response bytes and processes requests only when response storage is available. Deferred receive timeouts preserve complete buffered requests. PC tests use a simulated transport and register backend. The uart_registers hardware example now connects the concrete Pico UART to FrameProcessor and RegisterService with a no-servo test backend; the owner verified version/status/count replies in HTerm.
 
 UartTransport maps empty receive FIFO and full transmit FIFO to nonblocking results. It exposes Overrun, Break, Parity and Framing as receive errors instead of delivering the faulty entry to the parser. The application remains responsible for deciding how to recover an incomplete frame after such errors. The current hardware test does not inject these errors.
