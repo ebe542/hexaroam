@@ -16,7 +16,7 @@ pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
     RegisterRegion {
         first_index: 1,
         entries: 1,
-        bytes_per_entry: 1,
+        bytes_per_entry: 4,
         access: Access::ReadOnly,
     },
     RegisterRegion {
@@ -280,7 +280,7 @@ impl<O: OutputBackend> RegisterService<O> {
         } else {
             match header.index {
                 0 => (0, u32::from(self.protocol_version), 2),
-                1 => (1, u32::from(self.control.status()), 1),
+                1 => (1, self.control.status(), 4),
                 3 => (3, u32::from(self.control.value()), 1),
                 4 => (4, u32::from(self.servo_count), 1),
 

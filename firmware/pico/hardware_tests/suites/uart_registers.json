@@ -20,7 +20,7 @@
     "no_reply_observation_ms": 200,
     "read_response_timeout_ms": 1000
   },
-  "verification": "On 2026-11-03 the owner reported a successful automated run of this protocol-version-2 suite against real Pico hardware: 21 passed, 0 failed, 0 not completed; Overall: PASSED. The previous version-1 suite also passed on 2026-11-02.",
+  "verification": "On 2026-11-03 the owner reported all 21 UART hardware scenarios passing after the four-byte Status migration: 21 passed, 0 failed, 0 not completed. All 78 register host tests passed. Full local verification passed 465 tests and all 17 checks. CI for the width change has not yet been reported.",
   "before_each_case": [
     {
       "action": "Control remains disabled",
@@ -33,11 +33,11 @@
     },
     {
       "action": "Status remains zero",
-      "request_body_hex": "01 01 01 00",
+      "request_body_hex": "01 01 04 00",
       "encoding": "crc",
-      "tx_hex": "01 01 01 00 0F E3 21 81",
-      "response_body_hex": "80 01 01 00 00",
-      "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+      "tx_hex": "01 01 04 00 4A 17 56 FC",
+      "response_body_hex": "80 01 04 00 00 00 00 00",
+      "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
       "observe_ms": 1000
     }
   ],
@@ -67,11 +67,11 @@
       "steps": [
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -93,11 +93,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -162,11 +162,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -197,11 +197,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -250,11 +250,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -285,11 +285,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -320,11 +320,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -355,11 +355,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -399,11 +399,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -434,11 +434,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -451,29 +451,29 @@
       "steps": [
         {
           "action": "Opcode 02 register 0x01",
-          "request_body_hex": "02 01 01 00 FF",
+          "request_body_hex": "02 01 04 00 FF FF FF FF",
           "encoding": "crc",
-          "tx_hex": "02 01 01 00 FF A2 46 9E 28",
+          "tx_hex": "02 01 04 00 FF FF FF FF 55 B1 5A C4",
           "response_body_hex": "81 01 01 00 02",
           "expected_rx_hex": "81 01 01 00 02 41 02 D4 1D",
           "observe_ms": 1000
         },
         {
           "action": "Read register 0x01",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -504,11 +504,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -530,11 +530,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -601,11 +601,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -636,11 +636,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -698,11 +698,11 @@
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -715,20 +715,20 @@
       "steps": [
         {
           "action": "READ Status with corrupted CRC",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "bad_crc",
-          "tx_hex": "01 01 01 00 0F E3 21 01",
+          "tx_hex": "01 01 04 00 4A 17 56 7C",
           "response_body_hex": null,
           "expected_rx_hex": null,
           "observe_ms": 200
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]
@@ -741,29 +741,29 @@
       "steps": [
         {
           "action": "Send only READ Status header",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "raw",
-          "tx_hex": "01 01 01 00",
+          "tx_hex": "01 01 04 00",
           "response_body_hex": null,
           "expected_rx_hex": null,
           "observe_ms": 200
         },
         {
           "action": "Send only old CRC after timeout",
-          "request_body_hex": "0F E3 21 81",
+          "request_body_hex": "4A 17 56 FC",
           "encoding": "raw",
-          "tx_hex": "0F E3 21 81",
+          "tx_hex": "4A 17 56 FC",
           "response_body_hex": null,
           "expected_rx_hex": null,
           "observe_ms": 200
         },
         {
           "action": "Status remains zero",
-          "request_body_hex": "01 01 01 00",
+          "request_body_hex": "01 01 04 00",
           "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "80 01 01 00 00",
-          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 00 00 00",
+          "expected_rx_hex": "80 01 04 00 00 00 00 00 11 13 FF 0B",
           "observe_ms": 1000
         }
       ]

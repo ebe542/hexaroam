@@ -94,14 +94,14 @@ fn status_read_returns_crc_checked_response() {
         Header {
             opcode: Opcode::Read,
             index: 1,
-            length: 1,
+            length: 4,
         },
         &[],
         &mut response,
     )
     .expect("READ response");
 
-    assert_eq!(length, 9);
+    assert_eq!(length, 12);
 
     let frame = decode_frame(
         &response[..length],
@@ -115,12 +115,12 @@ fn status_read_returns_crc_checked_response() {
         Header {
             opcode: Opcode::Ack,
             index: 1,
-            length: 1,
+            length: 4,
         },
     );
     assert_eq!(
         frame.payload,
-        &[STATUS_CALIBRATION_VALID]
+        &STATUS_CALIBRATION_VALID.to_le_bytes()
     );
 }
 
@@ -163,7 +163,7 @@ fn set_control_returns_ack_and_changes_status() {
         Header {
             opcode: Opcode::Read,
             index: 1,
-            length: 1,
+            length: 4,
         },
         &[],
         &mut response,
@@ -180,7 +180,7 @@ fn set_control_returns_ack_and_changes_status() {
     assert_eq!(frame.header.index, 1);
     assert_eq!(
         frame.payload,
-        &[STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE],
+        &(STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE).to_le_bytes(),
     );
 }
 
@@ -207,11 +207,11 @@ fn unknown_read_is_discarded_without_response() {
 
     // Recover with the same parser, without a timeout or replacement.
     assert_eq!(
-        read_byte(&mut parser, &mut service, 3),
+        read_scalar(&mut parser, &mut service, 3, 1),
         0
     );
     assert_eq!(
-        read_byte(&mut parser, &mut service, 1),
+        read_scalar(&mut parser, &mut service, 1, 4),
         STATUS_CALIBRATION_VALID,
     );
 }
@@ -283,41 +283,42 @@ fn feed(
     (handled, response_length)
 }
 
-fn read_byte(
+fn read_scalar(
     parser: &mut StreamParser<'_>,
     service: &mut RegisterService<FakeOutput>,
     index: u8,
-) -> u8 {
-    let (request, size) = request_bytes(Opcode::Read, index, 1, &[]);
+    width: u16,
+) -> u32 {
+    assert!((1..=4).contains(&width));
+    let (request, size) = request_bytes(Opcode::Read, index, width, &[]);
     let mut response = [0; 12];
-
     let (handled, length) = feed(
         parser,
         service,
         &request[..size],
         &mut response,
     );
-
     assert_eq!(handled, 1);
-
+    let length = length.expect("READ response");
+    assert_eq!(length, 8 + usize::from(width));
     let frame = decode_frame(
-        &response[..length.expect("READ response")],
+        &response[..length],
         FrameKind::Response,
         &mut checksum,
     )
     .expect("Valid response CRC");
-
     assert_eq!(
         frame.header,
         Header {
             opcode: Opcode::Ack,
             index,
-            length: 1,
-        },
+            length: width,
+        }
     );
-    assert_eq!(frame.payload.len(), 1);
-
-    frame.payload[0]
+    assert_eq!(frame.payload.len(), usize::from(width));
+    let mut bytes = [0; 4];
+    bytes[..usize::from(width)].copy_from_slice(frame.payload);
+    u32::from_le_bytes(bytes)
 }
 
 #[test]
@@ -349,7 +350,7 @@ fn corrupted_crc_does_not_reach_service() {
         Header {
             opcode: Opcode::Read,
             index: 1,
-            length: 1,
+            length: 4,
         },
         &[],
         &mut response,
@@ -365,7 +366,7 @@ fn corrupted_crc_does_not_reach_service() {
 
     assert_eq!(
         frame.payload,
-        &[STATUS_CALIBRATION_VALID]
+        &STATUS_CALIBRATION_VALID.to_le_bytes()
     );
 }
 
@@ -392,7 +393,7 @@ fn valid_request_is_recognized_after_corrupted_frame() {
 
     // No timeout or parser replacement between the two requests.
     assert_eq!(
-        read_byte(&mut parser, &mut service, 1),
+        read_scalar(&mut parser, &mut service, 1, 4),
         STATUS_CALIBRATION_VALID,
     );
 }
@@ -421,7 +422,7 @@ fn timeout_discards_incomplete_request() {
     parser.on_timeout();
 
     assert_eq!(
-        read_byte(&mut parser, &mut service, 1),
+        read_scalar(&mut parser, &mut service, 1, 4),
         STATUS_CALIBRATION_VALID,
     );
 
@@ -451,7 +452,7 @@ fn timeout_discards_incomplete_request() {
     );
     assert!(ack.payload.is_empty());
     assert_eq!(
-        read_byte(&mut parser, &mut service, 1),
+        read_scalar(&mut parser, &mut service, 1, 4),
         STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE,
     );
 }
@@ -466,7 +467,7 @@ fn consecutive_requests_are_processed_in_order() {
         request_bytes(Opcode::Set, 3, 1, &[OUTPUT_ENABLE]);
     let (disable, disable_size) =
         request_bytes(Opcode::Clear, 3, 1, &[OUTPUT_ENABLE]);
-    let (read, read_size) = request_bytes(Opcode::Read, 1, 1, &[]);
+    let (read, read_size) = request_bytes(Opcode::Read, 1, 4, &[]);
 
     // Three complete frames without gaps or timeout events.
     let mut stream = [0; MAX_FRAME_SIZE];
@@ -481,7 +482,7 @@ fn consecutive_requests_are_processed_in_order() {
         size += bytes.len();
     }
 
-    let mut response = [0; 25];
+    let mut response = [0; 28];
     let (handled, length) = feed(
         &mut parser,
         &mut service,
@@ -490,17 +491,13 @@ fn consecutive_requests_are_processed_in_order() {
     );
 
     assert_eq!(handled, 3);
-    assert_eq!(length, Some(25));
+    assert_eq!(length, Some(28));
 
+    let status_bytes = STATUS_CALIBRATION_VALID.to_le_bytes();
     for (start, end, index, payload) in [
         (0, 8, 3, &[][..]),
         (8, 16, 3, &[][..]),
-        (
-            16,
-            25,
-            1,
-            &[STATUS_CALIBRATION_VALID][..],
-        ),
+        (16, 28, 1, &status_bytes[..]),
     ] {
         let frame = decode_frame(
             &response[start..end],
@@ -699,7 +696,7 @@ fn all_targets_round_trip_through_wire_frames() {
             | if active { STATUS_OUTPUT_ACTIVE } else { 0 };
 
         assert_eq!(
-            read_byte(&mut parser, &mut service, 1),
+            read_scalar(&mut parser, &mut service, 1, 4),
             status,
         );
     }
@@ -779,7 +776,7 @@ fn invalid_wire_batch_preserves_every_target() {
     );
 
     assert_eq!(
-        read_byte(&mut parser, &mut service, 1),
+        read_scalar(&mut parser, &mut service, 1, 4),
         STATUS_CALIBRATION_VALID,
     );
 }

@@ -1,5 +1,7 @@
 # Servo register service
 
+Current development change: Status now transfers four little-endian bytes. Bits 8..15 are reserved for the result of the last longer operation; Busy and result handling are not implemented. On 2026-11-03 the owner confirmed all 78 register host tests and all 21 revised UART hardware scenarios passing. Full local verification passed 465 tests and all 17 checks; CI for the width change has not yet been reported; older totals below predate it.
+
 Hardware-independent no_std register handling above [servo-protocol](../servo-protocol/README.md). RegisterService consumes CRC-checked ParsedFrame values and returns ACK/NACK frames borrowing caller-provided payload storage. The frame codec adds header/CRC bytes; this package does not directly access UART hardware or flash. See the [version-2 contract](../../docs/servo-register-protocol.md).
 
 ## Implemented register subset
@@ -7,7 +9,7 @@ Hardware-independent no_std register handling above [servo-protocol](../servo-pr
 | Index | Register | Bytes | Access |
 | --- | --- | ---: | --- |
 | 0x00 | Protocol version; UART fixture reports 2 | 2 | READ |
-| 0x01 | Control/backend status | 1 | READ |
+| 0x01 | Control/backend status | 4 | READ |
 | 0x02 | Unassigned; reserved for future restart reason | — | None |
 | 0x03 | Control | 1 | READ, WRITE, SET, CLR |
 | 0x04 | Servo count | 1 | READ |

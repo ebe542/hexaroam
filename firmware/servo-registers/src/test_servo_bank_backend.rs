@@ -661,9 +661,9 @@ fn register_service_controls_bank_and_forwards_service() {
     assert_read(
         &mut service,
         1,
-        1,
+        4,
         Opcode::Ack,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 
     modify(
@@ -676,9 +676,9 @@ fn register_service_controls_bank_and_forwards_service() {
     assert_read(
         &mut service,
         1,
-        1,
+        4,
         Opcode::Ack,
-        &[STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE],
+        &(STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE).to_le_bytes(),
     );
     assert_eq!(recorded.borrow().start_calls, 2);
 }
@@ -700,9 +700,9 @@ fn uninitialized_register_access_reports_state_error_without_fault() {
     assert_read(
         &mut service,
         1,
-        1,
+        4,
         Opcode::Ack,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 
     modify(

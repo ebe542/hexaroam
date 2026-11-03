@@ -1,5 +1,7 @@
 # Servo register protocol — version 2
 
+Current development change: Status now transfers four little-endian bytes. Bits 8..15 are reserved for the result of the last longer operation; Busy and result handling are not implemented. On 2026-11-03 the owner confirmed all 78 register host tests and all 21 revised UART hardware scenarios passing. Full local verification passed 465 tests and all 17 checks; CI for the width change has not yet been reported; older totals below predate it.
+
 Current development contract, updated 2026-11-03. ProtocolVersion is **2**, independent of the Cargo package and firmware versions. This revision replaces version-1 READ replies and LastError with ACK/NACK. It is not a released compatibility promise.
 
 ## Purpose and scope
@@ -10,14 +12,14 @@ The concrete hardware-test path is PC -> UART0 -> UartTransport -> FrameProcesso
 
 ## Internal memory versus wire representation
 
-Register indices are logical u8 values, not raw addresses. Internal alignment does not dictate wire widths. Header fields and multi-byte data use little endian. Target angles are signed i32 centidegrees; errors are u8. Fixed registers currently use the explicit widths below; the planned 32-bit status expansion is not implemented.
+Register indices are logical u8 values, not raw addresses. Internal alignment does not dictate wire widths. Header fields and multi-byte data use little endian. Target angles are signed i32 centidegrees; errors are u8. Fixed registers use the explicit widths below. Status is u32 and transfers exactly four little-endian bytes; Busy and action-result semantics are not implemented yet.
 
 ## Working register map
 
 | Index | Register | Current wire bytes | Access |
 | --- | --- | ---: | --- |
 | 0x00 | ProtocolVersion; UART fixture reports 2 | 2 | READ |
-| 0x01 | Status | 1 | READ |
+| 0x01 | Status | 4 | READ |
 | 0x02 | Unassigned; reserved for future restart reason | — | None |
 | 0x03 | Control | 1 | READ, WRITE, SET, CLR |
 | 0x04 | ServoCount | 1 | READ |

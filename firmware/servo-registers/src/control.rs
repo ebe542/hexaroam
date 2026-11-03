@@ -9,9 +9,9 @@ use crate::{
 };
 
 pub const OUTPUT_ENABLE: u8 = 1 << 0;
-pub const STATUS_CALIBRATION_VALID: u8 = 1 << 0;
-pub const STATUS_OUTPUT_ACTIVE: u8 = 1 << 1;
-pub const STATUS_FAULT: u8 = 1 << 3;
+pub const STATUS_CALIBRATION_VALID: u32 = 1 << 0;
+pub const STATUS_OUTPUT_ACTIVE: u32 = 1 << 1;
+pub const STATUS_FAULT: u32 = 1 << 3;
 
 pub struct ControlRegister<O: OutputBackend> {
     output: O,
@@ -42,7 +42,7 @@ impl<O: OutputBackend> ControlRegister<O> {
     }
 
     /// Reports calibration, actual backend state and latched fault.
-    pub fn status(&self) -> u8 {
+    pub fn status(&self) -> u32 {
         let mut status = 0;
 
         if self.calibration_valid {

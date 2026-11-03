@@ -79,6 +79,28 @@ fn read_u8(service: &mut RegisterService<FakeOutput>, index: u8) -> u8 {
     response.payload[0]
 }
 
+fn read_status(service: &mut RegisterService<FakeOutput>) -> u32 {
+    let mut output = [0; 4];
+    let response = service
+        .handle(
+            request(Opcode::Read, 1, 4, &[]),
+            &mut output,
+        )
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(
+        response.header,
+        Header {
+            opcode: Opcode::Ack,
+            index: 1,
+            length: 4,
+        },
+    );
+
+    u32::from_le_bytes(response.payload.try_into().unwrap())
+}
+
 fn modify_control(
     service: &mut RegisterService<FakeOutput>,
     opcode: Opcode,
@@ -112,7 +134,7 @@ fn successful_reads_return_ack_with_register_data() {
         &[0x34, 0x12],
     );
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID,
     );
     assert_eq!(read_u8(&mut service, 3), 0);
@@ -153,22 +175,22 @@ fn rejected_requests_return_nack_with_original_index() {
         (
             Opcode::Write,
             1,
-            1,
-            &[0][..],
+            4,
+            &[0; 4][..],
             ErrorCode::UnsupportedAccess,
         ),
         (
             Opcode::Set,
             1,
-            1,
-            &[0][..],
+            4,
+            &[0; 4][..],
             ErrorCode::UnsupportedAccess,
         ),
         (
             Opcode::Clear,
             1,
-            1,
-            &[0][..],
+            4,
+            &[0; 4][..],
             ErrorCode::UnsupportedAccess,
         ),
         (
@@ -181,14 +203,14 @@ fn rejected_requests_return_nack_with_original_index() {
         (
             Opcode::Read,
             1,
-            2,
+            8,
             &[][..],
             ErrorCode::OutOfBounds,
         ),
         (
             Opcode::Read,
             1,
-            1,
+            4,
             &[0][..],
             ErrorCode::InvalidLength,
         ),
@@ -217,7 +239,7 @@ fn rejected_requests_return_nack_with_original_index() {
         );
         assert_eq!(read_u8(&mut service, 3), 0);
         assert_eq!(
-            read_u8(&mut service, 1),
+            read_status(&mut service),
             STATUS_CALIBRATION_VALID,
         );
     }
@@ -287,7 +309,7 @@ fn control_set_and_clear_update_control_and_status() {
     );
     assert_eq!(read_u8(&mut service, 3), OUTPUT_ENABLE);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE,
     );
 
@@ -299,7 +321,7 @@ fn control_set_and_clear_update_control_and_status() {
     );
     assert_eq!(read_u8(&mut service, 3), 0);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID,
     );
 }
@@ -316,14 +338,14 @@ fn control_write_can_enable_and_disable_output() {
     );
     assert_eq!(read_u8(&mut service, 3), OUTPUT_ENABLE);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE,
     );
 
     modify_control(&mut service, Opcode::Write, 0, None);
     assert_eq!(read_u8(&mut service, 3), 0);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID,
     );
 }
@@ -342,7 +364,7 @@ fn reserved_control_bits_return_nack_without_state_change() {
 
         assert_eq!(read_u8(&mut service, 3), 0);
         assert_eq!(
-            read_u8(&mut service, 1),
+            read_status(&mut service),
             STATUS_CALIBRATION_VALID,
         );
     }
@@ -361,7 +383,7 @@ fn enabling_without_calibration_returns_nack() {
     );
 
     assert_eq!(read_u8(&mut service, 3), 0);
-    assert_eq!(read_u8(&mut service, 1), 0);
+    assert_eq!(read_status(&mut service), 0);
 }
 
 #[test]
@@ -379,7 +401,7 @@ fn invalid_initial_targets_do_not_set_fault() {
 
     assert_eq!(read_u8(&mut service, 3), 0);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID,
     );
 }
@@ -407,7 +429,7 @@ fn technical_start_failure_reports_backend_state_and_error() {
 
         assert_eq!(read_u8(&mut service, 3), 0);
         assert_eq!(
-            read_u8(&mut service, 1),
+            read_status(&mut service),
             STATUS_CALIBRATION_VALID | STATUS_FAULT | active,
         );
     }
@@ -442,7 +464,7 @@ fn technical_stop_failure_preserves_control_request() {
 
         assert_eq!(read_u8(&mut service, 3), OUTPUT_ENABLE);
         assert_eq!(
-            read_u8(&mut service, 1),
+            read_status(&mut service),
             STATUS_CALIBRATION_VALID | STATUS_FAULT | active,
         );
     }
@@ -464,7 +486,7 @@ fn later_requests_do_not_clear_latched_fault() {
     // A successful disable request does not clear the fault.
     modify_control(&mut service, Opcode::Write, 0, None);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID | STATUS_FAULT,
     );
 
@@ -519,7 +541,74 @@ fn missing_nack_capacity_prevents_control_change() {
     );
     assert_eq!(read_u8(&mut service, 3), 0);
     assert_eq!(
-        read_u8(&mut service, 1),
+        read_status(&mut service),
         STATUS_CALIBRATION_VALID,
     );
+}
+#[test]
+fn status_register_returns_four_little_endian_bytes() {
+    let mut service = service();
+
+    assert_reply(
+        &mut service,
+        request(Opcode::Read, 1, 4, &[]),
+        Opcode::Ack,
+        &[0x01, 0x00, 0x00, 0x00],
+    );
+
+    modify_control(
+        &mut service,
+        Opcode::Set,
+        OUTPUT_ENABLE,
+        None,
+    );
+
+    assert_reply(
+        &mut service,
+        request(Opcode::Read, 1, 4, &[]),
+        Opcode::Ack,
+        &[0x03, 0x00, 0x00, 0x00],
+    );
+}
+
+#[test]
+fn status_register_rejects_other_read_widths() {
+    for (length, error) in [
+        (0, ErrorCode::InvalidLength),
+        (1, ErrorCode::InvalidLength),
+        (2, ErrorCode::InvalidLength),
+        (3, ErrorCode::InvalidLength),
+        (5, ErrorCode::InvalidLength),
+        (8, ErrorCode::OutOfBounds),
+    ] {
+        let mut service = service();
+
+        // Direct service calls return NACK. The stream parser instead
+        // discards requests with implausible register lengths.
+        assert_reply(
+            &mut service,
+            request(Opcode::Read, 1, length, &[]),
+            Opcode::Nack,
+            &[error as u8],
+        );
+    }
+}
+
+#[test]
+fn status_register_short_response_buffer_preserves_output() {
+    for capacity in 0..4 {
+        let mut service = service();
+        let mut output = [0xA5; 4];
+
+        assert_eq!(
+            service.handle(
+                request(Opcode::Read, 1, 4, &[]),
+                &mut output[..capacity],
+            ),
+            Err(ServiceError::ResponseBufferTooSmall),
+        );
+
+        assert_eq!(output, [0xA5; 4]);
+        assert_eq!(read_u8(&mut service, 3), 0);
+    }
 }

@@ -184,8 +184,8 @@ fn inactive_writes_prepare_single_and_consecutive_targets() {
 
     assert_eq!(targets, expected);
     assert_eq!(
-        scalar(&mut service, 1, 1),
-        u32::from(STATUS_CALIBRATION_VALID),
+        scalar(&mut service, 1, 4),
+        STATUS_CALIBRATION_VALID,
     );
 }
 
@@ -208,8 +208,8 @@ fn active_write_updates_targets_without_disabling_output() {
         [1_234, -5_678]
     );
     assert_eq!(
-        scalar(&mut service, 1, 1),
-        u32::from(STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE),
+        scalar(&mut service, 1, 4),
+        STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE,
     );
 }
 
@@ -245,8 +245,8 @@ fn invalid_angle_rejects_complete_batch() {
                 | if active { STATUS_OUTPUT_ACTIVE } else { 0 };
 
             assert_eq!(
-                scalar(&mut service, 1, 1),
-                u32::from(expected_status),
+                scalar(&mut service, 1, 4),
+                expected_status,
             );
         }
     }
@@ -380,10 +380,8 @@ fn backend_failure_latches_fault_and_blocks_further_target_writes() {
         [0, 0]
     );
     assert_eq!(
-        scalar(&mut service, 1, 1),
-        u32::from(
-            STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE | STATUS_FAULT,
-        ),
+        scalar(&mut service, 1, 4),
+        STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE | STATUS_FAULT,
     );
 
     assert_eq!(

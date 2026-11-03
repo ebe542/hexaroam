@@ -232,7 +232,7 @@ fn idle_poll_services_backend_without_transmitting() {
 fn zero_budgets_still_service_backend_without_transport_access() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
-    transport.feed(&request(Opcode::Read, 1, 1, &[]));
+    transport.feed(&request(Opcode::Read, 1, 4, &[]));
 
     assert_eq!(
         poll(&mut processor, &mut transport, 0, 0),
@@ -249,7 +249,7 @@ fn zero_budgets_still_service_backend_without_transport_access() {
 fn fragmented_read_respects_receive_budget_and_queues_response() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
-    transport.feed(&request(Opcode::Read, 1, 1, &[]));
+    transport.feed(&request(Opcode::Read, 1, 4, &[]));
 
     let first = poll(&mut processor, &mut transport, 3, 20);
     assert_eq!(first.received, 3);
@@ -265,14 +265,14 @@ fn fragmented_read_respects_receive_budget_and_queues_response() {
     assert!(transport.outgoing.is_empty());
 
     let third = poll(&mut processor, &mut transport, 0, 20);
-    assert_eq!(third.transmitted, 9);
+    assert_eq!(third.transmitted, 12);
     assert_eq!(third.received, 0);
     assert!(!processor.response_pending());
 
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
     assert_eq!(trace.services.get(), 3);
 }
@@ -330,7 +330,7 @@ fn pending_response_blocks_reception_without_losing_next_request() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
 
-    transport.feed(&request(Opcode::Read, 1, 1, &[]));
+    transport.feed(&request(Opcode::Read, 1, 4, &[]));
     transport.feed(&request(Opcode::Read, 4, 1, &[]));
 
     let first = poll(&mut processor, &mut transport, 100, 0);
@@ -351,7 +351,7 @@ fn pending_response_blocks_reception_without_losing_next_request() {
     assert_eq!(transport.read_calls, read_calls);
 
     let next = poll(&mut processor, &mut transport, 100, 100);
-    assert_eq!(next.transmitted, 6);
+    assert_eq!(next.transmitted, 9);
     assert_eq!(next.received, 8);
     assert_eq!(next.processed, 1);
     assert!(processor.response_pending());
@@ -359,13 +359,13 @@ fn pending_response_blocks_reception_without_losing_next_request() {
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 
     poll(&mut processor, &mut transport, 0, 100);
 
-    assert_eq!(transport.outgoing.len(), 18);
-    assert_response(&transport.outgoing[9..], 4, &[18]);
+    assert_eq!(transport.outgoing.len(), 21);
+    assert_response(&transport.outgoing[12..], 4, &[18]);
     assert!(!processor.response_pending());
     assert_eq!(trace.services.get(), 5);
 }
@@ -375,7 +375,7 @@ fn transmit_backpressure_preserves_response_and_services_backend() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
 
-    queue_read(&mut processor, &mut transport, 1, 1);
+    queue_read(&mut processor, &mut transport, 1, 4);
     transport
         .write_results
         .push_back(Ok(false));
@@ -397,7 +397,7 @@ fn transmit_backpressure_preserves_response_and_services_backend() {
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
     assert!(!processor.response_pending());
 }
@@ -439,7 +439,7 @@ fn transmit_error_retains_suffix_without_replaying_accepted_byte() {
 fn receive_error_preserves_partial_request_until_caller_decides() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
-    let bytes = request(Opcode::Read, 1, 1, &[]);
+    let bytes = request(Opcode::Read, 1, 4, &[]);
 
     transport.feed(&bytes[..3]);
     transport
@@ -467,7 +467,7 @@ fn receive_error_preserves_partial_request_until_caller_decides() {
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 }
 
@@ -481,7 +481,7 @@ fn corrupt_request_is_ignored_and_following_read_is_processed() {
     corrupt[last] ^= 0x80;
 
     transport.feed(&corrupt);
-    transport.feed(&request(Opcode::Read, 1, 1, &[]));
+    transport.feed(&request(Opcode::Read, 1, 4, &[]));
 
     let progress = poll(&mut processor, &mut transport, 100, 100);
 
@@ -494,7 +494,7 @@ fn corrupt_request_is_ignored_and_following_read_is_processed() {
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 }
 
@@ -511,7 +511,7 @@ fn timeout_discards_incomplete_request_before_new_input() {
     assert_eq!(progress.processed, 0);
 
     processor.on_receive_timeout();
-    transport.feed(&request(Opcode::Read, 1, 1, &[]));
+    transport.feed(&request(Opcode::Read, 1, 4, &[]));
 
     let progress = poll(&mut processor, &mut transport, 100, 100);
     assert_eq!(progress.processed, 1);
@@ -522,7 +522,7 @@ fn timeout_discards_incomplete_request_before_new_input() {
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 }
 
@@ -543,7 +543,7 @@ fn timeout_preserves_complete_buffered_requests_and_pending_responses() {
         .encode(),
     );
 
-    candidate[4..12].copy_from_slice(&request(Opcode::Read, 1, 1, &[]));
+    candidate[4..12].copy_from_slice(&request(Opcode::Read, 1, 4, &[]));
     candidate[12..20].copy_from_slice(&request(Opcode::Read, 4, 1, &[]));
 
     // The last four bytes also form an incomplete SET header.
@@ -571,14 +571,14 @@ fn timeout_preserves_complete_buffered_requests_and_pending_responses() {
 
     // Sending the first response permits the buffered second READ.
     let second = poll(&mut processor, &mut transport, 0, 100);
-    assert_eq!(second.transmitted, 9);
+    assert_eq!(second.transmitted, 12);
     assert_eq!(second.processed, 1);
     assert!(processor.response_pending());
 
     assert_response(
         &transport.outgoing,
         1,
-        &[STATUS_CALIBRATION_VALID],
+        &STATUS_CALIBRATION_VALID.to_le_bytes(),
     );
 
     // Only after complete requests are drained may the incomplete SET
@@ -587,13 +587,13 @@ fn timeout_preserves_complete_buffered_requests_and_pending_responses() {
     assert_eq!(third.transmitted, 9);
     assert_eq!(third.processed, 0);
     assert!(!processor.response_pending());
-    assert_response(&transport.outgoing[9..], 4, &[18]);
+    assert_response(&transport.outgoing[12..], 4, &[18]);
 
     transport.feed(&request(Opcode::Read, 3, 1, &[]));
     poll(&mut processor, &mut transport, 100, 0);
     poll(&mut processor, &mut transport, 0, 100);
 
-    assert_response(&transport.outgoing[18..], 3, &[0]);
+    assert_response(&transport.outgoing[21..], 3, &[0]);
     assert_eq!(trace.starts.get(), 0);
     assert_eq!(trace.writes.get(), 0);
 }

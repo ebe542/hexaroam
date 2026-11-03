@@ -308,6 +308,8 @@ The GP16/GP17 assignment is for the current test setup. Final servo/communicatio
 
 ## UART register request/response test
 
+Current development update: Status now transfers four little-endian bytes. Rebuild and flash the firmware before using the revised suite. On 2026-11-03 the owner confirmed all 21 revised scenarios passing after this width change. The 78 register host tests also passed; full local verification passed 465 tests and all 17 checks; CI for the width change has not yet been reported.
+
 [uart_registers.rs](uart_registers.rs) connects the real UartTransport, FrameProcessor and RegisterService with the test-only [NoServoOutput](support/no_servo_output.rs) backend. It has no calibration or physical servo outputs and reports ProtocolVersion=2, Status=0 and ServoCount=0. Normal Pico firmware is unchanged.
 
 Build with `python tools/dev.py hardware-build` and upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_registers.uf2` in BOOTSEL mode. Remove the GP16-GP17 loopback jumper. Connect GP16/TX to the USB adapter RXD, GP17/RX to adapter TXD, and common GND. Use 3.3 V TTL, 115200 baud, 8N1 and no flow control. In HTerm, use HEX input/display without automatic CR/LF, send each request as one byte sequence and await its reply before sending another. Protocol UART0 carries binary replies only; debug text stays on UART1/GP20. The LED is expected to blink while the loop runs.

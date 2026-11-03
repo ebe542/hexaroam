@@ -142,7 +142,7 @@ def fixture_checks(data: dict) -> list[Step]:
     checks = []
     for name, index, format_string in [
         ("protocol_version", 0x00, "<H"),
-        ("status", 0x01, "<B"),
+        ("status", 0x01, "<I"),  # Status is a four-byte little-endian register.
         ("servo_count", 0x04, "<B"),
     ]:
         payload = struct.pack(format_string, data["fixture"][name])
