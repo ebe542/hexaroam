@@ -4,7 +4,10 @@
 
 mod service;
 
-pub use service::{ErrorCode, REGISTER_REGIONS, RegisterService, ServiceError};
+pub use service::{
+    CalibrationCompletionError, CalibrationSaveResult, ErrorCode,
+    REGISTER_REGIONS, RegisterService, ServiceError,
+};
 
 mod output;
 
@@ -30,6 +33,10 @@ pub use frame_processor::{
     FrameProcessingError, FrameProcessor, FrameProgress,
 };
 
+mod pending_calibration;
+
+pub use pending_calibration::{PendingCalibration, PendingCalibrationError};
+
 #[cfg(test)]
 mod test_support;
 
@@ -41,3 +48,6 @@ mod test_targets;
 
 #[cfg(test)]
 mod test_servo_bank_backend;
+
+#[cfg(test)]
+mod test_calibration_request;

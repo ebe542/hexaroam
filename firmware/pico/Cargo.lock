@@ -422,6 +422,7 @@ dependencies = [
  "hexaroam-servo-control",
  "hexaroam-servo-protocol",
  "hexaroam-servo-signal",
+ "hexaroam-servo-storage",
 ]
 
 [[package]]

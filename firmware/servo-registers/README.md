@@ -1,6 +1,6 @@
 # Servo register service
 
-Current development change: Status now transfers four little-endian bytes. Bits 8..15 are reserved for the result of the last longer operation; Busy and result handling are not implemented. On 2026-11-03 the owner confirmed all 78 register host tests and all 21 revised UART hardware scenarios passing. Full local verification passed 465 tests and all 17 checks; CI for the width change has not yet been reported; older totals below predate it.
+Current development status (2026-11-03): calibration WRITE at 0x10 now validates and owns a complete eighteen-servo dataset in RAM. A pending request sets Busy; completion records its result and releases the request. The owner confirmed all 12 request tests and full local verification with **489 tests and all 17 checks passing** (102 register-package tests in total). Physical ACK-completion gating, journal scheduling and restart integration remain future work. No hardware calibration-transfer run or CI result is claimed for this change. The preceding four-byte Status revision passed its UART suite and CI.
 
 Hardware-independent no_std register handling above [servo-protocol](../servo-protocol/README.md). RegisterService consumes CRC-checked ParsedFrame values and returns ACK/NACK frames borrowing caller-provided payload storage. The frame codec adds header/CRC bytes; this package does not directly access UART hardware or flash. See the [version-2 contract](../../docs/servo-register-protocol.md).
 
@@ -13,6 +13,7 @@ Hardware-independent no_std register handling above [servo-protocol](../servo-pr
 | 0x02 | Unassigned; reserved for future restart reason | — | None |
 | 0x03 | Control | 1 | READ, WRITE, SET, CLR |
 | 0x04 | Servo count | 1 | READ |
+| 0x10 | Complete calibration request | 368 | WRITE; READ/SET/CLR rejected |
 | 0x20..0x31 | Target angles for servo IDs 0..17 | 4 per servo | READ, WRITE |
 
 REGISTER_REGIONS supplies parser configuration. The service independently revalidates access and payload size before indexed reads or side effects. Successful READ returns ACK with data; successful WRITE/SET/CLR returns an empty ACK. Errors return NACK with the original index and one error byte. LastError was removed. The current handle signature retains Option<Frame>, but every handled request produces a response unless a local ServiceError occurs.
@@ -23,7 +24,7 @@ The stream parser discards unknown indices and implausible lengths before dispat
 
 ControlRegister owns an OutputBackend. Control bit 0 is OUTPUT_ENABLE; reserved bits are rejected even for CLR. WRITE replaces Control, SET applies OR and CLR clears selected bits. Enable requires calibration and no Fault. Backend InvalidTargets rejects startup without a technical fault; technical start/stop errors latch Fault and preserve accepted Control values. Repeated enable/disable avoids redundant calls. Disable remains possible in Fault but does not clear it.
 
-Status reports CALIBRATION_VALID at bit 0, actual OUTPUT_ACTIVE at bit 1 and latched FAULT at bit 3. It reports logical backend state, not measured position or servo power. Calibration validity is supplied at construction. Busy, action results, restart reason, restart and calibration transfer are not implemented.
+Status reports CALIBRATION_VALID at bit 0, actual OUTPUT_ACTIVE at bit 1 and latched FAULT at bit 3. It reports logical backend state, not measured position or servo power. Calibration validity is supplied at construction. Busy is bit 2; bits 8..15 report the calibration-save result. Restart reason and restart remain unimplemented; calibration transfer is accepted into RAM but does not yet write flash.
 
 ## Target-angle registers
 
@@ -38,6 +39,26 @@ RegisterService decodes the whole batch before one backend call and stages compl
 [servo_bank_backend.rs](src/servo_bank_backend.rs) implements OutputBackend directly for ServoBank<O, N> when O implements PulseBankLifecycle, without another target store or cached output state. Start delegates to start_prepared; missing/invalid targets become InvalidTargets. Lifecycle and submission errors retain their types in ServoBankBackendError. Stop retains accepted targets; state uses the backend's confirmed logical state.
 
 Unknown and uninitialized targets remain distinct errors. Uninitialized access maps to InvalidState without latching Fault. Inactive writes call prepare_targets; active writes call set_targets. service forwards through ControlRegister and OutputBackend to ServoBank::service and must remain reachable independently of incoming requests. Automatic zero-degree initialization and asynchronous fault recovery are not added.
+
+## Pending calibration data
+
+[PendingCalibration<N>](src/pending_calibration.rs) calls servo-storage::decode with the caller's Checksum implementation, preserving FormatError details. It then rejects the first missing ServoId in ascending order. Success owns the decoded array in RAM, independently of the receive buffer, and exposes only an immutable reference matching journal append's existing calibration argument. No flash access, journal slot/sequence selection, output changes or Busy transitions occur here.
+
+The twelve tests in [test_pending_calibration.rs](src/test_pending_calibration.rs) cover distinct calibrations including reversed pulse direction, arbitrary input order, ownership after input overwrite/drop, every missing servo, empty data, duplicate/unknown IDs, magic, lengths, CRC, invalid calibration values and a complete eighteen-servo set. The owner observed 12 failing tests before implementation, followed by all 12 passing. Completeness is relative to the const-generic N selected by the caller; this type does not choose the configured servo count.
+
+## Calibration request acceptance and completion
+
+Register 0x10 accepts exactly 368 payload bytes: the existing four-byte format header, eighteen 20-byte entries and inner CRC32. The outer protocol CRC remains separate. Unknown indices and implausible lengths are still discarded by the stream parser; direct service calls can return InvalidLength NACK. A shorter partial calibration does not reach the wire service for an InvalidValue reply. The register map permits READ for structural plausibility, but the service rejects calibration READ, SET and CLR with UnsupportedAccess.
+
+Acceptance requires inactive actual output and no pending request. Busy or active output returns InvalidState; invalid format, dataset CRC, duplicate/missing IDs or invalid calibration values return InvalidValue when the frame length is plausible. The service reserves NACK response capacity before accepting anything. It decodes with SoftwareCrc32 through PendingCalibration's Checksum interface; the RAM type itself remains checksum-adapter independent.
+
+Success installs the owned PendingCalibration<18>, resets the prior completion result and returns an empty ACK. Busy is derived from the presence of that request rather than a second mutable flag. Completeness currently uses the fixed eighteen-servo firmware capacity, not the active ServoCount, which may be zero before loading calibration. It does not update active calibration or ServoCount.
+
+While Busy, otherwise valid modifying requests are rejected before target-count or backend processing. Ordinary READ operations remain available. Invalid requests do not replace the pending data or prior operation result. pending_calibration() returns an immutable reference without changing Busy. complete_calibration(result) records the result before removing the request; a call without a request returns NoPendingCalibration without changing state. After either success or failure the request is released; retry requires submitting a new complete dataset.
+
+Status bits 8..15 use 0=None, 1=Success, 2=StorageError and 3=VerificationFailed. None is reported initially and after accepting a new request. The result persists after completion; rejected requests do not overwrite it. Fault remains an independent output-status bit.
+
+This step does not write flash. The program loop must later wait for the ACK to finish physically on UART before invoking the journal writer. RegisterService exposes request and completion methods, but forwarding them through FrameProcessor and coordinating transport completion are still future work. An available pending request alone is not a write authorization.
 
 ## Frame processing over a byte transport
 
@@ -56,7 +77,7 @@ Complete buffered requests are drained before an incomplete remainder is discard
 | [frame_processor.rs](src/frame_processor.rs) | Bounded protocol processing |
 | [test_support.rs](src/test_support.rs) | Shared host-test backend |
 
-The current 75 tests cover 16 service cases, 16 control cases, 8 target cases, 12 ServoBank cases, 11 wire-pipeline cases and 12 FrameProcessor cases. Pipeline tests check CRC, discarded headers, NACK errors, order, atomic target rejection and timeout recovery. Processor tests preserve budget, backpressure, retry and deferred-timeout coverage, including separate WRITE ACK and full-target READ responses.
+The current 102 register-package tests comprise 16 control, 19 service, 8 target, 12 ServoBank, 11 wire-pipeline, 12 FrameProcessor, 12 pending-calibration and 12 calibration-request cases. New request tests exercise state guards, immutable RAM ownership, read availability during Busy, atomic rejection, response capacity, completion and result retention. Physical UART timing and flash execution are separate checks.
 
 From the repository root:
 

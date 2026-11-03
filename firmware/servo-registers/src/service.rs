@@ -1,12 +1,22 @@
 use crate::{ControlRegister, OutputBackend};
+use crate::{PendingCalibration, STATUS_OUTPUT_ACTIVE};
 use hexaroam_servo_control::{Angle, ServoId, ServoTarget};
 use hexaroam_servo_protocol::{
     Access, Frame, Header, Opcode, ParsedFrame, RegisterRegion,
     ValidationError, validate_header,
 };
+use hexaroam_servo_storage::SoftwareCrc32;
+
+const CALIBRATION_INDEX: u8 = 0x10;
+
+// Serialized format: 4-byte header + 18 entries of 20 bytes + CRC32.
+const CALIBRATION_BYTES: u16 = 4 + 18 * 20 + 4;
+
+const STATUS_BUSY: u32 = 1 << 2;
+const RESULT_SHIFT: u32 = 8;
 
 /// Fixed registers and the current eighteen-servo target region.
-pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
+pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
     RegisterRegion {
         first_index: 0,
         entries: 1,
@@ -30,6 +40,12 @@ pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
         entries: 1,
         bytes_per_entry: 1,
         access: Access::ReadOnly,
+    },
+    RegisterRegion {
+        first_index: CALIBRATION_INDEX,
+        entries: 1,
+        bytes_per_entry: CALIBRATION_BYTES,
+        access: Access::ReadWrite,
     },
     RegisterRegion {
         first_index: 0x20,
@@ -58,11 +74,25 @@ pub enum ServiceError {
     ResponseBufferTooSmall,
     InvalidMap,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum CalibrationSaveResult {
+    Success = 1,
+    StorageError = 2,
+    VerificationFailed = 3,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CalibrationCompletionError {
+    NoPendingCalibration,
+}
 
 pub struct RegisterService<O: OutputBackend> {
     protocol_version: u16,
     servo_count: u8,
     control: ControlRegister<O>,
+    pending_calibration: Option<PendingCalibration<18>>,
+    calibration_result: Option<CalibrationSaveResult>,
 }
 
 impl<O: OutputBackend> RegisterService<O> {
@@ -76,6 +106,8 @@ impl<O: OutputBackend> RegisterService<O> {
             protocol_version,
             servo_count,
             control: ControlRegister::new(output, calibration_valid),
+            pending_calibration: None,
+            calibration_result: None,
         }
     }
 
@@ -124,6 +156,24 @@ impl<O: OutputBackend> RegisterService<O> {
             if payload.len() != expected_payload_length {
                 failure = Some(ErrorCode::InvalidLength);
             }
+        }
+
+        // Pending ownership is the source of truth for Busy. Reject changes
+        // before target-count checks or backend calls can have any effect.
+        if failure.is_none()
+            && header.opcode != Opcode::Read
+            && self.pending_calibration.is_some()
+        {
+            failure = Some(ErrorCode::InvalidState);
+        }
+
+        // The map permits READ for structural plausibility checks, but
+        // calibration readback is not part of this implementation step.
+        if failure.is_none()
+            && header.opcode == Opcode::Read
+            && header.index == CALIBRATION_INDEX
+        {
+            failure = Some(ErrorCode::UnsupportedAccess);
         }
 
         if failure.is_none() && (0x20..=0x31).contains(&header.index) {
@@ -243,6 +293,26 @@ impl<O: OutputBackend> RegisterService<O> {
 
             let result = if let Some(error) = failure {
                 Err(error)
+            } else if header.index == CALIBRATION_INDEX {
+                if header.opcode != Opcode::Write {
+                    Err(ErrorCode::UnsupportedAccess)
+                } else if self.control.status() & STATUS_OUTPUT_ACTIVE != 0 {
+                    Err(ErrorCode::InvalidState)
+                } else {
+                    match PendingCalibration::<18>::from_bytes(
+                        payload,
+                        &mut SoftwareCrc32,
+                    ) {
+                        Ok(pending) => {
+                            // Publish the complete validated request only.
+                            // Active calibration and ServoCount stay unchanged.
+                            self.calibration_result = None;
+                            self.pending_calibration = Some(pending);
+                            Ok(())
+                        }
+                        Err(_) => Err(ErrorCode::InvalidValue),
+                    }
+                }
             } else if header.index == 3 {
                 self.control
                     .apply(header.opcode, payload[0])
@@ -280,7 +350,7 @@ impl<O: OutputBackend> RegisterService<O> {
         } else {
             match header.index {
                 0 => (0, u32::from(self.protocol_version), 2),
-                1 => (1, self.control.status(), 4),
+                1 => (1, self.status(), 4),
                 3 => (3, u32::from(self.control.value()), 1),
                 4 => (4, u32::from(self.servo_count), 1),
 
@@ -290,8 +360,7 @@ impl<O: OutputBackend> RegisterService<O> {
             }
         };
 
-        // Do not change LastError or the output buffer if the caller
-        // failed to provide enough space for the response.
+        // Preserve the caller's buffer if response capacity is insufficient.
         if output.len() < width {
             return Err(ServiceError::ResponseBufferTooSmall);
         }
@@ -313,11 +382,51 @@ impl<O: OutputBackend> RegisterService<O> {
         }))
     }
 
+    fn status(&self) -> u32 {
+        let busy = if self.pending_calibration.is_some() {
+            STATUS_BUSY
+        } else {
+            0
+        };
+        let result = self
+            .calibration_result
+            .map_or(0, |result| {
+                (result as u32) << RESULT_SHIFT
+            });
+
+        self.control.status() | busy | result
+    }
+
     /// Services output independently of incoming register requests.
     ///
     /// The application loop must call this regularly.
     pub fn service(&mut self) {
         self.control.service();
+    }
+
+    /// Borrows the accepted request without clearing Busy.
+    ///
+    /// Presence does not imply that its ACK has finished transmission.
+    pub fn pending_calibration(&self) -> Option<&PendingCalibration<18>> {
+        self.pending_calibration.as_ref()
+    }
+
+    /// Records completion, releases the request and clears Busy.
+    ///
+    /// This does not replace the active calibration.
+    pub fn complete_calibration(
+        &mut self,
+        result: CalibrationSaveResult,
+    ) -> Result<(), CalibrationCompletionError> {
+        if self.pending_calibration.is_none() {
+            return Err(CalibrationCompletionError::NoPendingCalibration);
+        }
+
+        // Publish the result before releasing the request and clearing Busy.
+        self.calibration_result = Some(result);
+        self.pending_calibration = None;
+
+        Ok(())
     }
 }
 

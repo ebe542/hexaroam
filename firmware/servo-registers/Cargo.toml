@@ -8,6 +8,4 @@ license = "MIT"
 hexaroam-servo-control = { path = "../servo-control" }
 hexaroam-servo-protocol = { path = "../servo-protocol" }
 hexaroam-servo-signal = { path = "../servo-signal" }
-
-[dev-dependencies]
 hexaroam-servo-storage = { path = "../servo-storage" }

@@ -1,6 +1,6 @@
 # Servo register protocol — version 2
 
-Current development change: Status now transfers four little-endian bytes. Bits 8..15 are reserved for the result of the last longer operation; Busy and result handling are not implemented. On 2026-11-03 the owner confirmed all 78 register host tests and all 21 revised UART hardware scenarios passing. Full local verification passed 465 tests and all 17 checks; CI for the width change has not yet been reported; older totals below predate it.
+Current development status (2026-11-03): calibration WRITE at 0x10 now validates and owns a complete eighteen-servo dataset in RAM. A pending request sets Busy; completion records its result and releases the request. The owner confirmed all 12 request tests and full local verification with **489 tests and all 17 checks passing** (102 register-package tests in total). Physical ACK-completion gating, journal scheduling and restart integration remain future work. No hardware calibration-transfer run or CI result is claimed for this change. The preceding four-byte Status revision passed its UART suite and CI.
 
 Current development contract, updated 2026-11-03. ProtocolVersion is **2**, independent of the Cargo package and firmware versions. This revision replaces version-1 READ replies and LastError with ACK/NACK. It is not a released compatibility promise.
 
@@ -12,7 +12,7 @@ The concrete hardware-test path is PC -> UART0 -> UartTransport -> FrameProcesso
 
 ## Internal memory versus wire representation
 
-Register indices are logical u8 values, not raw addresses. Internal alignment does not dictate wire widths. Header fields and multi-byte data use little endian. Target angles are signed i32 centidegrees; errors are u8. Fixed registers use the explicit widths below. Status is u32 and transfers exactly four little-endian bytes; Busy and action-result semantics are not implemented yet.
+Register indices are logical u8 values, not raw addresses. Internal alignment does not dictate wire widths. Header fields and multi-byte data use little endian. Target angles are signed i32 centidegrees; errors are u8. Fixed registers use the explicit widths below. Status is u32 and transfers exactly four little-endian bytes; Busy and calibration-save result semantics are implemented in the register service.
 
 ## Working register map
 
@@ -23,7 +23,7 @@ Register indices are logical u8 values, not raw addresses. Internal alignment do
 | 0x02 | Unassigned; reserved for future restart reason | — | None |
 | 0x03 | Control | 1 | READ, WRITE, SET, CLR |
 | 0x04 | ServoCount | 1 | READ |
-| 0x10 | Planned complete calibration block; not implemented | — | Not yet available |
+| 0x10 | Complete eighteen-servo calibration request | 368 | WRITE; READ/SET/CLR rejected |
 | 0x20..0x31 | Target angles, servo IDs 0..17 | 4 per entry | READ, WRITE |
 
 The map describes capacity for eighteen targets; the service also enforces its configured servo count. The UART no-servo fixture reports zero. Broader capacities and final GPIO assignments remain future configuration work. No zero-degree defaults are imposed on the real ServoBank: required targets must be prepared before startup.
@@ -77,7 +77,7 @@ Caller-side response-buffer errors are ServiceError rather than wire NACKs. Modi
 
 Only Control bit 0 (OUTPUT_ENABLE) is implemented. WRITE replaces the value, SET applies OR and CLR clears bits. Reserved bits are rejected even when clearing them would have no effect. Enable requires valid calibration and no latched Fault. Disable remains possible in Fault and does not clear it.
 
-Current Status bits are CALIBRATION_VALID=0, OUTPUT_ACTIVE=1 and FAULT=3. Bit 2 is reserved for future Busy. Status reports actual backend logical state, including after an error, rather than measured position or power. Invalid angles and incomplete targets do not set a technical Fault; backend failures latch Fault and preserve accepted control/target values as specified by the backend contract.
+Current Status bits are CALIBRATION_VALID=0, OUTPUT_ACTIVE=1 and FAULT=3. Bit 2 is Busy while a calibration request is pending. Bits 8..15 contain its completion result. Status reports actual backend logical state, including after an error, rather than measured position or power. Invalid angles and incomplete targets do not set a technical Fault; backend failures latch Fault and preserve accepted control/target values as specified by the backend contract.
 
 Target reads return accepted backend values. Inactive writes prepare targets; active writes submit an atomic complete candidate batch. Omitted targets retain their accepted values. No partial batch is accepted if a value fails validation. A successful ACK does not guarantee that a pending signal plan is already active.
 
@@ -95,15 +95,31 @@ ByteTransport is nonblocking. try_read returns a byte or None; try_write returns
 
 ResponseBuffer owns one copied encoded frame. FrameProcessor services the output backend every poll, drains pending responses using a byte budget, then processes complete requests when response storage is available. Every service-produced ACK/NACK is queued before more requests are consumed. A newly queued response is transmitted on a later poll. Deferred timeouts preserve complete buffered requests and pending responses.
 
-## Planned longer operations — not implemented
+## Calibration request acceptance and completion
 
-Calibration transfer will accept a complete validated dataset only while output is inactive and Busy is clear. After buffering, Busy is set and ACK is sent. Flash writing starts only after physical UART completion of that ACK. Completion records an action result before clearing Busy. Rejected requests must not overwrite the retained result of a longer action. Status polling remains the intended completion mechanism; flash access can temporarily pause processing.
+Register 0x10 accepts exactly 368 payload bytes: the existing four-byte format header, eighteen 20-byte entries and inner CRC32. The outer protocol CRC remains separate. Unknown indices and implausible lengths are still discarded by the stream parser; direct service calls can return InvalidLength NACK. A shorter partial calibration does not reach the wire service for an InvalidValue reply. The register map permits READ for structural plausibility, but the service rejects calibration READ, SET and CLR with UnsupportedAccess.
 
-The master will explicitly request restart after confirming successful persistence. Restart will require inactive output and no Busy; its ACK must finish on the wire before reset. Boot loads and validates calibration, leaving outputs inactive. A hardware watchdog is planned to reset a stalled main loop; its deadline must cover legitimate flash operations. Restart reason, action-result fields, Busy, restart control and watchdog integration are not implemented in this revision.
+Acceptance requires inactive actual output and no pending request. Busy or active output returns InvalidState; invalid format, dataset CRC, duplicate/missing IDs or invalid calibration values return InvalidValue when the frame length is plausible. The service reserves NACK response capacity before accepting anything. It decodes with SoftwareCrc32 through PendingCalibration's Checksum interface; the RAM type itself remains checksum-adapter independent.
+
+Success installs the owned PendingCalibration<18>, resets the prior completion result and returns an empty ACK. Busy is derived from the presence of that request rather than a second mutable flag. Completeness currently uses the fixed eighteen-servo firmware capacity, not the active ServoCount, which may be zero before loading calibration. It does not update active calibration or ServoCount.
+
+While Busy, otherwise valid modifying requests are rejected before target-count or backend processing. Ordinary READ operations remain available. Invalid requests do not replace the pending data or prior operation result. pending_calibration() returns an immutable reference without changing Busy. complete_calibration(result) records the result before removing the request; a call without a request returns NoPendingCalibration without changing state. After either success or failure the request is released; retry requires submitting a new complete dataset.
+
+Status bits 8..15 use 0=None, 1=Success, 2=StorageError and 3=VerificationFailed. None is reported initially and after accepting a new request. The result persists after completion; rejected requests do not overwrite it. Fault remains an independent output-status bit.
+
+This step does not write flash. The program loop must later wait for the ACK to finish physically on UART before invoking the journal writer. RegisterService exposes request and completion methods, but forwarding them through FrameProcessor and coordinating transport completion are still future work. An available pending request alone is not a write authorization.
+
+## Planned persistence scheduling and restart — not implemented
+
+Calibration request acceptance and Busy/result handling are implemented as described above. The future loop will send the queued ACK before starting persistence. Flash writing starts only after physical UART completion of that ACK. Completion records an action result before clearing Busy. Rejected requests must not overwrite the retained result of a longer action. Status polling remains the intended completion mechanism; flash access can temporarily pause processing.
+
+The master will explicitly request restart after confirming successful persistence. Restart will require inactive output and no Busy; its ACK must finish on the wire before reset. Boot loads and validates calibration, leaving outputs inactive. A hardware watchdog is planned to reset a stalled main loop; its deadline must cover legitimate flash operations. Restart reason, restart control and watchdog integration are not implemented in this revision.
 
 Calibration remains an off-robot procedure. Protocol persistence does not measure angles or prove correct assembly. Board IDs, mandatory authentication, custom USB firmware updates and partial calibration writes are outside the current design. Current register widths and missing regions must not be mistaken for implemented planned features.
 
 ## Verification record and limits
+
+The current RAM-request step passed 489 local tests and all 17 checks as recorded above; no hardware calibration transfer or CI result is claimed yet. The following counts describe earlier protocol revisions.
 
 On 2026-11-03 the owner reported **82 protocol host tests**, **75 register host tests**, and full local verification with **462 passed, 0 failed; all 17 checks passed**. The owner also reported **21 passing UART hardware scenarios** for protocol version 2. See [current vectors and suite](uart-register-test-vectors.md) and the [hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).
 
