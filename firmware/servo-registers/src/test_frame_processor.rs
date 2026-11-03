@@ -180,7 +180,7 @@ fn assert_response(bytes: &[u8], index: u8, payload: &[u8]) {
     assert_eq!(
         frame.header,
         Header {
-            opcode: Opcode::Read,
+            opcode: Opcode::Ack,
             index,
             length: payload.len() as u16,
         },
@@ -278,7 +278,7 @@ fn fragmented_read_respects_receive_budget_and_queues_response() {
 }
 
 #[test]
-fn write_then_read_preserves_request_order_without_write_reply() {
+fn write_then_read_preserves_request_and_response_order() {
     let (mut processor, trace) = processor();
     let mut transport = TestTransport::default();
 
@@ -294,19 +294,35 @@ fn write_then_read_preserves_request_order_without_write_reply() {
     ));
     transport.feed(&request(Opcode::Read, 0x20, 8, &[]));
 
-    let progress = poll(&mut processor, &mut transport, 100, 100);
-
-    assert_eq!(progress.received, 24);
-    assert_eq!(progress.processed, 2);
-    assert_eq!(progress.transmitted, 0);
+    // The WRITE queues its ACK before the following READ is consumed.
+    let first = poll(&mut processor, &mut transport, 100, 100);
+    assert_eq!(first.received, 16);
+    assert_eq!(first.processed, 1);
+    assert_eq!(first.transmitted, 0);
+    assert_eq!(transport.incoming.len(), 8);
     assert_eq!(trace.writes.get(), 1);
     assert_eq!(trace.starts.get(), 0);
+    assert!(processor.response_pending());
     assert!(transport.outgoing.is_empty());
 
-    poll(&mut processor, &mut transport, 0, 100);
+    // Complete the write ACK, then process and queue the read response.
+    let second = poll(&mut processor, &mut transport, 100, 100);
+    assert_eq!(second.transmitted, 8);
+    assert_eq!(second.received, 8);
+    assert_eq!(second.processed, 1);
+    assert!(processor.response_pending());
+    assert_response(&transport.outgoing, 0x20, &[]);
 
-    assert_response(&transport.outgoing, 0x20, &targets);
+    let third = poll(&mut processor, &mut transport, 0, 100);
+    assert_eq!(third.transmitted, 16);
+    assert_eq!(third.received, 0);
+    assert_eq!(third.processed, 0);
+    assert_eq!(transport.outgoing.len(), 24);
+    assert_response(&transport.outgoing[..8], 0x20, &[]);
+    assert_response(&transport.outgoing[8..], 0x20, &targets);
     assert!(!processor.response_pending());
+    assert_eq!(trace.writes.get(), 1);
+    assert_eq!(trace.services.get(), 3);
 }
 
 #[test]
@@ -604,10 +620,11 @@ fn full_target_response_survives_small_receive_and_transmit_budgets() {
     let mut received = 0;
     let mut processed = 0;
 
+    // Receive the complete WRITE in small chunks. Its ACK blocks the READ.
     for _ in 0..32 {
         let progress = poll(&mut processor, &mut transport, 7, 0);
         assert!(progress.received <= 7);
-
+        assert_eq!(progress.transmitted, 0);
         received += progress.received;
         processed += progress.processed;
 
@@ -617,19 +634,54 @@ fn full_target_response_survives_small_receive_and_transmit_budgets() {
     }
 
     assert!(processor.response_pending());
-    assert_eq!(received, 88);
-    assert_eq!(processed, 2);
+    assert_eq!(received, 80);
+    assert_eq!(processed, 1);
+    assert_eq!(transport.incoming.len(), 8);
     assert_eq!(trace.writes.get(), 1);
     assert_eq!(trace.starts.get(), 0);
     assert!(transport.outgoing.is_empty());
 
-    let mut transmitted = 0;
+    // Drain the eight-byte ACK without receiving the next request.
+    let mut ack_transmitted = 0;
+    for _ in 0..2 {
+        let progress = poll(&mut processor, &mut transport, 0, 7);
+        assert_eq!(progress.received, 0);
+        assert_eq!(progress.processed, 0);
+        assert!(progress.transmitted <= 7);
+        ack_transmitted += progress.transmitted;
+        if !processor.response_pending() {
+            break;
+        }
+    }
+    assert_eq!(ack_transmitted, 8);
+    assert!(!processor.response_pending());
+    assert_response(&transport.outgoing, 0x20, &[]);
+    assert_eq!(transport.incoming.len(), 8);
 
+    // Receive the READ using the same small receive budget.
+    for _ in 0..2 {
+        let progress = poll(&mut processor, &mut transport, 7, 0);
+        assert!(progress.received <= 7);
+        assert_eq!(progress.transmitted, 0);
+        received += progress.received;
+        processed += progress.processed;
+        if processor.response_pending() {
+            break;
+        }
+    }
+    assert_eq!(received, 88);
+    assert_eq!(processed, 2);
+    assert!(processor.response_pending());
+    assert!(transport.incoming.is_empty());
+    assert_eq!(transport.outgoing.len(), 8);
+
+    let mut transmitted = 0;
     for _ in 0..32 {
         let progress = poll(&mut processor, &mut transport, 0, 7);
         assert!(progress.transmitted <= 7);
+        assert_eq!(progress.received, 0);
+        assert_eq!(progress.processed, 0);
         transmitted += progress.transmitted;
-
         if !processor.response_pending() {
             break;
         }
@@ -637,5 +689,9 @@ fn full_target_response_survives_small_receive_and_transmit_budgets() {
 
     assert!(!processor.response_pending());
     assert_eq!(transmitted, 80);
-    assert_response(&transport.outgoing, 0x20, &payload);
+    assert_eq!(transport.outgoing.len(), 88);
+    assert_response(&transport.outgoing[..8], 0x20, &[]);
+    assert_response(&transport.outgoing[8..], 0x20, &payload);
+    assert_eq!(trace.writes.get(), 1);
+    assert_eq!(trace.starts.get(), 0);
 }

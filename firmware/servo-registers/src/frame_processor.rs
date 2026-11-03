@@ -80,15 +80,14 @@ impl<O: OutputBackend> FrameProcessor<O> {
     /// 5. Apply a pending timeout only to the incomplete parser remainder.
     /// 6. Consume at most receive_budget new bytes, processing full requests.
     ///
-    /// READ responses are encoded and queued before processing more input.
+    /// ACK and NACK responses are encoded and queued before processing more input.
     /// A newly queued response is transmitted on a later poll call.
-    /// Modifying requests produce no direct response.
     ///
     /// A transmit error preserves the unsent response suffix.
     /// Receive errors are reported without implicitly clearing the parser.
     ///
     /// Byte budgets limit transport calls, not elapsed processing time.
-    /// The master must wait for a READ response before sending more requests.
+    /// The master must wait for each response before sending another request.
     pub fn poll<T: ByteTransport>(
         &mut self,
         transport: &mut T,
@@ -149,7 +148,7 @@ impl<O: OutputBackend> FrameProcessor<O> {
                     return Ok(progress);
                 }
 
-                // Modifying requests have no direct response.
+                // Continue only if the service did not produce a response.
                 continue;
             }
 

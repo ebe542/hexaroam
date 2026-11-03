@@ -1,5 +1,7 @@
 # Firmware
 
+Current protocol status (2026-11-03): version 2 uses ACK/NACK, with 82 protocol tests, 75 register tests and all 21 no-servo UART scenarios confirmed by the owner. Full local verification passed 462 tests and all 17 checks; CI for this revision has not yet been reported. The dated implementation notes below retain earlier milestones. For current behavior, see the [protocol contract](../docs/servo-register-protocol.md).
+
 Rust firmware for the central Pico and optional future servo-output expansion modules. The current program blinks the onboard LED and generates fixed servo pulses on GP0 and GP1 through one PIO state machine and DMA of Raspberry Pi Pico with RP2040, targeting `thumbv6m-none-eabi`. Operation with an attached servo is not verified.
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
@@ -253,7 +255,7 @@ The [servo-protocol library](servo-protocol/README.md) implements hardware-indep
 
 ## Fixed register service and control
 
-The [servo-registers library](servo-registers/README.md) implements fixed-register READ responses, retained/explicitly cleared LastError, Control WRITE/SET/CLR and backend-derived status. On 2026-10-31 the owner reported 41 passing PC tests, including simulated start/stop errors and persistent Fault. The output contract currently has a test-only backend; normal Pico firmware, target/calibration registers and UART integration remain unchanged or pending. The owner subsequently confirmed all 17 verification checks and all 9 shared documentation checks passing, including the 41 service tests. The owner confirmed green CI for this register-service revision.
+The [servo-registers library](servo-registers/README.md) implements protocol-version-2 ACK/NACK dispatch, Control WRITE/SET/CLR, target batches and backend-derived status. LastError was removed. The direct ServoBank backend and bounded FrameProcessor are host-tested; normal Pico application integration with real servo output and persisted calibration remains pending. See the package guide for the current 75-test breakdown.
 
 ## Register protocol integration tests
 
@@ -309,4 +311,4 @@ The [UART byte transport](pico/src/uart_transport.rs) implements ByteTransport w
 
 ## UART register hardware verification
 
-The owner confirmed [uart_registers](pico/hardware_tests/README.md#uart-register-requestresponse-test) on 2026-11-02: all three Version/Status/ServoCount READ responses matched their expected bytes and CRC in HTerm. The example connects the real UART transport and FrameProcessor to a register service without servo outputs or calibration. Full verification reported 451 tests and all 17 checks passing. UART0 uses GP16/GP17, while diagnostics stay on UART1/GP20. Error/timeout hardware tests and real protocol-driven servo signals remain future work. CI for this revision is pending.
+On 2026-11-03 the owner confirmed all 21 protocol-version-2 [UART register scenarios](pico/hardware_tests/README.md#uart-register-requestresponse-test) on real hardware. The no-servo example uses UART0 GP16/GP17 for binary ACK/NACK, with diagnostics on UART1 GP20. Full local verification passed 462 tests and all 17 checks. CI for the current revision has not yet been reported. Real protocol-driven servo output, calibration transfer and watchdog/restart integration remain future work.

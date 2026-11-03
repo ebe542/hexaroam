@@ -6,7 +6,7 @@ use hexaroam_servo_protocol::{
 };
 
 /// Fixed registers and the current eighteen-servo target region.
-pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
+pub const REGISTER_REGIONS: [RegisterRegion; 5] = [
     RegisterRegion {
         first_index: 0,
         entries: 1,
@@ -18,12 +18,6 @@ pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
         entries: 1,
         bytes_per_entry: 1,
         access: Access::ReadOnly,
-    },
-    RegisterRegion {
-        first_index: 2,
-        entries: 1,
-        bytes_per_entry: 4,
-        access: Access::ReadWrite,
     },
     RegisterRegion {
         first_index: 3,
@@ -46,7 +40,7 @@ pub const REGISTER_REGIONS: [RegisterRegion; 6] = [
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
+#[repr(u8)]
 pub enum ErrorCode {
     None = 0,
     UnknownIndex = 1,
@@ -69,7 +63,6 @@ pub struct RegisterService<O: OutputBackend> {
     protocol_version: u16,
     servo_count: u8,
     control: ControlRegister<O>,
-    last_error: ErrorCode,
 }
 
 impl<O: OutputBackend> RegisterService<O> {
@@ -83,17 +76,14 @@ impl<O: OutputBackend> RegisterService<O> {
             protocol_version,
             servo_count,
             control: ControlRegister::new(output, calibration_valid),
-            last_error: ErrorCode::None,
         }
     }
 
     /// Handles a CRC-checked request.
     ///
-    /// READ returns a response referencing output.
-    /// WRITE/SET/CLR return None, including rejected requests.
-    ///
-    /// Failed requests update LastError; successful accesses preserve it
-    /// except an explicit four-byte WRITE of zero to LastError.
+    /// Every handled request returns an ACK or NACK referencing output.
+    /// Successful reads return data; successful modifications return no payload.
+    /// Rejected requests return one error byte and the original register index.
     ///
     /// Local response-buffer errors leave registers and output unchanged.
     pub fn handle<'out>(
@@ -104,8 +94,7 @@ impl<O: OutputBackend> RegisterService<O> {
         let header = request.frame.header;
         let payload = request.frame.payload;
 
-        // Preserve a parser-reported rejection. Otherwise validate against
-        // this service's own map, protecting its public calling interface.
+        // Preserve the caller's buffer if response capacity is insufficient.
         let validation = request
             .validation
             .and_then(|()| validate_header(&header, &REGISTER_REGIONS));
@@ -179,7 +168,7 @@ impl<O: OutputBackend> RegisterService<O> {
 
                     return Ok(Some(Frame {
                         header: Header {
-                            opcode: Opcode::Read,
+                            opcode: Opcode::Ack,
                             index: header.index,
                             length: header.length,
                         },
@@ -187,7 +176,7 @@ impl<O: OutputBackend> RegisterService<O> {
                     }));
                 }
 
-                // Use the existing canonical LastError response below.
+                // Return a NACK through the common read-response path below.
             } else {
                 // Access validation permits only WRITE for target registers.
                 let mut targets = [ServoTarget {
@@ -211,72 +200,87 @@ impl<O: OutputBackend> RegisterService<O> {
                     };
                 }
 
-                // Submit once, after decoding the complete request.
-                // Calibration validation and atomic acceptance belong
-                // to the backend, not the register service.
-                if let Err(error) = self
-                    .control
-                    .set_targets(&targets[..count])
-                {
-                    self.last_error = error;
+                // Reserve space for a possible NACK before changing output.
+                if output.is_empty() {
+                    return Err(ServiceError::ResponseBufferTooSmall);
                 }
 
-                // Successful writes preserve any previous LastError.
-                // Target writes never produce a direct response.
-                return Ok(None);
+                let result = self
+                    .control
+                    .set_targets(&targets[..count]);
+
+                return match result {
+                    Ok(()) => Ok(Some(Frame {
+                        header: Header {
+                            opcode: Opcode::Ack,
+                            index: header.index,
+                            length: 0,
+                        },
+                        payload: &output[..0],
+                    })),
+                    Err(error) => {
+                        output[0] = error as u8;
+
+                        Ok(Some(Frame {
+                            header: Header {
+                                opcode: Opcode::Nack,
+                                index: header.index,
+                                length: 1,
+                            },
+                            payload: &output[..1],
+                        }))
+                    }
+                };
             }
         }
 
         if header.opcode != Opcode::Read {
-            if let Some(error) = failure {
-                self.last_error = error;
-                return Ok(None);
+            // A failed modifying request needs one byte for its error response.
+            // Check capacity before executing any operation.
+            if output.is_empty() {
+                return Err(ServiceError::ResponseBufferTooSmall);
             }
 
-            if header.index == 3 {
-                // Header and payload validation above guarantee exactly one byte.
-                if let Err(error) = self
-                    .control
+            let result = if let Some(error) = failure {
+                Err(error)
+            } else if header.index == 3 {
+                self.control
                     .apply(header.opcode, payload[0])
-                {
-                    self.last_error = error;
-                }
-
-                // Successful control operations preserve any previous LastError.
-                // WRITE, SET and CLR never produce a direct response.
-                return Ok(None);
-            }
-
-            // Control and target writes were handled above.
-            // The remaining writable register is LastError.
-            if header.opcode != Opcode::Write || header.index != 2 {
-                self.last_error = ErrorCode::UnsupportedAccess;
-                return Ok(None);
-            }
-
-            // Header validation and payload-length validation establish
-            // exactly four bytes before these indexed reads.
-            let value = u32::from_le_bytes([
-                payload[0], payload[1], payload[2], payload[3],
-            ]);
-
-            self.last_error = if value == 0 {
-                ErrorCode::None
             } else {
-                ErrorCode::InvalidValue
+                Err(ErrorCode::UnsupportedAccess)
             };
 
-            return Ok(None);
+            return match result {
+                Ok(()) => Ok(Some(Frame {
+                    header: Header {
+                        opcode: Opcode::Ack,
+                        index: header.index,
+                        length: 0,
+                    },
+                    payload: &output[..0],
+                })),
+                Err(error) => {
+                    output[0] = error as u8;
+
+                    Ok(Some(Frame {
+                        header: Header {
+                            opcode: Opcode::Nack,
+                            index: header.index,
+                            length: 1,
+                        },
+                        payload: &output[..1],
+                    }))
+                }
+            };
         }
 
         let (response_index, value, width) = if let Some(error) = failure {
-            // Canonical error response: READ LastError, four bytes.
-            (2, error as u32, 4_usize)
+            // Report the error against the original requested register.
+            (header.index, error as u32, 1_usize)
         } else {
             match header.index {
                 0 => (0, u32::from(self.protocol_version), 2),
                 1 => (1, u32::from(self.control.status()), 1),
-                2 => (2, self.last_error as u32, 4),
                 3 => (3, u32::from(self.control.value()), 1),
                 4 => (4, u32::from(self.servo_count), 1),
 
@@ -295,13 +299,13 @@ impl<O: OutputBackend> RegisterService<O> {
         let bytes = value.to_le_bytes();
         output[..width].copy_from_slice(&bytes[..width]);
 
-        if let Some(error) = failure {
-            self.last_error = error;
-        }
-
         Ok(Some(Frame {
             header: Header {
-                opcode: Opcode::Read,
+                opcode: if failure.is_some() {
+                    Opcode::Nack
+                } else {
+                    Opcode::Ack
+                },
                 index: response_index,
                 length: width as u16,
             },

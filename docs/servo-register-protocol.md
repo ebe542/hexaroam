@@ -1,224 +1,108 @@
-# Servo register protocol — first draft
+# Servo register protocol — version 2
 
-Status: design draft recorded on 2026-10-30, updated on 2026-10-31; initial framing/validation implementation with 50 owner-reported passing host tests; an initial fixed-register service is host-tested; UART integration remains pending. This document records the agreed direction and identifies remaining choices before implementation. Numeric addresses, wire-field widths and bit assignments below are the current working proposal, not a released compatibility promise.
+Current development contract, updated 2026-11-03. ProtocolVersion is **2**, independent of the Cargo package and firmware versions. This revision replaces version-1 READ replies and LastError with ACK/NACK. It is not a released compatibility promise.
 
 ## Purpose and scope
 
-The servo controller is a subordinate service. One protocol interface handles target angles, status, calibration transfer and invalidation. A separate UART carries diagnostic logs; log text never appears in the protocol stream. The main board initiates all transactions. The servo controller sends only READ responses, including READ error responses; it sends no unsolicited protocol events or WRITE acknowledgements.
+The servo controller is a subordinate service. The master initiates requests; the controller sends responses only, never unsolicited protocol events. Diagnostic logging uses a separate UART. UART is the current transport; the framing and register layers remain hardware-independent. SPI/I2C adapters are not implemented.
 
-Firmware is installed through USB. There is no custom firmware-update protocol, mandatory board serial number, authentication scheme or production provisioning workflow. Correct assembly and a calibration set appropriate to that assembly are assumptions. Format validation and CRC do not identify swapped servos or prove mechanical correctness.
-
-The logical register operations are transport-independent. On 2026-11-01 the owner confirmed UART as the protocol transport after comparing its response behavior with SPI. The controller can send a READ response after processing the complete request; the master bounds its wait with a response timeout. Diagnostic logging remains on a separate UART. Start with 115200 baud, 8N1; a different rate can be selected and verified later. Actual response and incomplete-frame timeout values still need to be defined and measured. SPI/I2C transports are outside the current implementation scope. No transport driver or main-loop changes are part of this decision.
-
-Protocol UART pin allocation must be agreed before hardware integration. The current baseboard assigns GP0..GP17 to eighteen servo signals and UART1 TX/RX to GP20/GP21 for diagnostics. Its remaining expansion pins do not provide a spare complete hardware-UART TX/RX pair. In particular GP18/GP19 are UART0 CTS/RTS, not TX/RX. A second hardware UART therefore requires revising servo pin assignments or another explicit design change. No schematic, wiring or firmware pin assignment is changed by this transport decision.
+The concrete hardware-test path is PC -> UART0 -> UartTransport -> FrameProcessor -> RegisterService -> NoServoOutput. The normal Pico demo does not yet run this protocol service with real servo outputs or journal-loaded calibration.
 
 ## Internal memory versus wire representation
 
-Internal fields and block starts are four-byte aligned. A small logical field may occupy four bytes internally but use fewer bytes on the wire. Internal padding is not transmitted and must not be interpreted as protocol data. The register space is logical: a received address is never a raw CPU/flash pointer and does not grant unrestricted memory access.
-
-The address identifies a field or the start of an allowed array/block access. A descriptor maps it to internal storage and defines permissions, wire width, signedness and length constraints. A universal pointer calculation is not the public protocol contract. A scalar WRITE replaces the complete decoded value rather than preserving unspecified upper bytes.
-
-The first draft uses fixed wire widths per field, not value-dependent Varints or ZigZag. All multibyte integer values are little endian. Angles remain signed i32 centidegrees (hundredths of a degree).
+Register indices are logical u8 values, not raw addresses. Internal alignment does not dictate wire widths. Header fields and multi-byte data use little endian. Target angles are signed i32 centidegrees; errors are u8. Fixed registers currently use the explicit widths below; the planned 32-bit status expansion is not implemented.
 
 ## Working register map
 
-Addresses are logical indices, not byte offsets. The concrete map is subject to final review before freezing test vectors.
+| Index | Register | Current wire bytes | Access |
+| --- | --- | ---: | --- |
+| 0x00 | ProtocolVersion; UART fixture reports 2 | 2 | READ |
+| 0x01 | Status | 1 | READ |
+| 0x02 | Unassigned; reserved for future restart reason | — | None |
+| 0x03 | Control | 1 | READ, WRITE, SET, CLR |
+| 0x04 | ServoCount | 1 | READ |
+| 0x10 | Planned complete calibration block; not implemented | — | Not yet available |
+| 0x20..0x31 | Target angles, servo IDs 0..17 | 4 per entry | READ, WRITE |
 
-| Index | Field / region | Wire representation | Access |
-| --- | --- | --- | --- |
-| 0x00 | ProtocolVersion | 2 bytes; version-number convention to finalize | READ |
-| 0x01 | Status | 1 byte | READ |
-| 0x02 | LastError | 4-byte unsigned error code | READ; WRITE of zero clears |
-| 0x03 | Control | 1 byte | READ, WRITE, SET, CLR |
-| 0x04 | ServoCount | 1 byte | READ |
-| 0x10 | Calibration block start | Complete existing serialized calibration format | READ, complete WRITE |
-| 0x20 + ID | TargetAngle array | 4 bytes per signed angle | READ, WRITE |
-
-For the current eighteen-servo board, target indices are 0x20 through 0x31. A WRITE starting at 0x25 with length 12 updates servos 5, 6 and 7. Length must be positive and divisible by four and the entire access must remain in the configured array. A scalar's length must match its defined wire width exactly. Length zero and cross-region accesses are rejected. Contiguous transfers of mixed scalar fields are not initially supported. SET/CLR apply only to Control, not to angles or calibration bytes.
-
-The existing calibration format is 8 + 20 * ServoCount bytes for a complete set: 368 bytes for eighteen servos. It contains its existing format header and CRC. Reuse it unchanged; the protocol's outer CRC protects opcode, address, length and the complete serialized payload. The journal envelope, sequence number and 512-byte slot padding are internal and are not part of this transferred calibration block. See the [storage format](../firmware/servo-storage/README.md).
-
-Protocol calibration writes require all configured servo IDs exactly once and valid entries. Partial calibration and per-servo invalidation are not exposed. Internally, a newer empty journal record with valid CRC invalidates the entire set; older complete records must not become authoritative again. A stored partial configuration is not sufficient to enable operation.
-
-The no-valid-calibration READ outcome and the final pulse/backend compatibility checks still need a concrete error code definition.
-
-The internal block orders fixed scalar fields first, then the four-byte-aligned calibration region and finally the target-angle array. Logical index 0x10 identifies the whole calibration block: its byte length does not consume following logical indices. Physical internal offsets are separate from protocol indices. The target array is the final logical region and can grow within the u8 index space.
+The map describes capacity for eighteen targets; the service also enforces its configured servo count. The UART no-servo fixture reports zero. Broader capacities and final GPIO assignments remain future configuration work. No zero-degree defaults are imposed on the real ServoBank: required targets must be prepared before startup.
 
 ## Operations and frames
 
-Proposed header fields:
-
-| Field | Bytes | Meaning |
-| --- | ---: | --- |
-| Opcode | 1 | READ=1, WRITE=2, SET=3, CLR=4 |
-| Address | 1 | Logical starting index (u8) |
-| Length | 2 | Payload bytes requested or supplied, not register count |
-
-A four-byte header is followed by payload where applicable and a four-byte CRC-32/ISO-HDLC. CRC covers the header and all payload bytes in wire order, excluding the transmitted CRC itself. The CRC value is transmitted little endian. Reuse the project's existing checksum implementation and standard check vector.
-
 ```text
-READ request:  READ  | Address | Length           | CRC32
-READ response: READ  | Address | Length | Data    | CRC32
-WRITE:         WRITE | Address | Length | Data    | CRC32
-SET:           SET   | Address | Length | Bitmask | CRC32
-CLR:           CLR   | Address | Length | Bitmask | CRC32
+Opcode:u8 | Register:u8 | Length:u16 LE | Payload | CRC32 LE
 ```
 
-All operations share the header. A READ request has no payload, although Length specifies the requested response payload size. A READ response has exactly Length payload bytes. The main-board receiver and controller receiver therefore know their respective frame direction; they cannot infer READ payload presence from the opcode alone. Initial SET/CLR masks are one byte with Length=1.
+| Opcode | Value | Payload |
+| --- | --- | --- |
+| READ | 0x01 | None; Length specifies requested response data |
+| WRITE | 0x02 | Exactly Length bytes |
+| SET | 0x03 | Exactly Length bytes; bitwise OR |
+| CLR | 0x04 | Exactly Length bytes; clear selected bits |
+| ACK | 0x80 | READ data, or empty after a successful modification |
+| NACK | 0x81 | Exactly one error byte; Length=1 |
 
-There is no separate start marker, frame type, request ID, per-frame protocol version or automatic retransmission in this draft. ProtocolVersion is read during connection setup and is separate from firmware version; a stable discovery/framing convention is required. At most one READ transaction is outstanding. The controller processes operations in received order; the master must not mix unrelated requests while awaiting a READ response.
+READ/WRITE/SET/CLR are request-only; ACK/NACK are response-only. ACK and NACK preserve the original requested index. An empty ACK has Length=0. Register permissions do not apply to response parsing: an empty write ACK is valid independently of register width.
 
-READ requests are eight bytes. WRITE/SET/CLR and READ responses are eight bytes plus Length. Eighteen contiguous angles require 72 payload bytes and an 80-byte WRITE. An eighteen-servo calibration WRITE is 376 bytes. These counts are for the proposed header and do not include idle time or UART start/stop bits.
+CRC-32/ISO-HDLC covers the complete header and payload. It is serialized as four little-endian bytes. The reflected polynomial is 0xEDB88320, initial register and final XOR are 0xFFFFFFFF, and the ASCII `123456789` check value is 0xCBF43926. Every calculation starts independently. The implementation receives its checksum function from the caller.
 
-## Replies and LastError
+Maximum payload is 512 bytes; maximum frame is 520 bytes. READ requests and empty ACKs are eight bytes. NACKs are nine bytes. An eighteen-target WRITE is 80 bytes and its success ACK is eight bytes. The frame codec validates size, direction and exact payload length before modifying an output buffer.
 
-Successful READ replies repeat the requested address and length with the selected data. An accepted or rejected WRITE/SET/CLR produces no immediate response. The master can read state or LastError explicitly.
+There is no start marker, request ID or automatic retransmission. The master keeps at most one request outstanding and waits for its response or timeout before retrying. Read ProtocolVersion at connection setup. A version mismatch must not be treated as permission to send version-dependent control requests.
 
-For a valid but rejected READ, the controller records the error and replies with the ordinary LastError address:
+## Replies and errors
 
-```text
-READ | Address(LastError) | 4 | ErrorCode(u32) | CRC32
-```
+Unknown indices and implausible lengths are rejected by the stream parser without a reply. This includes zero lengths, incorrect register-width alignment, ranges crossing a region and requested lengths exceeding the frame cap. The master observes a timeout for these cases.
 
-LastError is a normal register, not an address outside the register space. A master expecting another address recognizes this as an error response. If LastError itself was requested with an invalid length/access, the canonical four-byte error reply still supplies the reason. A valid direct read of LastError uses the same format normally.
+Known indices with plausible lengths are received completely and CRC-checked even if their operation is prohibited. Accepted requests receive ACK; rejected accesses, values or controller states receive NACK. Bad CRC and incomplete frames produce no response. No hardware action is permitted before full frame and semantic validation.
 
-No response means the master's READ transaction eventually times out. Corrupt or incomplete frames do not produce replies, since their opcode/address cannot be trusted. No register action occurs before full frame validation. Whether transport errors should also latch a diagnostic counter/error is still open.
+| Error | Value |
+| --- | ---: |
+| None | 0 |
+| UnknownIndex | 1 |
+| UnsupportedAccess | 2 |
+| InvalidLength | 3 |
+| OutOfBounds | 4 |
+| InvalidValue | 5 |
+| NotConfigured | 6 |
+| InvalidState | 7 |
+| OutputError | 8 |
 
-LastError retains the most recently recorded rejected-operation code. Successful operations and reads do not clear it. WRITE of a four-byte zero clears it; nonzero writes are rejected. LastError does not identify a particular WRITE and is not an exactly-once acknowledgement. Reading an unchanged desired value establishes that the desired state exists, not that a particular preceding write was accepted. The master can clear LastError before a deliberate operation and read it afterwards, but this does not turn CRC failure or a lost WRITE into a positive acknowledgement.
+The direct RegisterService interface revalidates requests, so it can report UnknownIndex or InvalidLength as NACK to a direct caller. Through the stream parser, structurally implausible headers are discarded instead. OutOfBounds still applies to plausible target accesses exceeding the configured count. LastError no longer exists; an ACK reports acceptance, not a measured physical servo position.
 
-An operational FAULT is distinct from LastError; clearing LastError does not recover servo output. Numeric error codes remain to be assigned. Expected categories include invalid address/length/access/state/value, incomplete calibration, busy, storage failure and output failure. The raw numeric reason exposed through a one-byte status summary versus LastError remains to be finalized if needed.
+Caller-side response-buffer errors are ServiceError rather than wire NACKs. Modifying operations reserve one byte of response capacity before executing, so they can report a backend failure without losing its result. A short caller buffer must not cause partial state changes.
 
 ## Control, status and operation rules
 
-Proposed Status bits (controller-owned, read-only):
+Only Control bit 0 (OUTPUT_ENABLE) is implemented. WRITE replaces the value, SET applies OR and CLR clears bits. Reserved bits are rejected even when clearing them would have no effect. Enable requires valid calibration and no latched Fault. Disable remains possible in Fault and does not clear it.
 
-| Bit | Meaning |
-| ---: | --- |
-| 0 | CALIBRATION_VALID |
-| 1 | OUTPUT_ACTIVE |
-| 2 | BUSY |
-| 3 | FAULT |
+Current Status bits are CALIBRATION_VALID=0, OUTPUT_ACTIVE=1 and FAULT=3. Bit 2 is reserved for future Busy. Status reports actual backend logical state, including after an error, rather than measured position or power. Invalid angles and incomplete targets do not set a technical Fault; backend failures latch Fault and preserve accepted control/target values as specified by the backend contract.
 
-Proposed Control bits:
-
-| Bit | Meaning |
-| ---: | --- |
-| 0 | OUTPUT_ENABLE: requested output state |
-| 1 | INVALIDATE_CALIBRATION: one-shot action request |
-
-SET applies `control | mask`; CLR applies `control & !mask`; WRITE requests the complete control value. The resulting request must be permitted by state and reserved-bit rules before any side effect. Simultaneous enable and invalidation is rejected. A running invalidation cannot be cancelled through CLR. Firmware clears the action bit after successful completion; exactly how failure is reflected in this bit is still to be defined. Read-only/reserved bits cannot be changed by the master.
-
-Targets initially default to zero internally, with output disabled. Ready-state writes prepare targets; active-state writes update them. Enabling output validates all configured targets against complete calibration: zero is not guaranteed to be in every servo's valid range. All outputs start as one complete plan. A target block is accepted atomically only after every value is valid and the downstream output accepts the whole candidate. The visible targets are accepted commands, not measured positions or evidence of mechanical movement.
-
-Disabling output returns Active to Ready after successful stop; other inactive states retain their state, and Fault is not cleared. Invalidating first ends output and leaves the operating mode, clears the enable request, then durably appends an empty calibration record. Calibration replacement is permitted only while output is inactive, accepts a complete set into RAM, validates it and persists it using the existing journal/backend. A storage error must not automatically reactivate output. An error return is not a rollback guarantee; reload may be needed to determine durable state.
-
-No valid/complete calibration means no servo signals; the controller stays available for status and configuration requests. A matching configuration can be supplied by the main board. Firmware applies local format, completeness, angle and supported-pulse validation; physical correctness remains an assembly/calibration responsibility.
-
-Boot and service-state transitions, BUSY lifetime, write completion polling, and the previously intended restart after calibration changes require a precise follow-up decision. In particular, polling a BUSY bit cannot work while synchronous flash operations block request processing; the master must allow those operations to finish and refrain from sending data during the XIP-off interval. No timeout duration or timing guarantee is assigned here.
+Target reads return accepted backend values. Inactive writes prepare targets; active writes submit an atomic complete candidate batch. Omitted targets retain their accepted values. No partial batch is accepted if a value fails validation. A successful ACK does not guarantee that a pending signal plan is already active.
 
 ## UART parsing and resynchronization
 
-Known opcode bytes are candidate starts, not unique markers: their values may appear anywhere in binary payloads or CRC. No command may execute just because an opcode or plausible header was seen.
+StreamParser owns a fixed 520-byte buffer. It first checks opcode direction, then request index/length plausibility independently of access permissions. Current regions all support READ, so a synthetic READ header supplies that plausibility check. The original opcode is then checked for access rights. Responses instead use ACK/NACK framing rules without register-map validation.
 
-1. Search for a known opcode.
-2. Collect the fixed header and check opcode/address/access/length plausibility. Impossible candidates are rejected immediately without buffering their claimed payload or calculating a full-frame CRC.
-3. For a plausible header, collect the exact frame size for the receiver's direction. Do not restart at opcode-like payload bytes.
-4. Validate CRC, then apply value/state checks and execute or return a valid READ error.
-5. On header rejection or CRC failure, search remaining buffered bytes and subsequent bytes for another candidate. On timeout, discard the remaining incomplete input after draining available frames. Advance by at least one byte for each rejected candidate so scanning always progresses; retain overlapping possible starts rather than dropping an entire untrusted length.
+Rejected candidates advance one byte, preserving overlapping possible starts. After a CRC error the length cannot be trusted, so the parser searches again rather than dropping a presumed whole frame. Plausibility filtering rejects false candidates such as SET Status with Length=256. A corrupt candidate with a plausible index and length can still delay recovery until timeout; immediate recovery is not guaranteed for arbitrary noise.
 
-Use bounded buffers and length limits before trusting received lengths. Address/range addition must not overflow. A READ for an invalid address/length can be recognized as a complete header-plus-CRC request and checked before producing its error reply; candidate scanning must not emit replies from unvalidated data. For malformed non-READ headers with impossible claimed payload sizes, resynchronize without waiting for those payloads. The implemented parser returns CRC-valid READ requests with their ValidationError where applicable. An oversized requested READ length still needs only an eight-byte request; it cannot cause a large payload allocation. Unsupported response opcodes and implausible non-READ candidates are skipped before payload collection.
+push rejects BufferFull without accepting or overwriting a byte. next_frame returns a borrowed payload; its bytes are retired on the next mutable parser use. Drain complete frames before on_timeout resets an incomplete remainder. Transport error handling and clock/idle detection belong to the caller.
 
-An inter-byte receive timeout discards an incomplete candidate and resets collection; an idle gap is an additional reset aid, not the sole means of recovery. Header plausibility and CRC validation are also required after resynchronization. Pure opcode recognition does not prove alignment. Short but plausible false candidates can temporarily consume bytes; the timeout bounds waiting for an incomplete one. A total-frame timeout can additionally bound a sender that keeps a candidate alive; whether it is needed is open.
+## Byte transport and queued responses
 
-Timeouts are configurable inputs to the parser, not PC sleeps or an embedded timer dependency. Their eventual values must account for byte time, allowable sender gaps and USB/UART buffering. A short PCB connection does not eliminate the need to test resets, truncation and UART overrun/framing errors. No measured reliability claim is made by this draft.
+ByteTransport is nonblocking. try_read returns a byte or None; try_write returns true only for an accepted byte. Backpressure and errors preserve unsent bytes. Acceptance by a UART FIFO does not mean that the final stop bit has left the wire.
 
-## Implementation order and PC tests
+ResponseBuffer owns one copied encoded frame. FrameProcessor services the output backend every poll, drains pending responses using a byte budget, then processes complete requests when response storage is available. Every service-produced ACK/NACK is queued before more requests are consumed. A newly queued response is transmitted on a later poll. Deferred timeouts preserve complete buffered requests and pending responses.
 
-Proceed in small steps after agreeing the remaining constants and codec interfaces:
+## Planned longer operations — not implemented
 
-1. Define frame types, opcode values, maximum sizes, register descriptors and error codes in a hardware-independent no_std Rust component.
-2. Write complete host tests and a matching interface/stubs before filling in the implementation. Use the existing CRC abstraction rather than coupling the codec to a Pico engine.
-3. Implement encoding/decoding and the incremental byte-stream parser; no flash, GPIO or real UART calls.
-4. Separately test register access validation and transactional dispatch against fake state/storage/output.
-5. Only then design the program loop and the UART adapter, including bounded servicing, polling/completion and flash-write flow control.
+Calibration transfer will accept a complete validated dataset only while output is inactive and Busy is clear. After buffering, Busy is set and ACK is sent. Flash writing starts only after physical UART completion of that ACK. Completion records an action result before clearing Busy. Rejected requests must not overwrite the retained result of a longer action. Status polling remains the intended completion mechanism; flash access can temporarily pause processing.
 
-Host-test cases should cover exact wire vectors and sizes; READ request/response distinction; little-endian signed angles; complete calibration payloads; legal/illegal scalar and array lengths; unknown opcodes/indices; range overflow; invalid access; reserved control bits; CRC corruption in header/data/CRC; split frames and back-to-back frames; opcode-like payload bytes; noise prefixes and overlapping candidates; corrupt plausible lengths; truncation and injected timeout; bounded memory and resynchronization to the next valid request; and no dispatch or partial state mutation before validation. Include normal and canonical LastError responses and ensure success does not silently clear a previous error.
+The master will explicitly request restart after confirming successful persistence. Restart will require inactive output and no Busy; its ACK must finish on the wire before reset. Boot loads and validates calibration, leaving outputs inactive. A hardware watchdog is planned to reset a stalled main loop; its deadline must cover legitimate flash operations. Restart reason, action-result fields, Busy, restart control and watchdog integration are not implemented in this revision.
 
-PC tests do not demonstrate physical UART timing, EMI tolerance, flash-operation flow control or hardware-safe stop behavior. Those require later integration and hardware checks.
+Calibration remains an off-robot procedure. Protocol persistence does not measure angles or prove correct assembly. Board IDs, mandatory authentication, custom USB firmware updates and partial calibration writes are outside the current design. Current register widths and missing regions must not be mistaken for implemented planned features.
 
-## Open decisions before freezing version 1
+## Verification record and limits
 
-- Numeric error codes; final concrete register map and protocol-version encoding.
-- Current tests fix a four-byte header, 512-byte payload cap and 520-byte maximum frame; reconsider only if a later supported configuration requires it.
-- Exact read/write permissions and status/control completion behavior in each state.
-- Register-service error responses and transport-error reporting; framing tests cover the CRC-valid rejected-READ path, but no replies or register mutations are implemented yet.
-- Calibration completion/restart/polling and master silence during blocking flash operations.
-- Timeout values, event semantics and handling of delayed READ responses without request IDs.
+On 2026-11-03 the owner reported **82 protocol host tests**, **75 register host tests**, and full local verification with **462 passed, 0 failed; all 17 checks passed**. The owner also reported **21 passing UART hardware scenarios** for protocol version 2. See [current vectors and suite](uart-register-test-vectors.md) and the [hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).
 
-This draft supersedes the earlier proposals for mandatory board IDs, a separate calibration-only service bus, per-command acknowledgements, partial protocol calibration, COBS/start-magic framing and a length expressed as register count. It does not alter the existing journal format, normal firmware, hardware tests or initialization code.
-
-## Implemented framing layer and verification
-
-The [servo-protocol package](../firmware/servo-protocol/README.md) is no_std and has no production dependency on UART, Pico or storage. The CRC function is supplied as `FnMut(&[u8]) -> u32`, with independent CRC-32/ISO-HDLC calculations required per call. Host tests reuse SoftwareCrc32 through a development-only servo-storage dependency. Fixed wire vectors were independently calculated using Python zlib.crc32.
-
-Header handles four-byte encoding/decoding. RegisterRegion describes logical entries and fixed byte widths; Access selects permitted operations. validate_header checks the map, index, access, length and region boundary, independently of payload/state. FrameKind distinguishes Request and Response; encode_frame/decode_frame handle exact complete frames and reject trailing bytes. The generic frame decoder enforces its declared-length cap, including READ requests; the stream parser separately handles CRC-valid READ requests with invalid requested lengths so the register service can reply with LastError.
-
-StreamParser owns a fixed 520-byte buffer. push accepts one byte or returns BufferFull without overwriting existing data. next_frame retires a previously returned frame, searches candidates and returns ParsedFrame with borrowed payload and its header-validation result. Borrowing prevents simultaneous mutation while that payload is used. Rejected candidates advance one byte so overlapping starts remain discoverable. Valid-frame bytes are removed only on the next mutable parsing/push call. Drain next_frame until None before delivering on_timeout; timeout clears the logical remainder without requiring byte zeroing. Register descriptors are checked at construction and reused for plausibility checks.
-
-On 2026-10-31 the owner reported 50 passing host tests: 8 header, 12 validation, 12 complete-frame and 18 stream-parser cases, after observing their intended failing phases. Tests cover the stated framing paths, not register execution, actual error replies, semantic control bits, calibrated target dispatch or physical UART timing. The package is now registered in dev.py test/fmt/check/verify/doc; the owner subsequently reported 326 passing tests and all 15 verification checks passing, plus all 8 combined documentation checks passing. No UART adapter, firmware main-loop change or hardware protocol test was performed. Local checks are complete; the owner performs staging and committing. CI for this protocol revision is pending.
-
-## Initial register service
-
-On 2026-10-31 the owner reported 41 passing tests for [servo-registers](../firmware/servo-registers/README.md): fixed-register service, control transitions and their integration. Indices 0x00..0x04 now implement version, dynamic control/backend status, LastError, Control and servo count. Control supports only OUTPUT_ENABLE; invalidation and reserved bits are not implemented. SET/CLR/WRITE failures update LastError without an immediate response. Status reports the backend's logical state even after failed start/stop operations. Fault and LastError are independent. Calibration validity is an injected constructor flag, not actual storage integration. A shared FakeOutput is the only backend implementation.
-
-These results narrow the earlier design's future-work statements: fixed register handling and enable/disable semantics are implemented, while target/calibration access, lifecycle/storage integration, actual READ error transmission, asynchronous faults/Busy, UART and the program loop are still pending. The owner subsequently confirmed all 17 verification checks and all 9 documentation checks passing, with all 41 register-service tests successful. The owner confirmed green CI for this register-service revision; no hardware protocol run is claimed.
-
-## Host byte-stream integration
-
-Seven tests in [test_pipeline.rs](../firmware/servo-registers/src/test_pipeline.rs) exercise request bytes through the parser and service to CRC-checked response bytes. Cases cover status, SET followed by status readback, canonical error responses, CRC rejection without service side effects, recovery after corruption, timeout recovery and consecutive requests. Parser state persists across requests in the recovery and consecutive-request tests. Timeout is injected rather than measured.
-
-The owner reported 48 register-package tests and 375 tests overall passing on 2026-10-31, with all 17 verification checks passing. The owner subsequently confirmed green CI for this integration-test revision. UART transport and the normal firmware loop remain future work.
-
-## Implemented target-register subset
-
-The service now implements READ/WRITE for indices 0x20..0x31, with four-byte little-endian i32 centidegree values. Requests may span consecutive servo IDs within the map and configured servo count. SET/CLR are not permitted. Reads return backend-owned accepted targets. Writes are validated and accepted as a complete batch; inactive writes prepare values, while active writes submit them without waiting for physical activation. No target writes reply directly.
-
-Missing calibration rejects both reads and writes. Fault rejects writes but permits reads when calibration is valid. Invalid angles preserve all targets without latching Fault; technical write failures preserve accepted targets and latch Fault. Complete READ data is staged before modifying the response buffer. Calibration validity remains a constructor flag, and only the test backend implements the target contract.
-
-On 2026-10-31 the owner confirmed 56 package tests and 383 tests overall passing, with all 17 verification checks passing. Eight target-register tests were observed failing before implementation. The owner subsequently confirmed green CI for this target-register revision. Actual ServoBank/PIO integration and UART transport remain future work.
-
-## Target-register wire verification
-
-Four additional host tests cover full eighteen-target WRITE/READ (72 payload bytes) with inactive and active output, partial writes preserving other targets, atomic rejection when the final angle is invalid, and a region-crossing READ returning a canonical error followed by a valid READ. The same parser instance is retained across requests; response headers, lengths, payloads and CRC are checked. Successful readback preserves LastError, and modifying requests produce no response.
-
-On 2026-10-31 the owner reported 60 register-package tests and 387 tests overall passing, with all 17 verification checks passing. CI for this target-wire-test revision is pending. Tests use FakeOutput, without UART or physical servo output.
-
-## ServoBank register backend
-
-The register backend contract now has a direct implementation for lifecycle-capable ServoBank instances. Accepted target reads come from the bank; inactive writes prepare and active writes submit. Uninitialized targets return InvalidState without latching Fault; incomplete startup returns InvalidTargets through the existing control mapping. RegisterService::service delegates ongoing output work independently of incoming frames. No UART delivery, calibration transfer or journal-loading integration is added. On 2026-11-01 the owner reported 72 package tests and 427 tests overall passing, with all 17 verification checks passing, after twelve new tests failed at placeholders. Tests use a recording pulse backend; physical protocol-driven output remains to be verified. CI for this revision is pending.
-
-## Byte transport and queued READ responses
-
-ByteTransport now defines hardware-independent nonblocking receive and transmit operations. ResponseBuffer stores one copied encoded response and an unsent offset. queue never replaces a pending response; Busy, Empty and TooLarge preserve the current state. Bounded service stops on backpressure or error and retains unsent bytes without replaying accepted bytes. Transport acceptance does not confirm physical transmission. The buffer does not encode or validate framing/CRC.
-
-On 2026-11-02 the owner reported 62 protocol-package tests and 439 tests overall passing, with all 17 verification checks passing, after twelve response-buffer tests failed at placeholders. A real UART transport, frame-processing coordination, actual timeout handling and the main loop are not yet connected. FrameProcessor in servo-registers now coordinates response space by stopping request processing while an encoded response remains pending. CI for this revision is pending.
-
-## Integrated frame processing
-
-FrameProcessor owns the request parser, register service and single response buffer. Each poll services output first and advances existing transmission before receiving more bytes. A READ response is encoded and queued for a later poll; pending transmission prevents another request from being handled. The master must still wait for its READ response before sending further requests. This flow control is not hardware RTS/CTS and does not protect against a sender violating that rule or a physical UART FIFO overrun.
-
-Receive-timeout events are recorded externally and deferred until complete buffered requests have been handled. Only the incomplete parser remainder is then cleared; responses are retained. The caller must account for unread transport data when detecting the event. No timeout duration, physical UART behavior or automatic receive-error reset is specified by this implementation. Transmit errors preserve the unsent suffix for caller-directed recovery.
-
-On 2026-11-02 the owner confirmed 84 register-package tests, 62 protocol-package tests and 451 tests overall passing, with all 17 verification checks passing. Twelve processor tests use a simulated byte transport and register backend; separate tests cover the direct ServoBank backend. The concrete UART adapter and physical end-to-end protocol test remain future work. CI for this combined transport/buffering/processing revision is pending.
-
-## UART transport hardware verification
-
-The concrete Pico UartTransport now implements ByteTransport and reports UART receive errors explicitly. On 2026-11-02 the owner confirmed the standalone UART0 GP16-to-GP17 loopback success message after 1024 matching bytes, with diagnostics on UART1/GP20. Full verification reported 451 tests and all 17 checks passing. This verifies byte transport, not FrameProcessor integration, register traffic, calibrated output or protocol timeout durations. The receive-error mapping exists but was not exercised by deliberate fault injection. CI for this UART-driver revision is pending.
-
-## Physical READ exchange verification
-
-On 2026-11-02 the owner confirmed the three exact HTerm READ responses documented in the [UART hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test): Version=1, Status=0 and ServoCount=0, including their expected CRC bytes. The test uses the concrete UART driver, FrameProcessor and RegisterService with NoServoOutput; it exercises no calibrated servo output. Full verification reported 451 tests and all 17 checks passing. The example uses an initial 100 ms receive-idle timeout but no timeout-recovery or malformed-frame hardware result is claimed yet. CI for this revision is pending.
-
-## Reference test data
-
-The canonical [UART register test vectors](uart-register-test-vectors.md) record the fixture, three hardware-confirmed READ exchanges, byte layout, CRC parameters and an independent standard-library Python reproduction command. Hardware execution instructions remain in the manual-test guide. Future test data should distinguish expected/generated results from owner-confirmed hardware observations.
+The previous version-1 UART suite passed on 2026-11-02; its bytes do not establish version-2 compatibility. CI for the current ACK/NACK revision has not yet been reported. Host tests, no-servo UART hardware tests and real servo output tests are separate evidence. Physical UART error injection, arbitrary EMI recovery, protocol-to-real-PIO output, journal-backed runtime initialization and longer-operation completion remain unverified in this combined path.

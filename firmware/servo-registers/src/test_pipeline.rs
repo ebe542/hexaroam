@@ -16,8 +16,9 @@ fn checksum(data: &[u8]) -> u32 {
 
 /// Sends one request byte by byte through the real parser and service.
 ///
-/// A modifying request must produce no response. READ responses are
-/// encoded here and decoded separately by the calling test.
+/// Use this helper for plausible requests that must reach the service.
+/// Their ACK or NACK is decoded separately by the calling test.
+/// Tests for discarded headers use feed() to assert no service call.
 fn exchange(
     service: &mut RegisterService<FakeOutput>,
     header: Header,
@@ -112,7 +113,7 @@ fn status_read_returns_crc_checked_response() {
     assert_eq!(
         frame.header,
         Header {
-            opcode: Opcode::Read,
+            opcode: Opcode::Ack,
             index: 1,
             length: 1,
         },
@@ -124,24 +125,38 @@ fn status_read_returns_crc_checked_response() {
 }
 
 #[test]
-fn set_control_has_no_response_and_changes_status() {
+fn set_control_returns_ack_and_changes_status() {
     let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
     let mut response = [0xA5; 12];
 
+    let length = exchange(
+        &mut service,
+        Header {
+            opcode: Opcode::Set,
+            index: 3,
+            length: 1,
+        },
+        &[OUTPUT_ENABLE],
+        &mut response,
+    )
+    .expect("SET response");
+    assert_eq!(length, 8);
+    let frame = decode_frame(
+        &response[..length],
+        FrameKind::Response,
+        &mut checksum,
+    )
+    .expect("Valid ACK CRC");
     assert_eq!(
-        exchange(
-            &mut service,
-            Header {
-                opcode: Opcode::Set,
-                index: 3,
-                length: 1,
-            },
-            &[OUTPUT_ENABLE],
-            &mut response,
-        ),
-        None,
+        frame.header,
+        Header {
+            opcode: Opcode::Ack,
+            index: 3,
+            length: 0,
+        }
     );
-    assert_eq!(response, [0xA5; 12]);
+    assert!(frame.payload.is_empty());
+    assert_eq!(&response[length..], &[0xA5; 4]);
 
     let length = exchange(
         &mut service,
@@ -170,42 +185,34 @@ fn set_control_has_no_response_and_changes_status() {
 }
 
 #[test]
-fn unknown_read_returns_canonical_error_response() {
+fn unknown_read_is_discarded_without_response() {
     let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
-    let mut response = [0; 12];
+    let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
+        .expect("Valid register map");
+    let (request, size) = request_bytes(Opcode::Read, 0xFF, 1, &[]);
+    let mut response = [0xA5; 12];
 
-    let length = exchange(
-        &mut service,
-        Header {
-            opcode: Opcode::Read,
-            index: 0xFF,
-            length: 1,
-        },
-        &[],
-        &mut response,
-    )
-    .expect("Error response");
-
-    assert_eq!(length, 12);
-
-    let frame = decode_frame(
-        &response[..length],
-        FrameKind::Response,
-        &mut checksum,
-    )
-    .expect("Valid error response CRC");
-
+    // Even a CRC-valid frame with an unknown index is discarded by the
+    // parser rather than reaching the register service for a NACK.
     assert_eq!(
-        frame.header,
-        Header {
-            opcode: Opcode::Read,
-            index: 2,
-            length: 4,
-        },
+        feed(
+            &mut parser,
+            &mut service,
+            &request[..size],
+            &mut response,
+        ),
+        (0, None),
+    );
+    assert_eq!(response, [0xA5; 12]);
+
+    // Recover with the same parser, without a timeout or replacement.
+    assert_eq!(
+        read_byte(&mut parser, &mut service, 3),
+        0
     );
     assert_eq!(
-        frame.payload,
-        &(ErrorCode::UnknownIndex as u32).to_le_bytes(),
+        read_byte(&mut parser, &mut service, 1),
+        STATUS_CALIBRATION_VALID,
     );
 }
 
@@ -235,8 +242,8 @@ fn request_bytes(
 
 /// Feeds bytes into an existing parser and handles complete requests.
 ///
-/// These tests allow at most one READ response per call.
-/// Modifying requests may precede it without producing a response.
+/// Multiple responses are appended in request order without overwriting
+/// previously encoded frames.
 fn feed(
     parser: &mut StreamParser<'_>,
     service: &mut RegisterService<FakeOutput>,
@@ -259,21 +266,16 @@ fn feed(
                 .handle(parsed, &mut response_payload)
                 .expect("Handle request")
             {
-                assert!(
-                    response_length.is_none(),
-                    "At most one READ response per call",
-                );
-
-                response_length = Some(
-                    encode_frame(
-                        frame.header,
-                        frame.payload,
-                        FrameKind::Response,
-                        response,
-                        &mut checksum,
-                    )
-                    .expect("Encode response"),
-                );
+                let offset = response_length.unwrap_or(0);
+                let length = encode_frame(
+                    frame.header,
+                    frame.payload,
+                    FrameKind::Response,
+                    &mut response[offset..],
+                    &mut checksum,
+                )
+                .expect("Encode response");
+                response_length = Some(offset + length);
             }
         }
     }
@@ -308,7 +310,7 @@ fn read_byte(
     assert_eq!(
         frame.header,
         Header {
-            opcode: Opcode::Read,
+            opcode: Opcode::Ack,
             index,
             length: 1,
         },
@@ -364,30 +366,6 @@ fn corrupted_crc_does_not_reach_service() {
     assert_eq!(
         frame.payload,
         &[STATUS_CALIBRATION_VALID]
-    );
-
-    let length = exchange(
-        &mut service,
-        Header {
-            opcode: Opcode::Read,
-            index: 2,
-            length: 4,
-        },
-        &[],
-        &mut response,
-    )
-    .expect("LastError response");
-
-    let frame = decode_frame(
-        &response[..length],
-        FrameKind::Response,
-        &mut checksum,
-    )
-    .expect("Valid response CRC");
-
-    assert_eq!(
-        frame.payload,
-        &(ErrorCode::None as u32).to_le_bytes(),
     );
 }
 
@@ -455,8 +433,23 @@ fn timeout_discards_incomplete_request() {
             &request[..size],
             &mut response,
         ),
-        (1, None),
+        (1, Some(8)),
     );
+    let ack = decode_frame(
+        &response[..8],
+        FrameKind::Response,
+        &mut checksum,
+    )
+    .expect("Valid recovery ACK");
+    assert_eq!(
+        ack.header,
+        Header {
+            opcode: Opcode::Ack,
+            index: 3,
+            length: 0,
+        }
+    );
+    assert!(ack.payload.is_empty());
     assert_eq!(
         read_byte(&mut parser, &mut service, 1),
         STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE,
@@ -488,7 +481,7 @@ fn consecutive_requests_are_processed_in_order() {
         size += bytes.len();
     }
 
-    let mut response = [0; 12];
+    let mut response = [0; 25];
     let (handled, length) = feed(
         &mut parser,
         &mut service,
@@ -497,27 +490,38 @@ fn consecutive_requests_are_processed_in_order() {
     );
 
     assert_eq!(handled, 3);
+    assert_eq!(length, Some(25));
 
-    let frame = decode_frame(
-        &response[..length.expect("Status response")],
-        FrameKind::Response,
-        &mut checksum,
-    )
-    .expect("Valid response CRC");
-
-    assert_eq!(
-        frame.header,
-        Header {
-            opcode: Opcode::Read,
-            index: 1,
-            length: 1,
-        },
-    );
-
-    // SET followed by CLR must leave output inactive.
-    assert_eq!(
-        frame.payload,
-        &[STATUS_CALIBRATION_VALID]
+    for (start, end, index, payload) in [
+        (0, 8, 3, &[][..]),
+        (8, 16, 3, &[][..]),
+        (
+            16,
+            25,
+            1,
+            &[STATUS_CALIBRATION_VALID][..],
+        ),
+    ] {
+        let frame = decode_frame(
+            &response[start..end],
+            FrameKind::Response,
+            &mut checksum,
+        )
+        .expect("Valid ordered response CRC");
+        assert_eq!(
+            frame.header,
+            Header {
+                opcode: Opcode::Ack,
+                index,
+                length: payload.len() as u16,
+            }
+        );
+        assert_eq!(frame.payload, payload);
+    }
+    assert!(
+        parser
+            .next_frame(&mut checksum)
+            .is_none()
     );
 }
 
@@ -527,7 +531,7 @@ fn wire_write_targets(
     service: &mut RegisterService<FakeOutput>,
     first: u8,
     values: &[i32],
-) {
+) -> Result<(), u8> {
     let mut payload = [0; 18 * 4];
 
     for (offset, value) in values.iter().enumerate() {
@@ -544,27 +548,53 @@ fn wire_write_targets(
     );
     let mut response = [0xA5; 80];
 
-    assert_eq!(
-        feed(
-            parser,
-            service,
-            &request[..size],
-            &mut response,
-        ),
-        (1, None),
+    let (handled, length) = feed(
+        parser,
+        service,
+        &request[..size],
+        &mut response,
     );
-    assert_eq!(response, [0xA5; 80]);
+    assert_eq!(handled, 1);
+    let length = length.expect("Target-write response");
+    let frame = decode_frame(
+        &response[..length],
+        FrameKind::Response,
+        &mut checksum,
+    )
+    .expect("Valid target-write response CRC");
+    assert_eq!(frame.header.index, 0x20 + first);
+    let result = match frame.header.opcode {
+        Opcode::Ack => {
+            assert_eq!(frame.header.length, 0);
+            assert!(frame.payload.is_empty());
+            assert_eq!(length, 8);
+            Ok(())
+        }
+        Opcode::Nack => {
+            assert_eq!(frame.header.length, 1);
+            assert_eq!(frame.payload.len(), 1);
+            assert_eq!(length, 9);
+            Err(frame.payload[0])
+        }
+        other => panic!("Unexpected response opcode: {other:?}"),
+    };
+    assert!(
+        response[length..]
+            .iter()
+            .all(|&byte| byte == 0xA5)
+    );
+    result
 }
 
 /// Checks response header, payload, total length and CRC.
 ///
-/// Requested and response indices may differ for canonical errors.
+/// ACK and NACK both preserve the requested register index.
 fn assert_wire_read(
     parser: &mut StreamParser<'_>,
     service: &mut RegisterService<FakeOutput>,
     requested_index: u8,
     requested_length: u16,
-    response_index: u8,
+    response_opcode: Opcode,
     expected_payload: &[u8],
 ) {
     let (request, size) = request_bytes(
@@ -596,8 +626,8 @@ fn assert_wire_read(
     assert_eq!(
         frame.header,
         Header {
-            opcode: Opcode::Read,
-            index: response_index,
+            opcode: response_opcode,
+            index: requested_index,
             length: expected_payload.len() as u16,
         },
     );
@@ -625,9 +655,24 @@ fn all_targets_round_trip_through_wire_frames() {
                     &request[..size],
                     &mut response,
                 ),
-                (1, None),
+                (1, Some(8)),
             );
-            assert_eq!(response, [0xA5; 12]);
+            let ack = decode_frame(
+                &response[..8],
+                FrameKind::Response,
+                &mut checksum,
+            )
+            .expect("Valid activation ACK");
+            assert_eq!(
+                ack.header,
+                Header {
+                    opcode: Opcode::Ack,
+                    index: 3,
+                    length: 0,
+                }
+            );
+            assert!(ack.payload.is_empty());
+            assert_eq!(&response[8..], &[0xA5; 4]);
         }
 
         let mut values = [0_i32; 18];
@@ -639,23 +684,15 @@ fn all_targets_round_trip_through_wire_frames() {
                 .copy_from_slice(&value.to_le_bytes());
         }
 
-        wire_write_targets(&mut parser, &mut service, 0, &values);
+        wire_write_targets(&mut parser, &mut service, 0, &values).unwrap();
 
         assert_wire_read(
             &mut parser,
             &mut service,
             0x20,
             72,
-            0x20,
+            Opcode::Ack,
             &expected,
-        );
-        assert_wire_read(
-            &mut parser,
-            &mut service,
-            2,
-            4,
-            2,
-            &(ErrorCode::None as u32).to_le_bytes(),
         );
 
         let status = STATUS_CALIBRATION_VALID
@@ -674,14 +711,15 @@ fn partial_wire_write_preserves_other_targets() {
     let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
         .expect("Valid register map");
 
-    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]);
+    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]).unwrap();
     wire_write_targets(
         &mut parser,
         &mut service,
         4,
         &[-4_500, 1_234],
-    );
-    wire_write_targets(&mut parser, &mut service, 17, &[9_000]);
+    )
+    .unwrap();
+    wire_write_targets(&mut parser, &mut service, 17, &[9_000]).unwrap();
 
     let mut values = [100_i32; 18];
     values[4] = -4_500;
@@ -700,7 +738,7 @@ fn partial_wire_write_preserves_other_targets() {
         &mut service,
         0x20,
         72,
-        0x20,
+        Opcode::Ack,
         &expected,
     );
 }
@@ -711,24 +749,18 @@ fn invalid_wire_batch_preserves_every_target() {
     let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
         .expect("Valid register map");
 
-    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]);
+    wire_write_targets(&mut parser, &mut service, 0, &[100; 18]).unwrap();
 
     // The first two values are valid, but the final value is not.
     // No part of this CRC-valid request may be accepted.
-    wire_write_targets(
-        &mut parser,
-        &mut service,
-        4,
-        &[-4_500, 1_234, 9_001],
-    );
-
-    assert_wire_read(
-        &mut parser,
-        &mut service,
-        2,
-        4,
-        2,
-        &(ErrorCode::InvalidValue as u32).to_le_bytes(),
+    assert_eq!(
+        wire_write_targets(
+            &mut parser,
+            &mut service,
+            4,
+            &[-4_500, 1_234, 9_001],
+        ),
+        Err(ErrorCode::InvalidValue as u8),
     );
 
     let mut expected = [0; 18 * 4];
@@ -742,19 +774,10 @@ fn invalid_wire_batch_preserves_every_target() {
         &mut service,
         0x20,
         72,
-        0x20,
+        Opcode::Ack,
         &expected,
     );
 
-    // Successful readback must not clear the previous error.
-    assert_wire_read(
-        &mut parser,
-        &mut service,
-        2,
-        4,
-        2,
-        &(ErrorCode::InvalidValue as u32).to_le_bytes(),
-    );
     assert_eq!(
         read_byte(&mut parser, &mut service, 1),
         STATUS_CALIBRATION_VALID,
@@ -762,30 +785,35 @@ fn invalid_wire_batch_preserves_every_target() {
 }
 
 #[test]
-fn target_read_crossing_region_returns_wire_error() {
+fn target_read_crossing_region_is_discarded_without_response() {
     let mut service = RegisterService::new(1, 18, FakeOutput::inactive(), true);
     let mut parser = StreamParser::new(FrameKind::Request, &REGISTER_REGIONS)
         .expect("Valid register map");
 
-    wire_write_targets(&mut parser, &mut service, 17, &[4_500]);
+    wire_write_targets(&mut parser, &mut service, 17, &[4_500]).unwrap();
 
     // Servo 17 exists, but a second entry would exceed the region.
-    assert_wire_read(
-        &mut parser,
-        &mut service,
-        0x31,
-        8,
-        2,
-        &(ErrorCode::OutOfBounds as u32).to_le_bytes(),
+    // The impossible range is rejected before any service call.
+    let (request, size) = request_bytes(Opcode::Read, 0x31, 8, &[]);
+    let mut response = [0xA5; 12];
+    assert_eq!(
+        feed(
+            &mut parser,
+            &mut service,
+            &request[..size],
+            &mut response,
+        ),
+        (0, None),
     );
+    assert_eq!(response, [0xA5; 12]);
 
-    // The same parser remains usable after the rejected READ.
+    // The same parser remains usable and the stored target is unchanged.
     assert_wire_read(
         &mut parser,
         &mut service,
         0x31,
         4,
-        0x31,
+        Opcode::Ack,
         &4_500_i32.to_le_bytes(),
     );
 }

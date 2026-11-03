@@ -9,6 +9,8 @@ pub enum Opcode {
     Write = 2,
     Set = 3,
     Clear = 4,
+    Ack = 0x80,
+    Nack = 0x81,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,6 +25,8 @@ impl Opcode {
             2 => Ok(Self::Write),
             3 => Ok(Self::Set),
             4 => Ok(Self::Clear),
+            0x80 => Ok(Self::Ack),
+            0x81 => Ok(Self::Nack),
             other => Err(HeaderError::UnknownOpcode(other)),
         }
     }

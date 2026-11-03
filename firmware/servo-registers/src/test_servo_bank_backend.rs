@@ -220,21 +220,28 @@ fn modify(
     payload: &[u8],
 ) {
     let mut output = [0xA5; 8];
+    let response = service
+        .handle(
+            request(
+                opcode,
+                index,
+                payload.len() as u16,
+                payload,
+            ),
+            &mut output,
+        )
+        .unwrap()
+        .expect("Every modifying request must receive a response");
 
     assert_eq!(
-        service
-            .handle(
-                request(
-                    opcode,
-                    index,
-                    payload.len() as u16,
-                    payload
-                ),
-                &mut output,
-            )
-            .unwrap(),
-        None,
+        response.header,
+        Header {
+            opcode: Opcode::Ack,
+            index,
+            length: 0,
+        },
     );
+    assert!(response.payload.is_empty());
     assert_eq!(output, [0xA5; 8]);
 }
 
@@ -242,7 +249,7 @@ fn assert_read(
     service: &mut TestService,
     requested_index: u8,
     length: u16,
-    response_index: u8,
+    response_opcode: Opcode,
     expected: &[u8],
 ) {
     let mut output = [0; 8];
@@ -263,8 +270,8 @@ fn assert_read(
     assert_eq!(
         response.header,
         Header {
-            opcode: Opcode::Read,
-            index: response_index,
+            opcode: response_opcode,
+            index: requested_index,
             length: expected.len() as u16,
         },
     );
@@ -595,7 +602,13 @@ fn register_service_controls_bank_and_forwards_service() {
         &targets,
     );
     assert_eq!(recorded.borrow().pulses, None);
-    assert_read(&mut service, 0x20, 8, 0x20, &targets);
+    assert_read(
+        &mut service,
+        0x20,
+        8,
+        Opcode::Ack,
+        &targets,
+    );
 
     modify(
         &mut service,
@@ -638,12 +651,18 @@ fn register_service_controls_bank_and_forwards_service() {
     assert_eq!(recorded.borrow().submit_calls, 1);
 
     targets[..4].copy_from_slice(&0_i32.to_le_bytes());
-    assert_read(&mut service, 0x20, 8, 0x20, &targets);
+    assert_read(
+        &mut service,
+        0x20,
+        8,
+        Opcode::Ack,
+        &targets,
+    );
     assert_read(
         &mut service,
         1,
         1,
-        1,
+        Opcode::Ack,
         &[STATUS_CALIBRATION_VALID],
     );
 
@@ -658,7 +677,7 @@ fn register_service_controls_bank_and_forwards_service() {
         &mut service,
         1,
         1,
-        1,
+        Opcode::Ack,
         &[STATUS_CALIBRATION_VALID | STATUS_OUTPUT_ACTIVE],
     );
     assert_eq!(recorded.borrow().start_calls, 2);
@@ -673,8 +692,8 @@ fn uninitialized_register_access_reports_state_error_without_fault() {
         &mut service,
         0x20,
         4,
-        2,
-        &(ErrorCode::InvalidState as u32).to_le_bytes(),
+        Opcode::Nack,
+        &[ErrorCode::InvalidState as u8],
     );
 
     // A rejected READ must not trigger a technical Fault.
@@ -682,7 +701,7 @@ fn uninitialized_register_access_reports_state_error_without_fault() {
         &mut service,
         1,
         1,
-        1,
+        Opcode::Ack,
         &[STATUS_CALIBRATION_VALID],
     );
 
@@ -699,14 +718,14 @@ fn uninitialized_register_access_reports_state_error_without_fault() {
         &mut service,
         0x20,
         8,
-        2,
-        &(ErrorCode::InvalidState as u32).to_le_bytes(),
+        Opcode::Nack,
+        &[ErrorCode::InvalidState as u8],
     );
     assert_read(
         &mut service,
         0x20,
         4,
-        0x20,
+        Opcode::Ack,
         &0_i32.to_le_bytes(),
     );
 

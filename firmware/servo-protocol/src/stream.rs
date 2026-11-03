@@ -60,9 +60,9 @@ impl<'a> StreamParser<'a> {
 
     /// Returns the next complete CRC-valid frame.
     ///
-    /// READ requests can carry a validation error for the register service.
-    /// No returned frame or validation result permits hardware changes
-    /// without the later payload/state checks.
+    /// Request indices and lengths must be plausible before collecting a frame.
+    /// Plausible requests can carry an access error for the register service.
+    /// No returned frame permits hardware changes without payload/state checks.
     pub fn next_frame(
         &mut self,
         checksum: &mut impl FnMut(&[u8]) -> u32,
@@ -82,7 +82,14 @@ impl<'a> StreamParser<'a> {
                 }
             };
 
-            if self.kind == FrameKind::Response && opcode != Opcode::Read {
+            let response_opcode = matches!(opcode, Opcode::Ack | Opcode::Nack);
+
+            let valid_direction = match self.kind {
+                FrameKind::Request => !response_opcode,
+                FrameKind::Response => response_opcode,
+            };
+
+            if !valid_direction {
                 self.discard_prefix(1);
                 continue;
             }
@@ -97,35 +104,55 @@ impl<'a> StreamParser<'a> {
                 length: u16::from_le_bytes([self.buffer[2], self.buffer[3]]),
             };
 
+            if self.kind == FrameKind::Request {
+                // Validate index and length independently of write permissions.
+                // All current regions support READ, so a synthetic READ header
+                // checks their widths and boundaries without authorizing writes.
+                let plausibility_header = Header {
+                    opcode: Opcode::Read,
+                    ..header
+                };
+
+                if validate_header(&plausibility_header, self.regions).is_err()
+                    || usize::from(header.length) > MAX_PAYLOAD_SIZE
+                {
+                    // Reject impossible candidates before collecting payload
+                    // or CRC, preserving overlapping possible frame starts.
+                    self.discard_prefix(1);
+                    continue;
+                }
+            }
+
             let read_request =
                 self.kind == FrameKind::Request && opcode == Opcode::Read;
 
-            let mut validation = validate_header(&header, self.regions);
+            // Responses describe an outcome, not a new register access.
+            // An empty ACK or a NACK for an unknown index is therefore valid.
+            let validation = match self.kind {
+                FrameKind::Request => validate_header(&header, self.regions),
+                FrameKind::Response => Ok(()),
+            };
 
-            // A READ request itself has no payload, even if its requested
-            // response length is invalid. Collect its CRC so the service
-            // can return a trustworthy LastError response.
-            //
-            // Even a map allowing larger reads cannot authorize a response
-            // exceeding our framing capacity.
-            if read_request
-                && usize::from(header.length) > MAX_PAYLOAD_SIZE
-                && validation.is_ok()
+            if self.kind == FrameKind::Response
+                && opcode == Opcode::Nack
+                && header.length != 1
             {
-                validation = Err(ValidationError::InvalidLength);
+                self.discard_prefix(1);
+                continue;
             }
 
             let payload_length = if read_request {
                 0
             } else {
-                if validation.is_err()
-                    || usize::from(header.length) > MAX_PAYLOAD_SIZE
-                {
-                    // Do not wait for payload claimed by an impossible
-                    // candidate. Preserve overlapping possible starts.
+                if usize::from(header.length) > MAX_PAYLOAD_SIZE {
+                    // Oversized payloads cannot fit in the parser buffer.
+                    // Preserve overlapping possible frame starts.
                     self.discard_prefix(1);
                     continue;
                 }
+
+                // A plausible request with denied access still needs a CRC
+                // check before the service may send a NACK response.
 
                 usize::from(header.length)
             };

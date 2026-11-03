@@ -15,12 +15,14 @@ fn known_opcode_values_are_decoded() {
 #[test]
 fn every_other_opcode_value_is_rejected() {
     for value in 0_u8..=u8::MAX {
-        if !(1..=4).contains(&value) {
-            assert_eq!(
-                Opcode::from_byte(value),
-                Err(HeaderError::UnknownOpcode(value)),
-            );
+        if matches!(value, 1..=4 | 0x80 | 0x81) {
+            continue;
         }
+
+        assert_eq!(
+            Opcode::from_byte(value),
+            Err(HeaderError::UnknownOpcode(value)),
+        );
     }
 }
 
@@ -100,5 +102,23 @@ fn all_opcodes_round_trip_without_changing_fields() {
             Header::decode(&header.encode()),
             Ok(header)
         );
+    }
+}
+
+#[test]
+fn response_opcodes_preserve_header_fields_and_wire_values() {
+    for opcode in [0x80, 0x81] {
+        for length in [0_u16, 4, 512] {
+            let [low, high] = length.to_le_bytes();
+            let bytes = [opcode, 0x20, low, high];
+
+            let decoded = Header::decode(&bytes)
+                .expect("ACK and NACK must be recognized");
+
+            assert_eq!(decoded.opcode as u8, opcode);
+            assert_eq!(decoded.index, 0x20);
+            assert_eq!(decoded.length, length);
+            assert_eq!(decoded.encode(), bytes);
+        }
     }
 }

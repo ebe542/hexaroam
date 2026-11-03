@@ -18,6 +18,7 @@ pub enum FrameError {
     InvalidLength,
     PayloadTooLarge,
     BufferTooSmall,
+    InvalidRequestOpcode,
     InvalidResponseOpcode,
     CrcMismatch,
 }
@@ -106,14 +107,31 @@ pub fn decode_frame<'a>(
 
 /// Determines payload size from direction and opcode.
 ///
-/// A READ request carries no payload: its length describes the response.
-/// Only READ responses are supported.
+/// READ requests carry no payload; their length describes the requested data.
+/// ACK responses carry zero or more bytes; NACK responses carry one error byte.
 fn frame_payload_length(
     header: Header,
     kind: FrameKind,
 ) -> Result<usize, FrameError> {
-    if kind == FrameKind::Response && header.opcode != crate::Opcode::Read {
-        return Err(FrameError::InvalidResponseOpcode);
+    use crate::Opcode;
+
+    match kind {
+        FrameKind::Request => {
+            if matches!(
+                header.opcode,
+                Opcode::Ack | Opcode::Nack
+            ) {
+                return Err(FrameError::InvalidRequestOpcode);
+            }
+        }
+        FrameKind::Response => {
+            if !matches!(
+                header.opcode,
+                Opcode::Ack | Opcode::Nack
+            ) {
+                return Err(FrameError::InvalidResponseOpcode);
+            }
+        }
     }
 
     let length = usize::from(header.length);
@@ -122,7 +140,11 @@ fn frame_payload_length(
         return Err(FrameError::PayloadTooLarge);
     }
 
-    if kind == FrameKind::Request && header.opcode == crate::Opcode::Read {
+    if header.opcode == Opcode::Nack && length != 1 {
+        return Err(FrameError::InvalidLength);
+    }
+
+    if kind == FrameKind::Request && header.opcode == Opcode::Read {
         Ok(0)
     } else {
         Ok(length)

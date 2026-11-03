@@ -71,7 +71,7 @@ impl<O: OutputBackend> ControlRegister<O> {
         value: u8,
     ) -> Result<(), ErrorCode> {
         let candidate = match opcode {
-            Opcode::Read => {
+            Opcode::Read | Opcode::Ack | Opcode::Nack => {
                 return Err(ErrorCode::UnsupportedAccess);
             }
             Opcode::Write => value,

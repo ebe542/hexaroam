@@ -106,10 +106,10 @@ A missing valid record is `Ok(None)`; that does not authorize normal operation. 
 | hexaroam-servo-storage | Calibration serialization, CRC abstraction, journal and storage geometry |
 | hexaroam-logging | Buffered logging and bounded formatting over a byte-output contract |
 | hexaroam-servo-protocol | Header/frame codec, register-map plausibility and stream parsing with CRC/resynchronization |
-| hexaroam-servo-registers | Fixed and target register dispatch, LastError, control transitions and output-backend contract |
+| hexaroam-servo-registers | Fixed and target register dispatch, ACK/NACK, control transitions and output-backend contract |
 | hexaroam-pico | Board setup, concrete UART/flash access, normal demo and separately registered hardware tests |
 
-Behavior, navigation, gait generation, inverse kinematics remain future layers. Protocol framing and an initial fixed-register service are host-tested; their UART, hardware backend and normal-firmware integration remain pending. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
+Behavior, navigation, gait generation, inverse kinematics remain future layers. Protocol framing and register handling are host-tested; UART integration passed the version-2 no-servo hardware suite. Protocol-to-real-PIO and normal-firmware integration remain pending. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
 
 ## Host-tested register-control path
 
@@ -121,14 +121,15 @@ flowchart TD
     Service --> Control["ControlRegister: enable, target access and latched fault"]
     Control --> Backend["OutputBackend contract"]
     Backend --> Fake["Shared simulated output: host tests only"]
-    Service --> Reply["READ Frame or no response for modifying requests"]
+    Service --> Reply["ACK or NACK Frame"]
     Reply --> Codec["Frame encoder: servo-protocol"]
-    Backend -.->|"future adapter"| Hardware["Real servo output"]
+    Backend --> Bank["ServoBank adapter: host-tested"]
+    Bank -.->|"protocol hardware integration pending"| Hardware["Real servo output"]
 ```
 
-Eleven host integration tests now connect request bytes, the incremental parser, register handling and encoded READ responses. They cover normal reads/control changes, canonical error responses, CRC rejection, resynchronization, timeout recovery and consecutive requests. The recovery tests retain the same parser instance; actual UART timing is not tested. The service consumes already checked frames and revalidates access/payload lengths. Status reflects the control component and its backend's current logical output state, not servo positions. Control preserves accepted requests on technical errors while Fault remains latched. There is no real adapter to DMA/PIO yet. The normal Pico fixed-plan demo is unchanged. See the [register-service guide](../../firmware/servo-registers/README.md).
+Eleven host integration tests now connect request bytes, the incremental parser, register handling and encoded ACK/NACK responses. They cover normal reads/control changes, NACK responses and discarded implausible headers, CRC rejection, resynchronization, timeout recovery and consecutive requests. The recovery tests retain the same parser instance; actual UART timing is not tested. The service consumes already checked frames and revalidates access/payload lengths. Status reflects the control component and its backend's current logical output state, not servo positions. Control preserves accepted requests on technical errors while Fault remains latched. The direct ServoBank adapter is host-tested separately; this pipeline uses FakeOutput. The normal Pico fixed-plan demo is unchanged. See the [register-service guide](../../firmware/servo-registers/README.md).
 
-Target-register READ/WRITE uses the same backend boundary and the Angle/ServoId/ServoTarget types from servo-control. Eight target-register service tests use the simulated backend. Four additional byte-stream tests now cover complete eighteen-target transfers, partial updates, atomic rejection and READ-boundary errors/recovery. The real ServoBank adapter remains separate work. See the [target-register guide](../../firmware/servo-registers/README.md#target-angle-registers).
+Target-register READ/WRITE uses the same backend boundary and the Angle/ServoId/ServoTarget types from servo-control. Eight target-register service tests use the simulated backend. Four additional byte-stream tests now cover complete eighteen-target transfers, partial updates, atomic rejection and discarded READ-boundary requests and recovery. The direct ServoBank adapter has separate host coverage. See the [target-register guide](../../firmware/servo-registers/README.md#target-angle-registers).
 
 ServoBank preparation and submission are now separate host-tested operations (66 owner-reported servo-control tests). They do not implement output-driver start/stop or the OutputBackend adapter. Zero-degree initialization and real lifecycle integration remain future work. The owner subsequently reported 397 tests overall and all 17 verification checks passing for the combined revision; CI is pending.
 
@@ -167,3 +168,7 @@ UartTransport in pico/src implements ByteTransport over an exclusively owned HAL
 ## Physical UART register reads
 
 The uart_registers manual example now connects UartTransport -> FrameProcessor -> RegisterService -> NoServoOutput, with binary replies returned over UART0. On 2026-11-02 the owner confirmed Version=1, Status=0 and ServoCount=0 responses with their exact CRC bytes in HTerm, then reported 451 tests and all 17 verification checks passing. The example has no calibrated servo backend; protocol-driven PIO output and journal integration remain separate work. Damaged-frame and timeout recovery have not yet been verified on this physical link. See the [procedure and wire vectors](../../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).
+
+## Current protocol verification (2026-11-03)
+
+The owner reported protocol version 2 passing 82 protocol host tests, 75 register host tests and all 21 no-servo UART hardware scenarios. Full local verification passed 462 tests and all 17 checks. ACK/NACK replace READ replies and LastError; the master waits for each response. The older dated implementation notes above describe their respective earlier stages, not the current total or remaining UART work. CI for the current revision has not yet been reported. See the [current contract](../servo-register-protocol.md).

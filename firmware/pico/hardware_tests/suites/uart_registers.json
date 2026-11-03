@@ -2,7 +2,7 @@
   "schema_version": 1,
   "firmware": "firmware/pico/hardware_tests/uart_registers.rs",
   "fixture": {
-    "protocol_version": 1,
+    "protocol_version": 2,
     "status": 0,
     "control": 0,
     "servo_count": 0,
@@ -20,41 +20,41 @@
     "no_reply_observation_ms": 200,
     "read_response_timeout_ms": 1000
   },
-  "verification": "On 2026-11-02 the owner reported a successful automated run against real Pico hardware using tools/uart_test.py: 21 passed, 0 failed, 0 not completed; Overall: PASSED. Scenarios 1 through 12 were also previously confirmed manually.",
+  "verification": "On 2026-11-03 the owner reported a successful automated run of this protocol-version-2 suite against real Pico hardware: 21 passed, 0 failed, 0 not completed; Overall: PASSED. The previous version-1 suite also passed on 2026-11-02.",
   "before_each_case": [
     {
-      "action": "Clear LastError",
-      "request_body_hex": "02 02 04 00 00 00 00 00",
+      "action": "Control remains disabled",
+      "request_body_hex": "01 03 01 00",
       "encoding": "crc",
-      "tx_hex": "02 02 04 00 00 00 00 00 2B 8B 09 2B",
-      "response_body_hex": null,
-      "expected_rx_hex": null,
-      "observe_ms": 200
+      "tx_hex": "01 03 01 00 61 37 A5 82",
+      "response_body_hex": "80 03 01 00 00",
+      "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+      "observe_ms": 1000
     },
     {
-      "action": "Read LastError = 0",
-      "request_body_hex": "01 02 04 00",
+      "action": "Status remains zero",
+      "request_body_hex": "01 01 01 00",
       "encoding": "crc",
-      "tx_hex": "01 02 04 00 13 A9 10 FE",
-      "response_body_hex": "01 02 04 00 00 00 00 00",
-      "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+      "tx_hex": "01 01 01 00 0F E3 21 81",
+      "response_body_hex": "80 01 01 00 00",
+      "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
       "observe_ms": 1000
     }
   ],
   "cases": [
     {
       "id": "read_version",
-      "title": "Read ProtocolVersion",
+      "title": "Read ProtocolVersion 2",
       "verification": "automated_hardware_confirmed",
       "note": "",
       "steps": [
         {
-          "action": "Read ProtocolVersion = 1",
+          "action": "Read register 0x00",
           "request_body_hex": "01 00 02 00",
           "encoding": "crc",
           "tx_hex": "01 00 02 00 FB DA CE AB",
-          "response_body_hex": "01 00 02 00 01 00",
-          "expected_rx_hex": "01 00 02 00 01 00 CC 8B 8C C9",
+          "response_body_hex": "80 00 02 00 02 00",
+          "expected_rx_hex": "80 00 02 00 02 00 72 1F 4D 37",
           "observe_ms": 1000
         }
       ]
@@ -66,29 +66,38 @@
       "note": "",
       "steps": [
         {
-          "action": "Read Status = 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
-      "id": "read_last_error",
-      "title": "Read LastError",
+      "id": "unassigned_read",
+      "title": "Discard READ of unassigned register 0x02",
       "verification": "automated_hardware_confirmed",
       "note": "",
       "steps": [
         {
-          "action": "Read LastError = 0",
+          "action": "Read former LastError index; no response",
           "request_body_hex": "01 02 04 00",
           "encoding": "crc",
           "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -100,12 +109,12 @@
       "note": "",
       "steps": [
         {
-          "action": "Read Control = 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         }
       ]
@@ -117,12 +126,12 @@
       "note": "",
       "steps": [
         {
-          "action": "Read ServoCount = 0",
+          "action": "Read register 0x04",
           "request_body_hex": "01 04 01 00",
           "encoding": "crc",
           "tx_hex": "01 04 01 00 E4 21 EA 87",
-          "response_body_hex": "01 04 01 00 00",
-          "expected_rx_hex": "01 04 01 00 00 CD 23 E2 75",
+          "response_body_hex": "80 04 01 00 00",
+          "expected_rx_hex": "80 04 01 00 00 EF BA 64 F9",
           "observe_ms": 1000
         }
       ]
@@ -131,42 +140,33 @@
       "id": "enable_write",
       "title": "WRITE enable without calibration",
       "verification": "automated_hardware_confirmed",
-      "note": "NotConfigured = 6. No physical output starts.",
+      "note": "",
       "steps": [
         {
-          "action": "WRITE Control enable",
+          "action": "Opcode 02 register 0x03",
           "request_body_hex": "02 03 01 00 01",
           "encoding": "crc",
           "tx_hex": "02 03 01 00 01 32 51 92 D8",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "81 03 01 00 06",
+          "expected_rx_hex": "81 03 01 00 06 D3 0E B0 B0",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0; no technical Fault",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 6",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 06 00 00 00",
-          "expected_rx_hex": "01 02 04 00 06 00 00 00 14 D3 ED 80",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -175,113 +175,86 @@
       "id": "enable_set",
       "title": "SET enable without calibration",
       "verification": "automated_hardware_confirmed",
-      "note": "NotConfigured = 6. No physical output starts.",
+      "note": "",
       "steps": [
         {
-          "action": "SET Control enable",
+          "action": "Opcode 03 register 0x03",
           "request_body_hex": "03 03 01 00 01",
           "encoding": "crc",
           "tx_hex": "03 03 01 00 01 82 78 F2 E5",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "81 03 01 00 06",
+          "expected_rx_hex": "81 03 01 00 06 D3 0E B0 B0",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0; no technical Fault",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 6",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 06 00 00 00",
-          "expected_rx_hex": "01 02 04 00 06 00 00 00 14 D3 ED 80",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
-      "id": "disable_preserves_error",
-      "title": "Disable operations preserve previous LastError",
+      "id": "disable_after_rejection",
+      "title": "Disable operations ACK after rejected enable",
       "verification": "automated_hardware_confirmed",
-      "note": "Successful WRITE/CLR and READs do not clear LastError. Output was inactive throughout.",
+      "note": "",
       "steps": [
         {
-          "action": "SET enable to establish NotConfigured",
+          "action": "Opcode 03 register 0x03",
           "request_body_hex": "03 03 01 00 01",
           "encoding": "crc",
           "tx_hex": "03 03 01 00 01 82 78 F2 E5",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read LastError = 6",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 06 00 00 00",
-          "expected_rx_hex": "01 02 04 00 06 00 00 00 14 D3 ED 80",
+          "response_body_hex": "81 03 01 00 06",
+          "expected_rx_hex": "81 03 01 00 06 D3 0E B0 B0",
           "observe_ms": 1000
         },
         {
-          "action": "WRITE Control = 0",
+          "action": "Opcode 02 register 0x03",
           "request_body_hex": "02 03 01 00 00",
           "encoding": "crc",
           "tx_hex": "02 03 01 00 00 A4 61 95 AF",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "80 03 00 00",
+          "expected_rx_hex": "80 03 00 00 7E D7 5B CE",
+          "observe_ms": 1000
         },
         {
-          "action": "CLR enable",
+          "action": "Opcode 04 register 0x03",
           "request_body_hex": "04 03 01 00 01",
           "encoding": "crc",
           "tx_hex": "04 03 01 00 01 92 A4 D2 57",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "80 03 00 00",
+          "expected_rx_hex": "80 03 00 00 7E D7 5B CE",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 6",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 06 00 00 00",
-          "expected_rx_hex": "01 02 04 00 06 00 00 00 14 D3 ED 80",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -290,42 +263,33 @@
       "id": "reserved_write",
       "title": "WRITE reserved Control bits",
       "verification": "automated_hardware_confirmed",
-      "note": "InvalidValue = 5. WRITE uses mask 03 to check reserved-bit validation before missing calibration.",
+      "note": "Restart is not implemented; only Control bit 0 is currently valid.",
       "steps": [
         {
-          "action": "WRITE reserved Control mask",
+          "action": "Opcode 02 register 0x03",
           "request_body_hex": "02 03 01 00 03",
           "encoding": "crc",
           "tx_hex": "02 03 01 00 03 1E 30 9C 36",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "81 03 01 00 05",
+          "expected_rx_hex": "81 03 01 00 05 69 5F B9 29",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 5",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 05 00 00 00",
-          "expected_rx_hex": "01 02 04 00 05 00 00 00 FA 7C 58 92",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -334,42 +298,33 @@
       "id": "reserved_set",
       "title": "SET reserved Control bits",
       "verification": "automated_hardware_confirmed",
-      "note": "InvalidValue = 5. WRITE uses mask 03 to check reserved-bit validation before missing calibration.",
+      "note": "Restart is not implemented; only Control bit 0 is currently valid.",
       "steps": [
         {
-          "action": "SET reserved Control mask",
+          "action": "Opcode 03 register 0x03",
           "request_body_hex": "03 03 01 00 02",
           "encoding": "crc",
           "tx_hex": "03 03 01 00 02 38 29 FB 7C",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "81 03 01 00 05",
+          "expected_rx_hex": "81 03 01 00 05 69 5F B9 29",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 5",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 05 00 00 00",
-          "expected_rx_hex": "01 02 04 00 05 00 00 00 FA 7C 58 92",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -378,54 +333,45 @@
       "id": "reserved_clr",
       "title": "CLR reserved Control bits",
       "verification": "automated_hardware_confirmed",
-      "note": "InvalidValue = 5. WRITE uses mask 03 to check reserved-bit validation before missing calibration.",
+      "note": "Restart is not implemented; only Control bit 0 is currently valid.",
       "steps": [
         {
-          "action": "CLR reserved Control mask",
+          "action": "Opcode 04 register 0x03",
           "request_body_hex": "04 03 01 00 02",
           "encoding": "crc",
           "tx_hex": "04 03 01 00 02 28 F5 DB CE",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
+          "response_body_hex": "81 03 01 00 05",
+          "expected_rx_hex": "81 03 01 00 05 69 5F B9 29",
+          "observe_ms": 1000
         },
         {
-          "action": "Control remains 0",
+          "action": "Control remains disabled",
           "request_body_hex": "01 03 01 00",
           "encoding": "crc",
           "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 5",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 05 00 00 00",
-          "expected_rx_hex": "01 02 04 00 05 00 00 00 FA 7C 58 92",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
-      "id": "last_error_write_and_clear",
-      "title": "Reject nonzero LastError and clear explicitly",
+      "id": "unassigned_write",
+      "title": "Discard writes to unassigned register 0x02",
       "verification": "automated_hardware_confirmed",
-      "note": "Only a four-byte WRITE of zero clears LastError. Reading it does not clear it.",
+      "note": "",
       "steps": [
         {
-          "action": "WRITE LastError = 1",
+          "action": "WRITE former LastError index; no response",
           "request_body_hex": "02 02 04 00 01 00 00 00",
           "encoding": "crc",
           "tx_hex": "02 02 04 00 01 00 00 00 4E EC B5 93",
@@ -434,34 +380,7 @@
           "observe_ms": 200
         },
         {
-          "action": "Read LastError = 5",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 05 00 00 00",
-          "expected_rx_hex": "01 02 04 00 05 00 00 00 FA 7C 58 92",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Successful Control read",
-          "request_body_hex": "01 03 01 00",
-          "encoding": "crc",
-          "tx_hex": "01 03 01 00 61 37 A5 82",
-          "response_body_hex": "01 03 01 00 00",
-          "expected_rx_hex": "01 03 01 00 00 74 1B 35 E8",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 5",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 05 00 00 00",
-          "expected_rx_hex": "01 02 04 00 05 00 00 00 FA 7C 58 92",
-          "observe_ms": 1000
-        },
-        {
-          "action": "WRITE LastError = 0",
+          "action": "WRITE zero to former LastError index; no response",
           "request_body_hex": "02 02 04 00 00 00 00 00",
           "encoding": "crc",
           "tx_hex": "02 02 04 00 00 00 00 00 2B 8B 09 2B",
@@ -470,12 +389,21 @@
           "observe_ms": 200
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
+          "action": "Control remains disabled",
+          "request_body_hex": "01 03 01 00",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "tx_hex": "01 03 01 00 61 37 A5 82",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -484,33 +412,33 @@
       "id": "readonly_version",
       "title": "WRITE to read-only version",
       "verification": "automated_hardware_confirmed",
-      "note": "The parser rejects this non-READ header before register dispatch. LastError remains unchanged, not UnsupportedAccess.",
+      "note": "",
       "steps": [
         {
-          "action": "Attempt WRITE to read-only register",
+          "action": "Opcode 02 register 0x00",
           "request_body_hex": "02 00 02 00 EF BE",
           "encoding": "crc",
           "tx_hex": "02 00 02 00 EF BE 8B B9 3C A3",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read original value",
-          "request_body_hex": "01 00 02 00",
-          "encoding": "crc",
-          "tx_hex": "01 00 02 00 FB DA CE AB",
-          "response_body_hex": "01 00 02 00 01 00",
-          "expected_rx_hex": "01 00 02 00 01 00 CC 8B 8C C9",
+          "response_body_hex": "81 00 01 00 02",
+          "expected_rx_hex": "81 00 01 00 02 24 65 68 A5",
           "observe_ms": 1000
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
+          "action": "Read register 0x00",
+          "request_body_hex": "01 00 02 00",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "tx_hex": "01 00 02 00 FB DA CE AB",
+          "response_body_hex": "80 00 02 00 02 00",
+          "expected_rx_hex": "80 00 02 00 02 00 72 1F 4D 37",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -519,33 +447,33 @@
       "id": "readonly_status",
       "title": "WRITE to read-only status",
       "verification": "automated_hardware_confirmed",
-      "note": "The parser rejects this non-READ header before register dispatch. LastError remains unchanged, not UnsupportedAccess.",
+      "note": "",
       "steps": [
         {
-          "action": "Attempt WRITE to read-only register",
+          "action": "Opcode 02 register 0x01",
           "request_body_hex": "02 01 01 00 FF",
           "encoding": "crc",
           "tx_hex": "02 01 01 00 FF A2 46 9E 28",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read original value",
-          "request_body_hex": "01 01 01 00",
-          "encoding": "crc",
-          "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
+          "response_body_hex": "81 01 01 00 02",
+          "expected_rx_hex": "81 01 01 00 02 41 02 D4 1D",
           "observe_ms": 1000
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
+          "action": "Read register 0x01",
+          "request_body_hex": "01 01 01 00",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
@@ -554,204 +482,177 @@
       "id": "readonly_servo_count",
       "title": "WRITE to read-only servo_count",
       "verification": "automated_hardware_confirmed",
-      "note": "The parser rejects this non-READ header before register dispatch. LastError remains unchanged, not UnsupportedAccess.",
+      "note": "",
       "steps": [
         {
-          "action": "Attempt WRITE to read-only register",
+          "action": "Opcode 02 register 0x04",
           "request_body_hex": "02 04 01 00 FF",
           "encoding": "crc",
           "tx_hex": "02 04 01 00 FF 90 B6 40 1F",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read original value",
-          "request_body_hex": "01 04 01 00",
-          "encoding": "crc",
-          "tx_hex": "01 04 01 00 E4 21 EA 87",
-          "response_body_hex": "01 04 01 00 00",
-          "expected_rx_hex": "01 04 01 00 00 CD 23 E2 75",
+          "response_body_hex": "81 04 01 00 02",
+          "expected_rx_hex": "81 04 01 00 02 73 F2 0A 2A",
           "observe_ms": 1000
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
+          "action": "Read register 0x04",
+          "request_body_hex": "01 04 01 00",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "tx_hex": "01 04 01 00 E4 21 EA 87",
+          "response_body_hex": "80 04 01 00 00",
+          "expected_rx_hex": "80 04 01 00 00 EF BA 64 F9",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "unknown_read",
-      "title": "READ unknown register",
+      "title": "Discard READ of unknown register 0xFF",
       "verification": "automated_hardware_confirmed",
-      "note": "UnknownIndex = 1. The direct READ error response uses LastError index 02 and length 4.",
+      "note": "",
       "steps": [
         {
-          "action": "READ unknown index FF",
+          "action": "READ unknown index; no response",
           "request_body_hex": "01 FF 01 00",
           "encoding": "crc",
           "tx_hex": "01 FF 01 00 D5 BD 7B 3E",
-          "response_body_hex": "01 02 04 00 01 00 00 00",
-          "expected_rx_hex": "01 02 04 00 01 00 00 00 AD EB 3A 1D",
-          "observe_ms": 1000
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "Read LastError = 1",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 01 00 00 00",
-          "expected_rx_hex": "01 02 04 00 01 00 00 00 AD EB 3A 1D",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "invalid_read_lengths",
-      "title": "Reject invalid READ lengths for every scalar",
+      "title": "Discard implausible READ lengths",
       "verification": "automated_hardware_confirmed",
-      "note": "InvalidLength = 3; OutOfBounds = 4. A CRC-valid rejected READ produces a canonical error response.",
+      "note": "",
       "steps": [
         {
-          "action": "Version: one byte instead of two",
+          "action": "Discard READ index 00, length 1",
           "request_body_hex": "01 00 01 00",
           "encoding": "crc",
           "tx_hex": "01 00 01 00 38 89 E3 80",
-          "response_body_hex": "01 02 04 00 03 00 00 00",
-          "expected_rx_hex": "01 02 04 00 03 00 00 00 26 23 33 B7",
-          "observe_ms": 1000
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "Status: two bytes cross scalar boundary",
+          "action": "Discard READ index 01, length 2",
           "request_body_hex": "01 01 02 00",
           "encoding": "crc",
           "tx_hex": "01 01 02 00 CC B0 0C AA",
-          "response_body_hex": "01 02 04 00 04 00 00 00",
-          "expected_rx_hex": "01 02 04 00 04 00 00 00 9F 1B E4 2A",
-          "observe_ms": 1000
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "LastError: one byte instead of four",
-          "request_body_hex": "01 02 01 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 01 00 56 5D 67 83",
-          "response_body_hex": "01 02 04 00 03 00 00 00",
-          "expected_rx_hex": "01 02 04 00 03 00 00 00 26 23 33 B7",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Control: two bytes cross scalar boundary",
+          "action": "Discard READ index 03, length 2",
           "request_body_hex": "01 03 02 00",
           "encoding": "crc",
           "tx_hex": "01 03 02 00 A2 64 88 A9",
-          "response_body_hex": "01 02 04 00 04 00 00 00",
-          "expected_rx_hex": "01 02 04 00 04 00 00 00 9F 1B E4 2A",
-          "observe_ms": 1000
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "ServoCount: zero-length READ",
+          "action": "Discard READ index 04, length 0",
           "request_body_hex": "01 04 00 00",
           "encoding": "crc",
           "tx_hex": "01 04 00 00 A5 10 F1 9E",
-          "response_body_hex": "01 02 04 00 03 00 00 00",
-          "expected_rx_hex": "01 02 04 00 03 00 00 00 26 23 33 B7",
-          "observe_ms": 1000
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "Read LastError = 3",
-          "request_body_hex": "01 02 04 00",
+          "action": "Discard READ index 20, length 3",
+          "request_body_hex": "01 20 03 00",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 03 00 00 00",
-          "expected_rx_hex": "01 02 04 00 03 00 00 00 26 23 33 B7",
+          "tx_hex": "01 20 03 00 5A AD 98 8A",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Discard READ index 31, length 8",
+          "request_body_hex": "01 31 08 00",
+          "encoding": "crc",
+          "tx_hex": "01 31 08 00 D6 BD 88 74",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Status remains zero",
+          "request_body_hex": "01 01 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 01 00 0F E3 21 81",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "targets_without_servos",
-      "title": "Reject target access with ServoCount zero",
+      "title": "Reject plausible target access with ServoCount zero",
       "verification": "automated_hardware_confirmed",
-      "note": "OutOfBounds = 4 is checked before calibration validity because ServoCount is zero. This does not test successful angle access.",
+      "note": "The static target region is plausible; the configured count is zero. These accesses reach the service and receive NACK.",
       "steps": [
         {
-          "action": "READ target 0 while no servo is configured",
+          "action": "READ target 0 returns OutOfBounds",
           "request_body_hex": "01 20 04 00",
           "encoding": "crc",
           "tx_hex": "01 20 04 00 9D 3B D9 C5",
-          "response_body_hex": "01 02 04 00 04 00 00 00",
-          "expected_rx_hex": "01 02 04 00 04 00 00 00 9F 1B E4 2A",
+          "response_body_hex": "81 20 01 00 04",
+          "expected_rx_hex": "81 20 01 00 04 2F 6F 39 EC",
           "observe_ms": 1000
         },
         {
-          "action": "Clear LastError",
-          "request_body_hex": "02 02 04 00 00 00 00 00",
-          "encoding": "crc",
-          "tx_hex": "02 02 04 00 00 00 00 00 2B 8B 09 2B",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
-          "observe_ms": 1000
-        },
-        {
-          "action": "WRITE target 0 = 0 centidegrees",
+          "action": "Opcode 02 register 0x20",
           "request_body_hex": "02 20 04 00 00 00 00 00",
           "encoding": "crc",
           "tx_hex": "02 20 04 00 00 00 00 00 9E A3 2B 73",
-          "response_body_hex": null,
-          "expected_rx_hex": null,
-          "observe_ms": 200
-        },
-        {
-          "action": "Read LastError = 4",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 04 00 00 00",
-          "expected_rx_hex": "01 02 04 00 04 00 00 00 9F 1B E4 2A",
+          "response_body_hex": "81 20 01 00 04",
+          "expected_rx_hex": "81 20 01 00 04 2F 6F 39 EC",
           "observe_ms": 1000
         },
         {
-          "action": "Status remains 0",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "discarded_write_headers",
-      "title": "Discard unknown or unsupported non-READ headers",
+      "title": "Discard unknown indices and implausible write lengths",
       "verification": "automated_hardware_confirmed",
-      "note": "These headers are discarded by the parser. The register service is not called, so LastError stays zero.",
+      "note": "",
       "steps": [
         {
-          "action": "WRITE unknown index FF",
+          "action": "WRITE unknown index; no response",
           "request_body_hex": "02 FF 01 00 55",
           "encoding": "crc",
           "tx_hex": "02 FF 01 00 55 C0 6D 24 78",
@@ -760,16 +661,7 @@
           "observe_ms": 200
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
-          "observe_ms": 1000
-        },
-        {
-          "action": "SET LastError is unsupported",
+          "action": "SET unassigned index; no response",
           "request_body_hex": "03 02 04 00 FF FF FF FF",
           "encoding": "crc",
           "tx_hex": "03 02 04 00 FF FF FF FF 56 AB 18 39",
@@ -778,16 +670,7 @@
           "observe_ms": 200
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
-          "observe_ms": 1000
-        },
-        {
-          "action": "CLR LastError is unsupported",
+          "action": "CLR unassigned index; no response",
           "request_body_hex": "04 02 04 00 FF FF FF FF",
           "encoding": "crc",
           "tx_hex": "04 02 04 00 FF FF FF FF 4F A2 DD 33",
@@ -796,33 +679,42 @@
           "observe_ms": 200
         },
         {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
+          "action": "WRITE target with misaligned length; no response",
+          "request_body_hex": "02 20 03 00 FF FF FF",
           "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
-          "observe_ms": 1000
+          "tx_hex": "02 20 03 00 FF FF FF A3 97 41 4A",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
         },
         {
-          "action": "Status remains 0",
+          "action": "SET Status with length 256; header only is sufficient to reject",
+          "request_body_hex": "03 01 00 01",
+          "encoding": "raw",
+          "tx_hex": "03 01 00 01",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "bad_crc",
-      "title": "Ignore a damaged CRC and accept the next request",
+      "title": "Ignore damaged CRC and accept next request",
       "verification": "automated_hardware_confirmed",
-      "note": "No reply is expected for the damaged frame. The parser does not update the register LastError.",
+      "note": "",
       "steps": [
         {
-          "action": "READ Status with corrupted final CRC byte",
+          "action": "READ Status with corrupted CRC",
           "request_body_hex": "01 01 01 00",
           "encoding": "bad_crc",
           "tx_hex": "01 01 01 00 0F E3 21 01",
@@ -831,33 +723,24 @@
           "observe_ms": 200
         },
         {
-          "action": "Valid READ Status after the observation interval",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]
     },
     {
       "id": "incomplete_timeout",
-      "title": "Discard a timed-out header before its old CRC arrives",
+      "title": "Discard timed-out header before its old CRC arrives",
       "verification": "automated_hardware_confirmed",
-      "note": "Wait the full 200 ms after the header and after the old CRC. The old CRC alone must not complete the expired READ or produce a response.",
+      "note": "Observe 200 ms after each partial transmission, exceeding the firmware idle timeout of 100 ms.",
       "steps": [
         {
-          "action": "Send only the four-byte READ Status header",
+          "action": "Send only READ Status header",
           "request_body_hex": "01 01 01 00",
           "encoding": "raw",
           "tx_hex": "01 01 01 00",
@@ -866,7 +749,7 @@
           "observe_ms": 200
         },
         {
-          "action": "Send only its old CRC after the timeout",
+          "action": "Send only old CRC after timeout",
           "request_body_hex": "0F E3 21 81",
           "encoding": "raw",
           "tx_hex": "0F E3 21 81",
@@ -875,21 +758,12 @@
           "observe_ms": 200
         },
         {
-          "action": "Send a new complete READ Status",
+          "action": "Status remains zero",
           "request_body_hex": "01 01 01 00",
           "encoding": "crc",
           "tx_hex": "01 01 01 00 0F E3 21 81",
-          "response_body_hex": "01 01 01 00 00",
-          "expected_rx_hex": "01 01 01 00 00 FF D3 3C 42",
-          "observe_ms": 1000
-        },
-        {
-          "action": "Read LastError = 0",
-          "request_body_hex": "01 02 04 00",
-          "encoding": "crc",
-          "tx_hex": "01 02 04 00 13 A9 10 FE",
-          "response_body_hex": "01 02 04 00 00 00 00 00",
-          "expected_rx_hex": "01 02 04 00 00 00 00 00 C8 8C 86 A5",
+          "response_body_hex": "80 01 01 00 00",
+          "expected_rx_hex": "80 01 01 00 00 DD 4A BA CE",
           "observe_ms": 1000
         }
       ]

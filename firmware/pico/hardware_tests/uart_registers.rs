@@ -106,7 +106,7 @@ fn main() -> ! {
 
     let mut transport = UartTransport::new(protocol_uart);
 
-    let registers = RegisterService::new(1, 0, NoServoOutput, false);
+    let registers = RegisterService::new(2, 0, NoServoOutput, false);
     let mut processor =
         FrameProcessor::new(registers).expect("Valid register map");
 

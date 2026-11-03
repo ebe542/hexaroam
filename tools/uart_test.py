@@ -147,11 +147,12 @@ def fixture_checks(data: dict) -> list[Step]:
     ]:
         payload = struct.pack(format_string, data["fixture"][name])
         header = struct.pack("<BBH", 0x01, index, len(payload))
+        response_header = struct.pack("<BBH", 0x80, index, len(payload))
         checks.append(
             Step(
                 f"Check fixture {name}",
                 with_crc(header),
-                with_crc(header + payload),
+                with_crc(response_header + payload),
                 timeout,
             )
         )
