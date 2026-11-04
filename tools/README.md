@@ -184,3 +184,15 @@ For steps expecting a reply, `observe_ms` is the maximum wait for the complete e
 Repeat `--case` to select multiple scenarios. Execution stops at the first failure; the summary distinguishes passed, failed and not-completed scenarios. Exit codes are 0 for success, 1 for a failed hardware check, 2 for configuration or serial errors, and 130 for interruption.
 
 These tests communicate with real hardware and are started manually; `dev.py verify` and CI do not execute them. See the [test vectors and verification record](../docs/uart-register-test-vectors.md).
+
+## Bounded polling in UART suites
+
+A step can optionally specify `retry_rx_hex` (one exact permitted intermediate response), `max_attempts` (at least 2) and `retry_delay_ms` (nonnegative). The final response remains `expected_rx_hex`; each attempt uses the same request and per-attempt response timeout. Only a complete permitted intermediate response triggers another request. Both final and intermediate replies receive the normal 20-ms settling window to detect extra bytes. Unknown replies, missing/incomplete replies, transport errors and attempt exhaustion fail the step. Ordinary steps default to one attempt. A no-reply step cannot enable retries.
+
+The [calibration persistence suite](../docs/uart-calibration-persistence.md) uses this for READ Status: retry on exact Busy, finish on Success, fail on storage-error status. It does not automatically repeat calibration WRITEs. Run the matching flash-writing firmware and reset before the complete suite:
+
+```bash
+python tools/uart_test.py --port COM6 --suite uart_calibration_persistence
+```
+
+On 2026-11-04 the owner reported the complete three-case calibration suite passing on real hardware after restart, using COM6 and the five-second response timeout. This verifies the suite run but does not establish that a Busy intermediate reply was observed. No simulated serial tests have been added.

@@ -42,6 +42,9 @@ class Step:
     transmit: bytes
     expected: bytes | None
     observe_seconds: float
+    retry_response: bytes | None = None
+    max_attempts: int = 1
+    retry_delay_seconds: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -99,7 +102,34 @@ def load_step(raw: dict) -> Step:
     if type(observe_ms) is not int or observe_ms <= 0:
         raise ValueError(f"{action}: observe_ms must be a positive integer")
 
-    return Step(action, transmit, expected, observe_ms / 1000)
+    retry_hex = raw.get("retry_rx_hex")
+    retry_response = None if retry_hex is None else bytes.fromhex(retry_hex)
+    max_attempts = raw.get("max_attempts", 1)
+    retry_delay_ms = raw.get("retry_delay_ms", 0)
+
+    if type(max_attempts) is not int or max_attempts < 1:
+        raise ValueError(f"{action}: max_attempts must be a positive integer")
+    if type(retry_delay_ms) is not int or retry_delay_ms < 0:
+        raise ValueError(f"{action}: retry_delay_ms must be a nonnegative integer")
+
+    if retry_response is None:
+        if max_attempts != 1 or retry_delay_ms != 0:
+            raise ValueError(f"{action}: retry options require retry_rx_hex")
+    elif (
+        expected is None
+        or not retry_response
+        or retry_response == expected
+        or max_attempts < 2
+    ):
+        raise ValueError(
+            f"{action}: retries require a distinct nonempty intermediate reply, "
+            "an expected final reply and at least two attempts"
+        )
+
+    return Step(
+        action, transmit, expected, observe_ms / 1000,
+        retry_response, max_attempts, retry_delay_ms / 1000,
+    )
 
 
 def load_suite(path: Path) -> tuple[dict, list[Step], list[Case]]:
@@ -179,6 +209,25 @@ def failure(action: str, reason: str, expected: bytes | None, actual: bytes):
 
 
 def execute_step(port, step: Step) -> None:
+    """Repeat only after an explicitly permitted complete intermediate reply."""
+    for attempt in range(1, step.max_attempts + 1):
+        if execute_attempt(port, step):
+            return
+
+        if attempt == step.max_attempts:
+            raise failure(
+                step.action,
+                f"final response not reached after {step.max_attempts} attempts",
+                step.expected,
+                step.retry_response,
+            )
+
+        if step.retry_delay_seconds:
+            time.sleep(step.retry_delay_seconds)
+
+
+def execute_attempt(port, step: Step) -> bool:
+    """Return True for final success, False for a permitted retry response."""
     # Do not silently discard late responses from an earlier operation.
     pending = read_available(port)
     if pending:
@@ -195,6 +244,10 @@ def execute_step(port, step: Step) -> None:
             f"{step.action}: partial write ({written} of {len(step.transmit)} bytes)"
         )
 
+    replies = tuple(
+        reply for reply in (step.expected, step.retry_response)
+        if reply is not None
+    )
     received = bytearray()
     deadline = time.monotonic() + step.observe_seconds
     completion_deadline: float | None = None
@@ -213,7 +266,7 @@ def execute_step(port, step: Step) -> None:
                     bytes(received),
                 )
 
-            if not step.expected.startswith(received):
+            if not any(reply.startswith(received) for reply in replies):
                 raise failure(
                     step.action,
                     "response differs or contains extra bytes",
@@ -222,8 +275,7 @@ def execute_step(port, step: Step) -> None:
                 )
 
         if (
-            step.expected is not None
-            and received == step.expected
+            any(received == reply for reply in replies)
             and completion_deadline is None
         ):
             # Allow the full settling interval even when the response
@@ -241,13 +293,17 @@ def execute_step(port, step: Step) -> None:
         # Expected replies use a timeout followed by a short settling window.
         time.sleep(min(0.002, remaining))
 
-    if step.expected is not None and bytes(received) != step.expected:
-        raise failure(
-            step.action,
-            "response timeout or incomplete response",
-            step.expected,
-            bytes(received),
-        )
+    if step.expected is None or bytes(received) == step.expected:
+        return True
+    if step.retry_response is not None and bytes(received) == step.retry_response:
+        return False
+
+    raise failure(
+        step.action,
+        "response timeout or incomplete response",
+        step.expected,
+        bytes(received),
+    )
 
 
 def print_summary(passed: int, failed: int, total: int, success: bool) -> None:

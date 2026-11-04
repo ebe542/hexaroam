@@ -179,6 +179,13 @@ path = "hardware_tests/uart_registers.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "uart_calibration_persistence"
+path = "hardware_tests/uart_calibration_persistence.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"

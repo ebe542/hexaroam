@@ -13,3 +13,13 @@ python tools/uart_test.py --port COM5 --suite uart_registers
 ```
 
 See [UART hardware suite instructions](../../../../tools/README.md#uart-hardware-suites) for Windows/Ubuntu setup, wiring, port selection and individual scenarios.
+
+## Calibration persistence
+
+`uart_calibration_persistence.json` targets the separate flash-writing firmware of the same name. Reset before each complete three-case run:
+
+```bash
+python tools/uart_test.py --port COM6 --suite uart_calibration_persistence
+```
+
+It persists synthetic A, repeats A and persists changed B. The firmware checks journal data, sequence and backend counters. See the [procedure and separate restart verification](../../../../docs/uart-calibration-persistence.md). The owner reported the build passing 53 checks and subsequently all three cases passing on hardware after restart on 2026-11-04. A subsequent boot confirmed fixture B at sequence 28, slot 11.

@@ -323,3 +323,11 @@ python tools/uart_test.py --port COM5 --suite uart_registers
 ```
 
 On 2026-11-02 the owner reported 21 passing scenarios and green CI for the previous version-1 suite. On 2026-11-03 the owner also reported all 21 version-2 scenarios passing on real hardware (0 failed, 0 not completed). Use the rebuilt version-2 firmware for this suite; CI for the current revision has not yet been reported. Manual hardware suites remain outside CI and host unit-test counts.
+
+## UART calibration persistence
+
+[uart_calibration_persistence.rs](uart_calibration_persistence.rs) adds the real FlashJournalStorage backend and test-only write/erase counters to the no-servo UART path. It checks every accepted persistence result against a journal reload and verifies that identical data changes neither counters nor slot/sequence. Diagnostic UART1 reports the boot record and each checked result. The reserved journal is updated with synthetic data; no servo output, DMA or core1 is started.
+
+The owner reported all 53 hardware-build checks passing on 2026-11-04. On 2026-11-04 the owner confirmed all three UART cases passing after restart with the five-second response timeout; the subsequent boot confirmed fixture B at sequence 28, slot 11. See the [complete hardware procedure](../../../docs/uart-calibration-persistence.md) for firmware upload, suite invocation, status polling, expected logs and evidence limits.
+
+For the completed UART calibration persistence revision, the owner reported all three hardware scenarios passing, B surviving restart at sequence 28/slot 11, and full local verification with 520 tests and all 17 checks passing on 2026-11-04. The parser's retained-candidate optimization passed all 87 protocol tests and eliminated the observed RX overrun in the successful hardware runs; no arbitrary sustained-throughput guarantee is implied. CI for this combined revision has not yet been reported.

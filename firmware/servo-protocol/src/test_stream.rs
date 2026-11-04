@@ -930,3 +930,6 @@ fn invalid_write_access_with_bad_crc_is_discarded() {
             .is_none()
     );
 }
+
+#[path = "test_stream_candidate.rs"]
+mod candidate;

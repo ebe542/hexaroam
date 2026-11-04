@@ -18,12 +18,20 @@ pub struct ParsedFrame<'a> {
     pub validation: Result<(), ValidationError>,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct FrameCandidate {
+    header: Header,
+    frame_length: usize,
+    validation: Result<(), ValidationError>,
+}
+
 pub struct StreamParser<'a> {
     kind: FrameKind,
     regions: &'a [RegisterRegion],
     buffer: [u8; MAX_FRAME_SIZE],
     len: usize,
     consumed: usize,
+    candidate: Option<FrameCandidate>,
 }
 
 impl<'a> StreamParser<'a> {
@@ -39,6 +47,7 @@ impl<'a> StreamParser<'a> {
             buffer: [0; MAX_FRAME_SIZE],
             len: 0,
             consumed: 0,
+            candidate: None,
         })
     }
 
@@ -61,6 +70,8 @@ impl<'a> StreamParser<'a> {
     /// Returns the next complete CRC-valid frame.
     ///
     /// Request indices and lengths must be plausible before collecting a frame.
+    /// Header validation is performed once per candidate and retained while
+    /// waiting for its remaining bytes.
     /// Plausible requests can carry an access error for the register service.
     /// No returned frame permits hardware changes without payload/state checks.
     pub fn next_frame(
@@ -74,95 +85,104 @@ impl<'a> StreamParser<'a> {
                 return None;
             }
 
-            let opcode = match Opcode::from_byte(self.buffer[0]) {
-                Ok(opcode) => opcode,
-                Err(_) => {
-                    self.discard_prefix(1);
-                    continue;
-                }
-            };
-
-            let response_opcode = matches!(opcode, Opcode::Ack | Opcode::Nack);
-
-            let valid_direction = match self.kind {
-                FrameKind::Request => !response_opcode,
-                FrameKind::Response => response_opcode,
-            };
-
-            if !valid_direction {
-                self.discard_prefix(1);
-                continue;
-            }
-
-            if self.len < HEADER_SIZE {
-                return None;
-            }
-
-            let header = Header {
-                opcode,
-                index: self.buffer[1],
-                length: u16::from_le_bytes([self.buffer[2], self.buffer[3]]),
-            };
-
-            if self.kind == FrameKind::Request {
-                // Validate index and length independently of write permissions.
-                // All current regions support READ, so a synthetic READ header
-                // checks their widths and boundaries without authorizing writes.
-                let plausibility_header = Header {
-                    opcode: Opcode::Read,
-                    ..header
+            let candidate = if let Some(candidate) = self.candidate {
+                candidate
+            } else {
+                let opcode = match Opcode::from_byte(self.buffer[0]) {
+                    Ok(opcode) => opcode,
+                    Err(_) => {
+                        self.discard_prefix(1);
+                        continue;
+                    }
                 };
 
-                if validate_header(&plausibility_header, self.regions).is_err()
-                    || usize::from(header.length) > MAX_PAYLOAD_SIZE
-                {
-                    // Reject impossible candidates before collecting payload
-                    // or CRC, preserving overlapping possible frame starts.
+                let response_opcode =
+                    matches!(opcode, Opcode::Ack | Opcode::Nack);
+
+                let valid_direction = match self.kind {
+                    FrameKind::Request => !response_opcode,
+                    FrameKind::Response => response_opcode,
+                };
+
+                if !valid_direction {
                     self.discard_prefix(1);
                     continue;
                 }
-            }
 
-            let read_request =
-                self.kind == FrameKind::Request && opcode == Opcode::Read;
+                if self.len < HEADER_SIZE {
+                    return None;
+                }
 
-            // Responses describe an outcome, not a new register access.
-            // An empty ACK or a NACK for an unknown index is therefore valid.
-            let validation = match self.kind {
-                FrameKind::Request => validate_header(&header, self.regions),
-                FrameKind::Response => Ok(()),
-            };
+                let header = Header {
+                    opcode,
+                    index: self.buffer[1],
+                    length: u16::from_le_bytes([
+                        self.buffer[2],
+                        self.buffer[3],
+                    ]),
+                };
 
-            if self.kind == FrameKind::Response
-                && opcode == Opcode::Nack
-                && header.length != 1
-            {
-                self.discard_prefix(1);
-                continue;
-            }
+                if self.kind == FrameKind::Request {
+                    // All current regions support READ. This checks index,
+                    // width and boundaries independently of write permissions.
+                    let plausibility_header = Header {
+                        opcode: Opcode::Read,
+                        ..header
+                    };
 
-            let payload_length = if read_request {
-                0
-            } else {
+                    if validate_header(&plausibility_header, self.regions)
+                        .is_err()
+                    {
+                        self.discard_prefix(1);
+                        continue;
+                    }
+                }
+
                 if usize::from(header.length) > MAX_PAYLOAD_SIZE {
-                    // Oversized payloads cannot fit in the parser buffer.
-                    // Preserve overlapping possible frame starts.
                     self.discard_prefix(1);
                     continue;
                 }
 
-                // A plausible request with denied access still needs a CRC
-                // check before the service may send a NACK response.
+                if self.kind == FrameKind::Response
+                    && opcode == Opcode::Nack
+                    && header.length != 1
+                {
+                    self.discard_prefix(1);
+                    continue;
+                }
 
-                usize::from(header.length)
+                let validation = match self.kind {
+                    FrameKind::Request => {
+                        validate_header(&header, self.regions)
+                    }
+                    FrameKind::Response => Ok(()),
+                };
+
+                let payload_length = if self.kind == FrameKind::Request
+                    && opcode == Opcode::Read
+                {
+                    0
+                } else {
+                    usize::from(header.length)
+                };
+
+                let candidate = FrameCandidate {
+                    header,
+                    frame_length: HEADER_SIZE + payload_length + CRC_SIZE,
+                    validation,
+                };
+
+                // Additional payload bytes do not change this header.
+                // Prefix removal and timeout invalidate the cached candidate.
+                self.candidate = Some(candidate);
+                candidate
             };
 
-            let crc_offset = HEADER_SIZE + payload_length;
-            let frame_length = crc_offset + CRC_SIZE;
-
-            if self.len < frame_length {
+            if self.len < candidate.frame_length {
                 return None;
             }
+
+            let crc_offset = candidate.frame_length - CRC_SIZE;
 
             let received_crc = u32::from_le_bytes([
                 self.buffer[crc_offset],
@@ -177,15 +197,15 @@ impl<'a> StreamParser<'a> {
             }
 
             // Keep bytes in place while the returned payload borrows them.
-            // Rust prevents another mutable parser call during that borrow.
-            self.consumed = frame_length;
+            self.consumed = candidate.frame_length;
+            self.candidate = None;
 
             return Some(ParsedFrame {
                 frame: Frame {
-                    header,
+                    header: candidate.header,
                     payload: &self.buffer[HEADER_SIZE..crc_offset],
                 },
-                validation,
+                validation: candidate.validation,
             });
         }
     }
@@ -197,6 +217,7 @@ impl<'a> StreamParser<'a> {
         // Reset the logical contents; clearing the backing bytes is unnecessary.
         self.len = 0;
         self.consumed = 0;
+        self.candidate = None;
     }
 
     fn retire_consumed(&mut self) {
@@ -208,6 +229,8 @@ impl<'a> StreamParser<'a> {
     }
 
     fn discard_prefix(&mut self, count: usize) {
+        // Removing a prefix changes the possible frame start.
+        self.candidate = None;
         self.buffer
             .copy_within(count..self.len, 0);
         self.len -= count;

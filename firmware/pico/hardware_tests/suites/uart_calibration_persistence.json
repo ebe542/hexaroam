@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "firmware": "firmware/pico/hardware_tests/uart_calibration_persistence.rs",
+  "fixture": {
+    "protocol_version": 2,
+    "status": 0,
+    "control": 0,
+    "servo_count": 0,
+    "calibration_valid": false
+  },
+  "serial": {
+    "baud": 115200,
+    "data_bits": 8,
+    "parity": "none",
+    "stop_bits": 1,
+    "flow_control": "none"
+  },
+  "timing": {
+    "firmware_receive_idle_ms": 100,
+    "no_reply_observation_ms": 200,
+    "read_response_timeout_ms": 5000
+  },
+  "verification": "On 2026-11-04 the owner reported Fixture check, store_a, repeat_a and store_b passing on real Pico hardware with COM6 and the 5000-ms response timeout after restart. Preflight before restart correctly rejected retained Success Status. A subsequent boot reported seq=28, slot=11, fixture=B, followed by UART calibration persistence ready. This confirms B remains readable after restart; an explicit pre-reset B sequence/slot log was not reported. The owner subsequently reported full local verification passing 520 tests and all 17 checks. CI for this combined revision has not yet been reported.",
+  "instructions": "Reset the Pico before each suite invocation so preflight Status is zero. Flash the matching firmware. This suite updates the reserved calibration journal with synthetic data; run all three cases in order. Restart verification via UART1 is separate.",
+  "before_each_case": [
+    {
+      "action": "Control remains disabled",
+      "request_body_hex": "01 03 01 00",
+      "encoding": "crc",
+      "tx_hex": "01 03 01 00 61 37 A5 82",
+      "response_body_hex": "80 03 01 00 00",
+      "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+      "observe_ms": 5000
+    }
+  ],
+  "cases": [
+    {
+      "id": "store_a",
+      "title": "Persist synthetic dataset A",
+      "verification": "automated_hardware_confirmed",
+      "note": "Run the whole suite in this order. The firmware verifies stored data, sequence and backend write/erase counters; UART1 logs the details.",
+      "steps": [
+        {
+          "action": "WRITE complete calibration A",
+          "request_body_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF E8 03 00 00 94 11 00 00 D0 07 00 00 01 00 00 00 76 EE FF FF ED 03 00 00 9E 11 00 00 CB 07 00 00 02 00 00 00 80 EE FF FF F2 03 00 00 A8 11 00 00 C6 07 00 00 03 00 00 00 8A EE FF FF F7 03 00 00 B2 11 00 00 C1 07 00 00 04 00 00 00 94 EE FF FF FC 03 00 00 BC 11 00 00 BC 07 00 00 05 00 00 00 9E EE FF FF 01 04 00 00 C6 11 00 00 B7 07 00 00 06 00 00 00 A8 EE FF FF 06 04 00 00 D0 11 00 00 B2 07 00 00 07 00 00 00 B2 EE FF FF 0B 04 00 00 DA 11 00 00 AD 07 00 00 08 00 00 00 BC EE FF FF 10 04 00 00 E4 11 00 00 A8 07 00 00 09 00 00 00 C6 EE FF FF 15 04 00 00 EE 11 00 00 A3 07 00 00 0A 00 00 00 D0 EE FF FF 1A 04 00 00 F8 11 00 00 9E 07 00 00 0B 00 00 00 DA EE FF FF 1F 04 00 00 02 12 00 00 99 07 00 00 0C 00 00 00 E4 EE FF FF 24 04 00 00 0C 12 00 00 94 07 00 00 0D 00 00 00 EE EE FF FF 29 04 00 00 16 12 00 00 8F 07 00 00 0E 00 00 00 F8 EE FF FF 2E 04 00 00 20 12 00 00 8A 07 00 00 0F 00 00 00 02 EF FF FF 33 04 00 00 2A 12 00 00 85 07 00 00 10 00 00 00 0C EF FF FF 38 04 00 00 34 12 00 00 80 07 00 00 11 00 00 00 16 EF FF FF 3D 04 00 00 3E 12 00 00 7B 07 00 00 79 D7 52 EC",
+          "encoding": "crc",
+          "tx_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF E8 03 00 00 94 11 00 00 D0 07 00 00 01 00 00 00 76 EE FF FF ED 03 00 00 9E 11 00 00 CB 07 00 00 02 00 00 00 80 EE FF FF F2 03 00 00 A8 11 00 00 C6 07 00 00 03 00 00 00 8A EE FF FF F7 03 00 00 B2 11 00 00 C1 07 00 00 04 00 00 00 94 EE FF FF FC 03 00 00 BC 11 00 00 BC 07 00 00 05 00 00 00 9E EE FF FF 01 04 00 00 C6 11 00 00 B7 07 00 00 06 00 00 00 A8 EE FF FF 06 04 00 00 D0 11 00 00 B2 07 00 00 07 00 00 00 B2 EE FF FF 0B 04 00 00 DA 11 00 00 AD 07 00 00 08 00 00 00 BC EE FF FF 10 04 00 00 E4 11 00 00 A8 07 00 00 09 00 00 00 C6 EE FF FF 15 04 00 00 EE 11 00 00 A3 07 00 00 0A 00 00 00 D0 EE FF FF 1A 04 00 00 F8 11 00 00 9E 07 00 00 0B 00 00 00 DA EE FF FF 1F 04 00 00 02 12 00 00 99 07 00 00 0C 00 00 00 E4 EE FF FF 24 04 00 00 0C 12 00 00 94 07 00 00 0D 00 00 00 EE EE FF FF 29 04 00 00 16 12 00 00 8F 07 00 00 0E 00 00 00 F8 EE FF FF 2E 04 00 00 20 12 00 00 8A 07 00 00 0F 00 00 00 02 EF FF FF 33 04 00 00 2A 12 00 00 85 07 00 00 10 00 00 00 0C EF FF FF 38 04 00 00 34 12 00 00 80 07 00 00 11 00 00 00 16 EF FF FF 3D 04 00 00 3E 12 00 00 7B 07 00 00 79 D7 52 EC EB C8 A8 06",
+          "response_body_hex": "80 10 00 00",
+          "expected_rx_hex": "80 10 00 00 57 CA 3B D0",
+          "observe_ms": 5000
+        },
+        {
+          "action": "Poll Status until calibration persistence succeeds",
+          "request_body_hex": "01 01 04 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 01 00 00",
+          "expected_rx_hex": "80 01 04 00 00 01 00 00 26 79 3D 0A",
+          "observe_ms": 5000,
+          "retry_rx_hex": "80 01 04 00 04 00 00 00 46 84 9D 84",
+          "max_attempts": 50,
+          "retry_delay_ms": 20
+        },
+        {
+          "action": "Control remains disabled",
+          "request_body_hex": "01 03 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 03 01 00 61 37 A5 82",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+          "observe_ms": 5000
+        },
+        {
+          "action": "ServoCount remains zero until a future initialization implementation",
+          "request_body_hex": "01 04 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 04 01 00 E4 21 EA 87",
+          "response_body_hex": "80 04 01 00 00",
+          "expected_rx_hex": "80 04 01 00 00 EF BA 64 F9",
+          "observe_ms": 5000
+        }
+      ]
+    },
+    {
+      "id": "repeat_a",
+      "title": "Repeat A without another write or sequence increment",
+      "verification": "automated_hardware_confirmed",
+      "note": "Run the whole suite in this order. The firmware verifies stored data, sequence and backend write/erase counters; UART1 logs the details.",
+      "steps": [
+        {
+          "action": "WRITE complete calibration A",
+          "request_body_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF E8 03 00 00 94 11 00 00 D0 07 00 00 01 00 00 00 76 EE FF FF ED 03 00 00 9E 11 00 00 CB 07 00 00 02 00 00 00 80 EE FF FF F2 03 00 00 A8 11 00 00 C6 07 00 00 03 00 00 00 8A EE FF FF F7 03 00 00 B2 11 00 00 C1 07 00 00 04 00 00 00 94 EE FF FF FC 03 00 00 BC 11 00 00 BC 07 00 00 05 00 00 00 9E EE FF FF 01 04 00 00 C6 11 00 00 B7 07 00 00 06 00 00 00 A8 EE FF FF 06 04 00 00 D0 11 00 00 B2 07 00 00 07 00 00 00 B2 EE FF FF 0B 04 00 00 DA 11 00 00 AD 07 00 00 08 00 00 00 BC EE FF FF 10 04 00 00 E4 11 00 00 A8 07 00 00 09 00 00 00 C6 EE FF FF 15 04 00 00 EE 11 00 00 A3 07 00 00 0A 00 00 00 D0 EE FF FF 1A 04 00 00 F8 11 00 00 9E 07 00 00 0B 00 00 00 DA EE FF FF 1F 04 00 00 02 12 00 00 99 07 00 00 0C 00 00 00 E4 EE FF FF 24 04 00 00 0C 12 00 00 94 07 00 00 0D 00 00 00 EE EE FF FF 29 04 00 00 16 12 00 00 8F 07 00 00 0E 00 00 00 F8 EE FF FF 2E 04 00 00 20 12 00 00 8A 07 00 00 0F 00 00 00 02 EF FF FF 33 04 00 00 2A 12 00 00 85 07 00 00 10 00 00 00 0C EF FF FF 38 04 00 00 34 12 00 00 80 07 00 00 11 00 00 00 16 EF FF FF 3D 04 00 00 3E 12 00 00 7B 07 00 00 79 D7 52 EC",
+          "encoding": "crc",
+          "tx_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF E8 03 00 00 94 11 00 00 D0 07 00 00 01 00 00 00 76 EE FF FF ED 03 00 00 9E 11 00 00 CB 07 00 00 02 00 00 00 80 EE FF FF F2 03 00 00 A8 11 00 00 C6 07 00 00 03 00 00 00 8A EE FF FF F7 03 00 00 B2 11 00 00 C1 07 00 00 04 00 00 00 94 EE FF FF FC 03 00 00 BC 11 00 00 BC 07 00 00 05 00 00 00 9E EE FF FF 01 04 00 00 C6 11 00 00 B7 07 00 00 06 00 00 00 A8 EE FF FF 06 04 00 00 D0 11 00 00 B2 07 00 00 07 00 00 00 B2 EE FF FF 0B 04 00 00 DA 11 00 00 AD 07 00 00 08 00 00 00 BC EE FF FF 10 04 00 00 E4 11 00 00 A8 07 00 00 09 00 00 00 C6 EE FF FF 15 04 00 00 EE 11 00 00 A3 07 00 00 0A 00 00 00 D0 EE FF FF 1A 04 00 00 F8 11 00 00 9E 07 00 00 0B 00 00 00 DA EE FF FF 1F 04 00 00 02 12 00 00 99 07 00 00 0C 00 00 00 E4 EE FF FF 24 04 00 00 0C 12 00 00 94 07 00 00 0D 00 00 00 EE EE FF FF 29 04 00 00 16 12 00 00 8F 07 00 00 0E 00 00 00 F8 EE FF FF 2E 04 00 00 20 12 00 00 8A 07 00 00 0F 00 00 00 02 EF FF FF 33 04 00 00 2A 12 00 00 85 07 00 00 10 00 00 00 0C EF FF FF 38 04 00 00 34 12 00 00 80 07 00 00 11 00 00 00 16 EF FF FF 3D 04 00 00 3E 12 00 00 7B 07 00 00 79 D7 52 EC EB C8 A8 06",
+          "response_body_hex": "80 10 00 00",
+          "expected_rx_hex": "80 10 00 00 57 CA 3B D0",
+          "observe_ms": 5000
+        },
+        {
+          "action": "Poll Status until calibration persistence succeeds",
+          "request_body_hex": "01 01 04 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 01 00 00",
+          "expected_rx_hex": "80 01 04 00 00 01 00 00 26 79 3D 0A",
+          "observe_ms": 5000,
+          "retry_rx_hex": "80 01 04 00 04 00 00 00 46 84 9D 84",
+          "max_attempts": 50,
+          "retry_delay_ms": 20
+        },
+        {
+          "action": "Control remains disabled",
+          "request_body_hex": "01 03 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 03 01 00 61 37 A5 82",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+          "observe_ms": 5000
+        },
+        {
+          "action": "ServoCount remains zero until a future initialization implementation",
+          "request_body_hex": "01 04 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 04 01 00 E4 21 EA 87",
+          "response_body_hex": "80 04 01 00 00",
+          "expected_rx_hex": "80 04 01 00 00 EF BA 64 F9",
+          "observe_ms": 5000
+        }
+      ]
+    },
+    {
+      "id": "store_b",
+      "title": "Persist changed synthetic dataset B",
+      "verification": "automated_hardware_confirmed",
+      "note": "Run the whole suite in this order. The firmware verifies stored data, sequence and backend write/erase counters; UART1 logs the details.",
+      "steps": [
+        {
+          "action": "WRITE complete calibration B",
+          "request_body_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF 4C 04 00 00 94 11 00 00 34 08 00 00 01 00 00 00 76 EE FF FF 51 04 00 00 9E 11 00 00 2F 08 00 00 02 00 00 00 80 EE FF FF 56 04 00 00 A8 11 00 00 2A 08 00 00 03 00 00 00 8A EE FF FF 5B 04 00 00 B2 11 00 00 25 08 00 00 04 00 00 00 94 EE FF FF 60 04 00 00 BC 11 00 00 20 08 00 00 05 00 00 00 9E EE FF FF 65 04 00 00 C6 11 00 00 1B 08 00 00 06 00 00 00 A8 EE FF FF 6A 04 00 00 D0 11 00 00 16 08 00 00 07 00 00 00 B2 EE FF FF 6F 04 00 00 DA 11 00 00 11 08 00 00 08 00 00 00 BC EE FF FF 74 04 00 00 E4 11 00 00 0C 08 00 00 09 00 00 00 C6 EE FF FF 79 04 00 00 EE 11 00 00 07 08 00 00 0A 00 00 00 D0 EE FF FF 7E 04 00 00 F8 11 00 00 02 08 00 00 0B 00 00 00 DA EE FF FF 83 04 00 00 02 12 00 00 FD 07 00 00 0C 00 00 00 E4 EE FF FF 88 04 00 00 0C 12 00 00 F8 07 00 00 0D 00 00 00 EE EE FF FF 8D 04 00 00 16 12 00 00 F3 07 00 00 0E 00 00 00 F8 EE FF FF 92 04 00 00 20 12 00 00 EE 07 00 00 0F 00 00 00 02 EF FF FF 97 04 00 00 2A 12 00 00 E9 07 00 00 10 00 00 00 0C EF FF FF 9C 04 00 00 34 12 00 00 E4 07 00 00 11 00 00 00 16 EF FF FF A1 04 00 00 3E 12 00 00 DF 07 00 00 3E 4E 33 BD",
+          "encoding": "crc",
+          "tx_hex": "02 10 70 01 48 01 68 01 00 00 00 00 6C EE FF FF 4C 04 00 00 94 11 00 00 34 08 00 00 01 00 00 00 76 EE FF FF 51 04 00 00 9E 11 00 00 2F 08 00 00 02 00 00 00 80 EE FF FF 56 04 00 00 A8 11 00 00 2A 08 00 00 03 00 00 00 8A EE FF FF 5B 04 00 00 B2 11 00 00 25 08 00 00 04 00 00 00 94 EE FF FF 60 04 00 00 BC 11 00 00 20 08 00 00 05 00 00 00 9E EE FF FF 65 04 00 00 C6 11 00 00 1B 08 00 00 06 00 00 00 A8 EE FF FF 6A 04 00 00 D0 11 00 00 16 08 00 00 07 00 00 00 B2 EE FF FF 6F 04 00 00 DA 11 00 00 11 08 00 00 08 00 00 00 BC EE FF FF 74 04 00 00 E4 11 00 00 0C 08 00 00 09 00 00 00 C6 EE FF FF 79 04 00 00 EE 11 00 00 07 08 00 00 0A 00 00 00 D0 EE FF FF 7E 04 00 00 F8 11 00 00 02 08 00 00 0B 00 00 00 DA EE FF FF 83 04 00 00 02 12 00 00 FD 07 00 00 0C 00 00 00 E4 EE FF FF 88 04 00 00 0C 12 00 00 F8 07 00 00 0D 00 00 00 EE EE FF FF 8D 04 00 00 16 12 00 00 F3 07 00 00 0E 00 00 00 F8 EE FF FF 92 04 00 00 20 12 00 00 EE 07 00 00 0F 00 00 00 02 EF FF FF 97 04 00 00 2A 12 00 00 E9 07 00 00 10 00 00 00 0C EF FF FF 9C 04 00 00 34 12 00 00 E4 07 00 00 11 00 00 00 16 EF FF FF A1 04 00 00 3E 12 00 00 DF 07 00 00 3E 4E 33 BD EB C8 A8 06",
+          "response_body_hex": "80 10 00 00",
+          "expected_rx_hex": "80 10 00 00 57 CA 3B D0",
+          "observe_ms": 5000
+        },
+        {
+          "action": "Poll Status until calibration persistence succeeds",
+          "request_body_hex": "01 01 04 00",
+          "encoding": "crc",
+          "tx_hex": "01 01 04 00 4A 17 56 FC",
+          "response_body_hex": "80 01 04 00 00 01 00 00",
+          "expected_rx_hex": "80 01 04 00 00 01 00 00 26 79 3D 0A",
+          "observe_ms": 5000,
+          "retry_rx_hex": "80 01 04 00 04 00 00 00 46 84 9D 84",
+          "max_attempts": 50,
+          "retry_delay_ms": 20
+        },
+        {
+          "action": "Control remains disabled",
+          "request_body_hex": "01 03 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 03 01 00 61 37 A5 82",
+          "response_body_hex": "80 03 01 00 00",
+          "expected_rx_hex": "80 03 01 00 00 56 82 B3 64",
+          "observe_ms": 5000
+        },
+        {
+          "action": "ServoCount remains zero until a future initialization implementation",
+          "request_body_hex": "01 04 01 00",
+          "encoding": "crc",
+          "tx_hex": "01 04 01 00 E4 21 EA 87",
+          "response_body_hex": "80 04 01 00 00",
+          "expected_rx_hex": "80 04 01 00 00 EF BA 64 F9",
+          "observe_ms": 5000
+        }
+      ]
+    }
+  ]
+}
