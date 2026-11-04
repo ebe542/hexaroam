@@ -142,6 +142,24 @@ pub fn append<const N: usize, S: JournalStorage>(
     })
 }
 
+/// Saves calibrations only when they differ from the newest valid record.
+///
+/// Identical data returns the existing record without writing, erasing
+/// or incrementing its sequence. Read and scan errors abort the operation.
+pub fn save_if_changed<const N: usize, S: JournalStorage>(
+    storage: &mut S,
+    calibrations: &[Option<Calibration>; N],
+    checksum: &mut impl Checksum,
+) -> Result<LocatedRecord<N>, JournalError<S::Error>> {
+    if let Some(latest) = load::<N, S>(storage, checksum)? {
+        if latest.record.calibrations == *calibrations {
+            return Ok(latest);
+        }
+    }
+
+    append(storage, calibrations, checksum)
+}
+
 #[cfg(test)]
 #[path = "test_journal.rs"]
 mod tests;

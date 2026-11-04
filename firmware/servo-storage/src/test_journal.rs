@@ -8,7 +8,7 @@ use super::{JournalError, append};
 use crate::{
     JournalRead, JournalRecord, JournalStorage, LocatedRecord, SLOT_COUNT,
     SLOT_SIZE, SLOTS_PER_SECTOR, ScanError, SlotError, SoftwareCrc32,
-    encode_slot,
+    encode_slot, save_if_changed,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -539,5 +539,235 @@ fn last_available_sequence_can_be_written() {
             &mut SoftwareCrc32,
         ),
         expected(1, u64::MAX, [Some(calibration())]),
+    );
+}
+
+fn changed_calibration() -> Calibration {
+    Calibration::new(
+        Angle::from_centidegrees(-4_500),
+        1_100,
+        Angle::from_centidegrees(9_000),
+        2_100,
+    )
+    .unwrap()
+}
+
+#[test]
+fn save_if_changed_writes_first_record_into_empty_journal() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(0, 1, calibrations),
+    );
+    assert_eq!(
+        storage.operations.as_slice(),
+        &[(b'W', 0)]
+    );
+}
+
+#[test]
+fn save_if_changed_preserves_identical_record_and_storage() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+    storage.seed(3, 7, calibrations);
+    let before = storage.slots;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(3, 7, calibrations),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_appends_different_calibrations() {
+    let mut storage = MemoryStorage::new();
+    storage.seed(0, 7, [Some(calibration())]);
+    let previous = storage.slots[0];
+    let calibrations = [Some(changed_calibration())];
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(1, 8, calibrations),
+    );
+
+    assert_eq!(
+        storage.operations.as_slice(),
+        &[(b'W', 1)]
+    );
+    assert_eq!(storage.slots[0], previous);
+}
+
+#[test]
+fn save_if_changed_compares_highest_sequence_not_last_slot() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+
+    storage.seed(1, 20, calibrations);
+    storage.seed(10, 19, [Some(changed_calibration())]);
+    let before = storage.slots;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(1, 20, calibrations),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_does_not_reuse_matching_older_record() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+
+    storage.seed(0, 1, calibrations);
+    storage.seed(1, 2, [Some(changed_calibration())]);
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(2, 3, calibrations),
+    );
+
+    assert_eq!(
+        storage.operations.as_slice(),
+        &[(b'W', 2)]
+    );
+}
+
+#[test]
+fn save_if_changed_does_not_rotate_full_identical_journal() {
+    let mut storage = MemoryStorage::new();
+    storage.fill_sector(0, 1);
+    storage.fill_sector(1, 9);
+    let before = storage.slots;
+    let calibrations = [Some(calibration())];
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(
+            SLOT_COUNT - 1,
+            SLOT_COUNT as u64,
+            calibrations,
+        ),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_accepts_identical_data_at_maximum_sequence() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+    storage.seed(0, u64::MAX, calibrations);
+    let before = storage.slots;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        expected(0, u64::MAX, calibrations),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_aborts_on_read_error_without_modification() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+    storage.seed(0, 1, calibrations);
+    storage.fail_read_slot = Some(SLOT_COUNT - 1);
+    let before = storage.slots;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        Err(JournalError::Storage(
+            StorageError::Read
+        )),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_aborts_on_ambiguous_sequences() {
+    let mut storage = MemoryStorage::new();
+    let calibrations = [Some(calibration())];
+    storage.seed(0, 7, calibrations);
+    storage.seed(1, 7, calibrations);
+    let before = storage.slots;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &calibrations,
+            &mut SoftwareCrc32,
+        ),
+        Err(JournalError::Scan(
+            ScanError::DuplicateSequence(7),
+        )),
+    );
+
+    assert!(storage.operations.is_empty());
+    assert_eq!(storage.slots, before);
+}
+
+#[test]
+fn save_if_changed_propagates_append_write_failure() {
+    let mut storage = MemoryStorage::new();
+    storage.fail_write = true;
+
+    assert_eq!(
+        save_if_changed(
+            &mut storage,
+            &[Some(calibration())],
+            &mut SoftwareCrc32,
+        ),
+        Err(JournalError::Storage(
+            StorageError::Write
+        )),
+    );
+
+    assert_eq!(
+        storage.operations.as_slice(),
+        &[(b'W', 0)]
     );
 }

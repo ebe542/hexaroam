@@ -37,6 +37,12 @@ mod pending_calibration;
 
 pub use pending_calibration::{PendingCalibration, PendingCalibrationError};
 
+mod calibration_persistence;
+
+pub use calibration_persistence::{
+    CalibrationPersistenceError, persist_calibration,
+};
+
 #[cfg(test)]
 mod test_support;
 

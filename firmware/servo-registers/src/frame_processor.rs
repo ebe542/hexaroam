@@ -6,7 +6,10 @@ use hexaroam_servo_protocol::{
     encode_frame,
 };
 
-use crate::{OutputBackend, REGISTER_REGIONS, RegisterService, ServiceError};
+use crate::{
+    CalibrationCompletionError, CalibrationSaveResult, OutputBackend,
+    PendingCalibration, REGISTER_REGIONS, RegisterService, ServiceError,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct FrameProgress {
@@ -180,6 +183,29 @@ impl<O: OutputBackend> FrameProcessor<O> {
                 }
             }
         }
+    }
+
+    /// Borrows a pending request once the software response buffer is empty.
+    ///
+    /// Transport acceptance does not guarantee delivery to the master.
+    /// Repeated calls retain the request and Busy until completion.
+    pub fn calibration_ready(&self) -> Option<&PendingCalibration<18>> {
+        if self.response.is_pending() {
+            return None;
+        }
+
+        self.registers.pending_calibration()
+    }
+
+    /// Reports completion of a previously released calibration request.
+    ///
+    /// The caller must finish persistence before reporting its result.
+    pub fn complete_calibration(
+        &mut self,
+        result: CalibrationSaveResult,
+    ) -> Result<(), CalibrationCompletionError> {
+        self.registers
+            .complete_calibration(result)
     }
 }
 

@@ -29,7 +29,7 @@ pub use storage::{
 
 mod journal;
 
-pub use journal::{JournalError, append, load};
+pub use journal::{JournalError, append, load, save_if_changed};
 
 mod journal_layout;
 

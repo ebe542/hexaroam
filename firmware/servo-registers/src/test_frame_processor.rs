@@ -695,3 +695,6 @@ fn full_target_response_survives_small_receive_and_transmit_budgets() {
     assert_eq!(trace.writes.get(), 1);
     assert_eq!(trace.starts.get(), 0);
 }
+
+#[path = "test_calibration_dispatch.rs"]
+mod calibration_dispatch;

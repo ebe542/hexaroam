@@ -1,6 +1,6 @@
 # Servo register service
 
-Current development status (2026-11-03): calibration WRITE at 0x10 now validates and owns a complete eighteen-servo dataset in RAM. A pending request sets Busy; completion records its result and releases the request. The owner confirmed all 12 request tests and full local verification with **489 tests and all 17 checks passing** (102 register-package tests in total). Physical ACK-completion gating, journal scheduling and restart integration remain future work. No hardware calibration-transfer run or CI result is claimed for this change. The preceding four-byte Status revision passed its UART suite and CI.
+Current development status (2026-11-04): the hardware-independent persist_calibration() function now connects FrameProcessor readiness to journal save_if_changed() and completion status. The owner confirmed all eight persistence-integration tests and full local verification with **515 tests and all 17 checks passing**. The register package now contains 118 host tests. Combined physical UART/flash persistence, normal-application integration and CI for this step have not yet been reported.
 
 Hardware-independent no_std register handling above [servo-protocol](../servo-protocol/README.md). RegisterService consumes CRC-checked ParsedFrame values and returns ACK/NACK frames borrowing caller-provided payload storage. The frame codec adds header/CRC bytes; this package does not directly access UART hardware or flash. See the [version-2 contract](../../docs/servo-register-protocol.md).
 
@@ -58,13 +58,27 @@ While Busy, otherwise valid modifying requests are rejected before target-count 
 
 Status bits 8..15 use 0=None, 1=Success, 2=StorageError and 3=VerificationFailed. None is reported initially and after accepting a new request. The result persists after completion; rejected requests do not overwrite it. Fault remains an independent output-status bit.
 
-This step does not write flash. The program loop must later wait for the ACK to finish physically on UART before invoking the journal writer. RegisterService exposes request and completion methods, but forwarding them through FrameProcessor and coordinating transport completion are still future work. An available pending request alone is not a write authorization.
+This step does not write flash. The program loop must later wait until the complete ACK has been accepted by the transport and the software response buffer is empty before invoking the journal writer. A separate UART-idle interface is not required. FrameProcessor now forwards completion and exposes calibration_ready() only when its software response buffer is empty. The caller must perform persistence before reporting completion; the API does not independently verify that a journal write took place. An available pending request alone is not a write authorization.
 
 ## Frame processing over a byte transport
 
 [FrameProcessor](src/frame_processor.rs) owns RegisterService, a request StreamParser, one ResponseBuffer<MAX_FRAME_SIZE> and a pending receive-timeout flag. Every poll first services output, then transmits an existing response within its byte budget. Pending response bytes block reception. Newly produced ACK/NACK frames are copied into the response buffer and transmitted on a later poll. The master waits for each response before sending its next request.
 
 Complete buffered requests are drained before an incomplete remainder is discarded on a deferred timeout. The caller detects timeouts and accounts for unread transport data. Receive errors preserve parser contents; transmit errors retain the unsent suffix. FrameProgress reports receive/transmit counts, processed requests and receive_empty; false receive_empty can mean no read was attempted. Byte budgets bound transport calls, not elapsed processing time. Transport acceptance does not mean physical UART completion.
+
+## Calibration dispatch after response acceptance
+
+calibration_ready() returns an immutable pending request only when no encoded response bytes remain in the software buffer. Partial transmission, backpressure, transmit errors and a newly queued status response delay readiness. Repeated readiness checks do not consume the request or clear Busy. There is no separate UART-idle query; software-buffer completion does not prove physical transmission or receipt by the master.
+
+complete_calibration() forwards Success, StorageError or VerificationFailed to RegisterService, where the result is retained and the request released. The caller must save the request before invoking completion. Eight host tests in [test_calibration_dispatch.rs](src/test_calibration_dispatch.rs) cover initial/queued states, partial ACKs, backpressure, retry after transmission errors, status-response gating and completion, using the parent FrameProcessor test module's simulated transport. No journal operation occurs in those tests.
+
+## Calibration persistence integration
+
+[persist_calibration()](src/calibration_persistence.rs) borrows the FrameProcessor, a JournalStorage backend and a Checksum adapter. It returns Ok(false) without any storage access when no request is ready, including while ACK bytes remain queued. For a released request it calls save_if_changed(); identical newest data succeeds without another program/erase or sequence increment. Changed data uses the existing append and verification logic.
+
+Successful persistence reports CalibrationSaveResult::Success. JournalError::VerificationFailed maps to the distinct verification result; other journal errors map to StorageError. The original JournalError remains available to the caller through CalibrationPersistenceError::Journal. Completion releases the request and clears Busy on either success or failure, so retries require a new request and do not happen implicitly. Unexpected completion errors are returned separately. Ok(true) means the request completed successfully; it does not necessarily mean flash was written.
+
+The eight tests in [test_calibration_persistence.rs](src/test_calibration_persistence.rs) combine the real request parser, FrameProcessor, register service and journal logic with simulated UART/storage. They verify idle and queued/partial ACK guards, successful saving, identical retry, changed data, read/write errors, failed verification and absence of automatic retry. No GPIO or real flash operation is exercised. The future program loop must call this function after poll; physical UART-idle waiting is not required by the chosen design.
 
 ## Modules and tests
 
@@ -77,7 +91,7 @@ Complete buffered requests are drained before an incomplete remainder is discard
 | [frame_processor.rs](src/frame_processor.rs) | Bounded protocol processing |
 | [test_support.rs](src/test_support.rs) | Shared host-test backend |
 
-The current 102 register-package tests comprise 16 control, 19 service, 8 target, 12 ServoBank, 11 wire-pipeline, 12 FrameProcessor, 12 pending-calibration and 12 calibration-request cases. New request tests exercise state guards, immutable RAM ownership, read availability during Busy, atomic rejection, response capacity, completion and result retention. Physical UART timing and flash execution are separate checks.
+The current 118 register-package tests comprise 16 control, 19 service, 8 target, 12 ServoBank, 11 wire-pipeline, 28 FrameProcessor integration cases (including eight dispatch and eight persistence cases), 12 pending-calibration and 12 calibration-request cases. New request tests exercise state guards, immutable RAM ownership, read availability during Busy, atomic rejection, response capacity, completion and result retention. Physical UART timing and flash execution are separate checks.
 
 From the repository root:
 
@@ -93,3 +107,7 @@ python tools/dev.py doc
 The [uart_registers example](../pico/hardware_tests/README.md#uart-register-requestresponse-test) connects UartTransport and FrameProcessor to NoServoOutput. It reports version 2, Status=0 and ServoCount=0; there is no physical servo backend or journal-loaded calibration. The example applies a provisional 100-ms receive-idle timeout. On 2026-11-03 the owner reported all 21 scenarios passing on real hardware; see [wire vectors](../../docs/uart-register-test-vectors.md).
 
 The owner also reported all 75 package tests, 82 protocol-package tests, and full local verification with 462 tests and 17 checks passing. CI for this revision has not yet been reported. These results do not establish protocol-to-real-PIO integration, flash-operation timing, UART hardware-error injection or normal-application behavior.
+
+## Retry-safe journal saving (2026-11-04)
+
+The storage layer now provides `save_if_changed()`. The host-tested persist_calibration() function uses it to acknowledge already persisted identical data without another flash write or sequence increment. Busy rejects concurrent modifications; a retry after completion can be accepted and compared against the newest valid record. ACK delivery is not guaranteed by draining the transmit buffer, so equality-based saving is required independently of UART timing. Ten new host tests and full local verification (499 tests, all 17 checks) passed according to the owner. The persistence coordinator now uses this function with FrameProcessor readiness; the UART hardware example does not yet invoke it.
