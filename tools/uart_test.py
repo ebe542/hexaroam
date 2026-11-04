@@ -16,6 +16,10 @@ DEFAULT_SUITE_DIR = (
     PROJECT_ROOT / "firmware" / "pico" / "hardware_tests" / "suites"
 )
 
+# Detect trailing bytes briefly after a complete response without waiting
+# for the full response timeout on every successful step.
+RESPONSE_SETTLE_SECONDS = 0.020
+
 
 def resolve_suite(value: str) -> Path:
     """Resolve bare names in the suite directory and explicit paths from cwd."""
@@ -193,6 +197,7 @@ def execute_step(port, step: Step) -> None:
 
     received = bytearray()
     deadline = time.monotonic() + step.observe_seconds
+    completion_deadline: float | None = None
 
     while True:
         chunk = read_available(port)
@@ -216,12 +221,24 @@ def execute_step(port, step: Step) -> None:
                     bytes(received),
                 )
 
-        remaining = deadline - time.monotonic()
+        if (
+            step.expected is not None
+            and received == step.expected
+            and completion_deadline is None
+        ):
+            # Allow the full settling interval even when the response
+            # completes close to its timeout. Extra bytes still fail above.
+            completion_deadline = time.monotonic() + RESPONSE_SETTLE_SECONDS
+
+        active_deadline = (
+            deadline if completion_deadline is None else completion_deadline
+        )
+        remaining = active_deadline - time.monotonic()
         if remaining <= 0:
             break
 
-        # Observe the entire window, even after a complete correct reply,
-        # so additional or delayed bytes are also detected.
+        # No-reply steps retain their complete observation window.
+        # Expected replies use a timeout followed by a short settling window.
         time.sleep(min(0.002, remaining))
 
     if step.expected is not None and bytes(received) != step.expected:

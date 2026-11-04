@@ -179,6 +179,8 @@ python tools/uart_test.py --port COM5 --suite uart_registers --case read_status
 python tools/uart_test.py --port COM5 --suite ./other-tests/custom.json
 ```
 
+For steps expecting a reply, `observe_ms` is the maximum wait for the complete expected bytes. After a correct complete reply the runner observes another 20 ms for trailing bytes, then proceeds. A response completing near the timeout still receives the full 20-ms settling window. Steps expecting no response retain their entire `observe_ms` observation period (currently 200 ms); those pauses also allow the firmware's receive-idle timeout to recover incomplete candidates. Bytes arriving after the settling window may be detected before a later step, but are not guaranteed to be attributed to their original response. This shorter observation policy has not yet been verified on hardware.
+
 Repeat `--case` to select multiple scenarios. Execution stops at the first failure; the summary distinguishes passed, failed and not-completed scenarios. Exit codes are 0 for success, 1 for a failed hardware check, 2 for configuration or serial errors, and 130 for interruption.
 
 These tests communicate with real hardware and are started manually; `dev.py verify` and CI do not execute them. See the [test vectors and verification record](../docs/uart-register-test-vectors.md).

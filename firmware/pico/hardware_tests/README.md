@@ -316,7 +316,7 @@ Build with `python tools/dev.py hardware-build` and upload `firmware/pico/target
 
 The canonical [UART test vectors](../../../docs/uart-register-test-vectors.md) contain the current protocol-version-2 wire layout, complete requests and ACK/NACK responses, CRC details and the 21-scenario JSON suite. Expected fixture values are Version=2, Status=0, Control=0 and ServoCount=0. Unknown indices and implausible lengths receive no reply; plausible prohibited operations receive NACK. LastError no longer exists.
 
-The receive loop uses 32-byte receive/transmit budgets and a provisional 100-ms receive-idle timeout. The suite uses 200-ms no-reply observations and 1000-ms response windows. Run the suite with HTerm closed:
+The receive loop uses 32-byte receive/transmit budgets and a provisional 100-ms receive-idle timeout. The suite uses 200-ms no-reply observations and a 1000-ms timeout for complete responses. The runner now finishes successful response steps after an additional 20-ms settling window; a hardware run with this shorter policy is pending. Run the suite with HTerm closed:
 
 ```bash
 python tools/uart_test.py --port COM5 --suite uart_registers
