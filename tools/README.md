@@ -196,3 +196,7 @@ python tools/uart_test.py --port COM6 --suite uart_calibration_persistence
 ```
 
 On 2026-11-04 the owner reported the complete three-case calibration suite passing on real hardware after restart, using COM6 and the five-second response timeout. This verifies the suite run but does not establish that a Busy intermediate reply was observed. No simulated serial tests have been added.
+
+## UART throughput benchmark
+
+See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the existing register protocol and real hardware. Its initial response timeout remains under investigation.

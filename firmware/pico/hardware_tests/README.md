@@ -331,3 +331,7 @@ On 2026-11-02 the owner reported 21 passing scenarios and green CI for the previ
 The owner reported all 53 hardware-build checks passing on 2026-11-04. On 2026-11-04 the owner confirmed all three UART cases passing after restart with the five-second response timeout; the subsequent boot confirmed fixture B at sequence 28, slot 11. See the [complete hardware procedure](../../../docs/uart-calibration-persistence.md) for firmware upload, suite invocation, status polling, expected logs and evidence limits.
 
 For the completed UART calibration persistence revision, the owner reported all three hardware scenarios passing, B surviving restart at sequence 28/slot 11, and full local verification with 520 tests and all 17 checks passing on 2026-11-04. The parser's retained-candidate optimization passed all 87 protocol tests and eliminated the observed RX overrun in the successful hardware runs; no arbitrary sustained-throughput guarantee is implied. CI for this combined revision has not yet been reported.
+
+## UART throughput benchmark
+
+`uart_benchmark` uses synthetic calibration for 18 logical servos without physical output or flash access. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
