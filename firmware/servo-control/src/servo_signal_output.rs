@@ -115,6 +115,13 @@ impl<O: SignalPlanOutput, const N: usize, const PLAN_CAPACITY: usize>
 {
     type Error = ServoSignalOutputError<O::Error>;
 
+    fn is_busy_error(error: &Self::Error) -> bool {
+        match error {
+            ServoSignalOutputError::Output(error) => O::is_busy_error(error),
+            _ => false,
+        }
+    }
+
     fn submit_pulses(
         &mut self,
         pulse_widths_us: &[u32],

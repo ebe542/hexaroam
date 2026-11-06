@@ -849,6 +849,10 @@ impl<
 {
     type Error = OutputSubmissionError;
 
+    fn is_busy_error(error: &Self::Error) -> bool {
+        matches!(error, OutputSubmissionError::Busy)
+    }
+
     fn submit_plan<const CAPACITY: usize>(
         &mut self,
         plan: &SignalPlan<CAPACITY>,

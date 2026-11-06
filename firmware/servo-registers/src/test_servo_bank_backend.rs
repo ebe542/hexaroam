@@ -53,6 +53,10 @@ struct RecordingOutput {
 impl PulseBankOutput for RecordingOutput {
     type Error = SubmissionError;
 
+    fn is_busy_error(error: &Self::Error) -> bool {
+        matches!(error, SubmissionError::Busy)
+    }
+
     fn submit_pulses(&mut self, pulses: &[u32]) -> Result<(), Self::Error> {
         let mut recorded = self.recorded.borrow_mut();
         recorded.submit_calls += 1;
@@ -732,4 +736,31 @@ fn uninitialized_register_access_reports_state_error_without_fault() {
     assert_eq!(recorded.borrow().start_calls, 0);
     assert_eq!(recorded.borrow().submit_calls, 0);
     assert_eq!(recorded.borrow().pulses, None);
+}
+
+#[test]
+fn classifies_wrapped_pulse_busy() {
+    assert!(
+        <TestBank as OutputBackend>::is_busy_error(
+            &ServoBankBackendError::Submission(SubmissionError::Busy),
+        )
+    );
+}
+
+#[test]
+fn classifies_stopped_submission_as_non_busy() {
+    assert!(
+        !<TestBank as OutputBackend>::is_busy_error(
+            &ServoBankBackendError::Submission(SubmissionError::Stopped),
+        )
+    );
+}
+
+#[test]
+fn classifies_lifecycle_failure_as_non_busy() {
+    assert!(
+        !<TestBank as OutputBackend>::is_busy_error(
+            &ServoBankBackendError::Lifecycle(LifecycleError::Faulted),
+        )
+    );
 }

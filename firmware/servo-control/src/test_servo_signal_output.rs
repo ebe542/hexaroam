@@ -45,6 +45,10 @@ struct TestOutput {
 impl SignalPlanOutput for TestOutput {
     type Error = TestError;
 
+    fn is_busy_error(error: &Self::Error) -> bool {
+        matches!(error, TestError::Busy)
+    }
+
     fn submit_plan<const CAPACITY: usize>(
         &mut self,
         plan: &SignalPlan<CAPACITY>,
@@ -789,4 +793,40 @@ fn bank_lifecycle_trait_wraps_backend_errors_and_reports_state() {
         assert_eq!(adapter.output.stop_calls, 1);
         assert_eq!(adapter.output.calls, 0);
     }
+}
+
+#[test]
+fn classifies_wrapped_signal_busy() {
+    type Output = ServoSignalOutput<TestOutput, 2, 3>;
+
+    assert!(
+        <Output as PulseBankOutput>::is_busy_error(
+            &ServoSignalOutputError::Output(TestError::Busy),
+        )
+    );
+}
+
+#[test]
+fn classifies_signal_fault_as_non_busy() {
+    type Output = ServoSignalOutput<TestOutput, 2, 3>;
+
+    assert!(
+        !<Output as PulseBankOutput>::is_busy_error(
+            &ServoSignalOutputError::Output(TestError::Faulted),
+        )
+    );
+}
+
+#[test]
+fn classifies_pulse_count_mismatch_as_non_busy() {
+    type Output = ServoSignalOutput<TestOutput, 2, 3>;
+
+    assert!(
+        !<Output as PulseBankOutput>::is_busy_error(
+            &ServoSignalOutputError::PulseCountMismatch {
+                expected: 2,
+                actual: 1,
+            },
+        )
+    );
 }

@@ -6,6 +6,12 @@ use hexaroam_servo_signal::SignalOutputState;
 pub trait PulseBankOutput {
     type Error;
 
+    /// Identifies temporary backpressure without changing output state.
+    /// Other errors must not be classified as Busy.
+    fn is_busy_error(_error: &Self::Error) -> bool {
+        false
+    }
+
     /// Submits all servo pulse widths in ServoId order.
     ///
     /// The backend must consume or copy the slice during this call.

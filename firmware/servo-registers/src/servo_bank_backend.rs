@@ -20,6 +20,13 @@ pub enum ServoBankBackendError<Submission, Lifecycle> {
 impl<O: PulseBankLifecycle, const N: usize> OutputBackend for ServoBank<O, N> {
     type Error = ServoBankBackendError<O::Error, O::LifecycleError>;
 
+    fn is_busy_error(error: &Self::Error) -> bool {
+        match error {
+            ServoBankBackendError::Submission(error) => O::is_busy_error(error),
+            ServoBankBackendError::Lifecycle(_) => false,
+        }
+    }
+
     fn start(&mut self) -> Result<(), OutputStartError<Self::Error>> {
         match ServoBank::start_prepared(self) {
             Ok(()) => Ok(()),

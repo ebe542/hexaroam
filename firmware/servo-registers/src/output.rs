@@ -32,6 +32,12 @@ pub enum TargetWriteError<E> {
 pub trait OutputBackend {
     type Error;
 
+    /// Identifies temporary backpressure without changing output state.
+    /// Other errors must not be classified as Busy.
+    fn is_busy_error(_error: &Self::Error) -> bool {
+        false
+    }
+
     /// Validates all prepared initial targets before starting output.
     ///
     /// Ok means the complete output was started.

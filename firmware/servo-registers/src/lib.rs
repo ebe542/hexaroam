@@ -43,6 +43,8 @@ pub use calibration_persistence::{
     CalibrationPersistenceError, persist_calibration,
 };
 
+pub mod command_service;
+
 #[cfg(test)]
 mod test_support;
 
