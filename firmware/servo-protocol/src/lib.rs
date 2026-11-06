@@ -30,3 +30,5 @@ pub use transport::ByteTransport;
 mod response_buffer;
 
 pub use response_buffer::{ResponseBuffer, ResponseQueueError};
+
+pub mod cobs;
