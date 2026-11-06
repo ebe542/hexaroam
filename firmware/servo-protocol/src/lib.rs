@@ -32,3 +32,9 @@ mod response_buffer;
 pub use response_buffer::{ResponseBuffer, ResponseQueueError};
 
 pub mod cobs;
+
+pub mod cobs_frame;
+
+pub mod cobs_receiver;
+
+pub mod cobs_transmitter;
