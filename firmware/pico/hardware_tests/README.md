@@ -335,3 +335,7 @@ For the completed UART calibration persistence revision, the owner reported all 
 ## UART throughput benchmark
 
 `uart_benchmark` uses synthetic calibration for 18 logical servos without physical output or flash access. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
+
+## Inactive initialization and COBS commands
+
+`inactive_output` checks Low startup without bootstrap pulses, then explicit start/stop/start; the owner confirmed the specified hardware behavior. `uart_commands` adds UART0 COBS/CRC32 command processing with two real PIO/DMA channels and synthetic calibration. See [build, wiring, response suites and scope verification](../../../docs/uart-command-tests.md). On 2026-11-06 the owner reported all 23 command-suite cases passing, followed by the separate scope case passing and correct signal observations. No sustained-throughput result is claimed.

@@ -200,3 +200,7 @@ On 2026-11-04 the owner reported the complete three-case calibration suite passi
 ## UART throughput benchmark
 
 See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the existing register protocol and real hardware. Its initial response timeout remains under investigation.
+
+## COBS command hardware suites
+
+Use `python tools/uart_test.py --port COM6 --suite uart_commands` with the matching firmware. The optional suite field `"framing": "cobs_crc32"` selects COBS/CRC32; omitted framing retains the register protocol. See [setup, scenarios, limits and separate oscilloscope suite](../docs/uart-command-tests.md). The owner reported all 23 command-suite cases and the separate scope case passing on real hardware, including correct signal observations, on 2026-11-06. These are manual hardware checks, not CI tests.

@@ -5,7 +5,7 @@ use rp2040_hal::{
     dma::{Channel, ChannelIndex, single_buffer},
     gpio::{DynPinId, Pin, PullNone},
     pac,
-    pio::{PIOExt, Running, StateMachine, StateMachineIndex, Tx},
+    pio::{PIOExt, Running, StateMachine, StateMachineIndex, Stopped, Tx},
 };
 
 use crate::{
@@ -167,6 +167,56 @@ fn clear_pio_fault_flag<P: PIOExt>() {
     }
 }
 
+/// Owns a never-started or previously started state machine.
+///
+/// Running is the HAL handle type. Existing stop/fault paths can
+/// disable hardware execution while retaining that handle type.
+enum OutputStateMachine<P: PIOExt, SM: StateMachineIndex> {
+    Stopped(StateMachine<(P, SM), Stopped>),
+    Running(StateMachine<(P, SM), Running>),
+    Transition,
+}
+
+impl<P: PIOExt, SM: StateMachineIndex> OutputStateMachine<P, SM> {
+    fn clear_fifos(&mut self) {
+        match self {
+            Self::Stopped(machine) => machine.clear_fifos(),
+            Self::Running(machine) => machine.clear_fifos(),
+            Self::Transition => {
+                unreachable!("State machine ownership transition");
+            }
+        }
+    }
+
+    fn exec_instruction(&mut self, instruction: pio::Instruction) {
+        match self {
+            Self::Stopped(machine) => machine.exec_instruction(instruction),
+            Self::Running(machine) => machine.exec_instruction(instruction),
+            Self::Transition => {
+                unreachable!("State machine ownership transition");
+            }
+        }
+    }
+
+    /// Starts a prepared machine for the first time, or restarts a
+    /// previously started machine using the existing HAL restart path.
+    /// The caller must prepare FIFO and DMA before enabling execution.
+    fn restart(&mut self) {
+        let machine = core::mem::replace(self, Self::Transition);
+
+        *self = match machine {
+            Self::Stopped(machine) => Self::Running(machine.start()),
+            Self::Running(mut machine) => {
+                machine.restart();
+                Self::Running(machine)
+            }
+            Self::Transition => {
+                unreachable!("State machine ownership transition");
+            }
+        };
+    }
+}
+
 pub struct SwitchingOutput<
     P: PIOExt,
     SM: StateMachineIndex,
@@ -174,7 +224,7 @@ pub struct SwitchingOutput<
     const N: usize,
     const WORD_CAPACITY: usize,
 > {
-    state_machine: StateMachine<(P, SM), Running>,
+    state_machine: OutputStateMachine<P, SM>,
     _pins: [Pin<DynPinId, P::PinFunction, PullNone>; N],
     transfer: DmaResources<P, SM, CH, WORD_CAPACITY>,
     pending: Option<PendingSignalPlan<'static, WORD_CAPACITY>>,
@@ -191,6 +241,61 @@ impl<
     const WORD_CAPACITY: usize,
 > SwitchingOutput<P, SM, CH, N, WORD_CAPACITY>
 {
+    /// Takes ownership without starting PIO or DMA.
+    ///
+    /// PreparedOutput has already established Low output levels.
+    /// No signal plan is installed until start_plan is called.
+    ///
+    /// Capacity must accommodate the worst-case complete plan:
+    /// N distinct pulse endings plus the final Low interval,
+    /// with two encoded words per entry.
+    pub fn new(
+        mut prepared: PreparedOutput<P, SM, N>,
+        channel: Channel<CH>,
+        first_buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
+        second_buffer: &'static mut OutputBuffer<WORD_CAPACITY>,
+        period_us: u32,
+    ) -> Result<Self, OutputStartError> {
+        if pio_fault_flag::<P>() {
+            return Err(OutputStartError::Faulted);
+        }
+
+        if period_us == 0 {
+            return Err(OutputStartError::InvalidPlan);
+        }
+
+        let required_words = N
+            .checked_add(1)
+            .and_then(|entries| entries.checked_mul(2))
+            .ok_or(OutputStartError::InsufficientCapacity)?;
+
+        if WORD_CAPACITY < required_words {
+            return Err(OutputStartError::InsufficientCapacity);
+        }
+
+        prepared.state_machine.clear_fifos();
+
+        let gpio_mask = prepared.gpio_mask;
+
+        Ok(Self {
+            state_machine: OutputStateMachine::Stopped(prepared.state_machine),
+            _pins: prepared.pins,
+            transfer: DmaResources::Stopped {
+                channel,
+                buffer: first_buffer,
+                tx: prepared.tx,
+            },
+            pending: Some(PendingSignalPlan::new(
+                second_buffer,
+                period_us,
+                gpio_mask,
+            )),
+            period_us,
+            gpio_mask,
+            faulted: false,
+        })
+    }
+
     pub fn start<const PLAN_CAPACITY: usize>(
         mut prepared: PreparedOutput<P, SM, N>,
         channel: Channel<CH>,
@@ -239,7 +344,7 @@ impl<
         let state_machine = prepared.state_machine.start();
 
         Ok(Self {
-            state_machine: state_machine,
+            state_machine: OutputStateMachine::Running(state_machine),
             _pins: prepared.pins,
             transfer: DmaResources::Running(transfer),
             pending: Some(PendingSignalPlan::new(

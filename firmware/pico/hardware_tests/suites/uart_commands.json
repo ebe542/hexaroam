@@ -1,0 +1,1292 @@
+{
+  "schema_version": 1,
+  "framing": "cobs_crc32",
+  "firmware": "firmware/pico/hardware_tests/uart_commands.rs",
+  "fixture": {
+    "status": 1,
+    "servo_count": 2,
+    "calibration_valid": true
+  },
+  "serial": {
+    "baud": 115200,
+    "data_bits": 8,
+    "parity": "none",
+    "stop_bits": 1,
+    "flow_control": "none"
+  },
+  "timing": {
+    "firmware_receive_idle_ms": 100,
+    "no_reply_observation_ms": 200,
+    "read_response_timeout_ms": 1000
+  },
+  "verification": "On 2026-11-06 the owner reported all 23 UART cases passing on real Pico hardware: 23 passed, 0 failed, 0 not completed. Physical signal behavior was separately confirmed with uart_commands_scope; ordinary response checks alone are not pulse measurements. Final owner-run project verification passed 665 tests and all 17 checks; CI for this combined revision remains pending.",
+  "instructions": "Flash uart_commands.uf2 and reset before invocation. Use unloaded GP0/GP1 only. Close other COM-port clients. Status preflight requires 1. Each case disables output before and after execution. Fail-fast abort does not guarantee cleanup; reset the Pico after failure. Fixture servo_count is descriptive, not queried by the protocol.",
+  "before_each_case": [
+    {
+      "action": "Disable and stop output",
+      "request_body_hex": "02 00",
+      "encoding": "crc",
+      "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+      "response_body_hex": "80 02",
+      "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Read Status 1",
+      "request_body_hex": "01",
+      "encoding": "crc",
+      "tx_hex": "00 06 01 1B DF 05 A5 00",
+      "response_body_hex": "80 01 01 00 00 00",
+      "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+      "observe_ms": 1000
+    }
+  ],
+  "cases": [
+    {
+      "id": "read_status",
+      "title": "Read calibrated, disabled boot state",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "enable_only",
+      "title": "Enable permission without starting pulses",
+      "verification": "automated_hardware_confirmed",
+      "note": "Scope: GP0/GP1 must remain Low until a complete initial target set.",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 3",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 05 25 33 A7 80 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "disabled_targets",
+      "title": "Reject targets while output is disabled",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "81 03 04",
+          "expected_rx_hex": "00 08 81 03 04 7F 3F F6 33 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "partial_initial",
+      "title": "Require a complete initial pose",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500]",
+          "request_body_hex": "03 00 6C EE FF FF",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 09 6C EE FF FF E3 74 FC 5B 00",
+          "response_body_hex": "81 03 04",
+          "expected_rx_hex": "00 08 81 03 04 7F 3F F6 33 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 1: [4500]",
+          "request_body_hex": "03 01 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 05 03 01 94 11 01 05 09 45 F0 25 00",
+          "response_body_hex": "81 03 04",
+          "expected_rx_hex": "00 08 81 03 04 7F 3F F6 33 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 3",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 05 25 33 A7 80 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "start_output",
+      "title": "Start both channels from a complete pose",
+      "verification": "automated_hardware_confirmed",
+      "note": "Scope: GP0=1000 us, GP1=2000 us, synchronous rising edges, period 20 ms. Automated Status is not a pulse measurement.",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "partial_update",
+      "title": "Update one target while preserving the other",
+      "verification": "automated_hardware_confirmed",
+      "note": "Scope: final GP0=1500 us, GP1=2000 us. Use the scope suite for a longer observation window.",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [0]",
+          "request_body_hex": "03 00 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 01 01 01 01 05 0D D3 56 37 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_angles",
+      "title": "Reject a complete batch containing an invalid angle",
+      "verification": "automated_hardware_confirmed",
+      "note": "Scope: rejected batch must preserve GP0=1000 us and GP1=2000 us.",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [0, 4501]",
+          "request_body_hex": "03 00 00 00 00 00 95 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 01 01 01 01 03 95 11 01 05 A4 0B C7 9F 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_servo_range",
+      "title": "Reject servo IDs beyond the two-channel fixture",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 2: [0]",
+          "request_body_hex": "03 02 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 03 03 02 01 01 01 05 6D 80 96 4D 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 1: [0, 0]",
+          "request_body_hex": "03 01 00 00 00 00 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 03 03 01 01 01 01 01 01 01 01 05 36 C7 C6 1F 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 3",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 05 25 33 A7 80 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_enable_value",
+      "title": "Reject non-boolean enable parameter",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable value 2",
+          "request_body_hex": "02 02",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 02 51 11 E1 9D 00",
+          "response_body_hex": "81 02 03",
+          "expected_rx_hex": "00 08 81 02 03 9D 9B 89 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_lengths",
+      "title": "Reject command-specific parameter lengths",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Status with parameter",
+          "request_body_hex": "01 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 01 05 BE 23 C2 58 00",
+          "response_body_hex": "81 01 02",
+          "expected_rx_hex": "00 08 81 01 02 C8 F8 A3 E8 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable without parameter",
+          "request_body_hex": "02",
+          "encoding": "crc",
+          "tx_hex": "00 06 02 A1 8E 0C 3C 00",
+          "response_body_hex": "81 02 02",
+          "expected_rx_hex": "00 08 81 02 02 0B AB 8E C3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Targets without angle",
+          "request_body_hex": "03 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 05 3C 41 F4 6A 00",
+          "response_body_hex": "81 03 02",
+          "expected_rx_hex": "00 08 81 03 02 4A 9A 95 DA 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Targets with partial angle",
+          "request_body_hex": "03 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 01 05 4B 67 07 FD 00",
+          "response_body_hex": "81 03 02",
+          "expected_rx_hex": "00 08 81 03 02 4A 9A 95 DA 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "unknown_command",
+      "title": "Reject an intact unknown command",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Unknown command FE",
+          "request_body_hex": "FE",
+          "encoding": "crc",
+          "tx_hex": "00 06 FE 96 30 07 88 00",
+          "response_body_hex": "81 FE 01",
+          "expected_rx_hex": "00 04 81 FE 01 04 54 8E E2 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "ignore_responses",
+      "title": "Ignore incoming ACK and NACK without reply loops",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Incoming ACK",
+          "request_body_hex": "80 02",
+          "encoding": "crc",
+          "tx_hex": "00 07 80 02 98 EB 54 94 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Incoming NACK",
+          "request_body_hex": "81 03 05",
+          "encoding": "crc",
+          "tx_hex": "00 08 81 03 05 E9 0F F1 44 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "bad_crc",
+      "title": "Discard CRC-invalid enable and recover",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Corrupted enable CRC",
+          "request_body_hex": "02 01",
+          "encoding": "bad_crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 84 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "bad_crc_running",
+      "title": "Corrupted disable must not stop active output",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Corrupted disable CRC",
+          "request_body_hex": "02 00",
+          "encoding": "bad_crc",
+          "tx_hex": "00 02 02 05 7D 70 EF F3 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "malformed_cobs",
+      "title": "Discard a truncated COBS block and recover",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Malformed COBS block",
+          "request_body_hex": "00 03 11 00",
+          "encoding": "raw",
+          "tx_hex": "00 03 11 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "encoded_overflow",
+      "title": "Discard oversized encoded frame and suffix",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "257 encoded bytes plus suffix",
+          "request_body_hex": "00 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 02 11 00",
+          "encoding": "raw",
+          "tx_hex": "00 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 02 11 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "empty_frames",
+      "title": "Ignore delimiters and discard empty decoded content",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Delimiter run",
+          "request_body_hex": "00 00 00",
+          "encoding": "raw",
+          "tx_hex": "00 00 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "COBS empty content without CRC",
+          "request_body_hex": "00 01 00",
+          "encoding": "raw",
+          "tx_hex": "00 01 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "noise_recovery",
+      "title": "Recover from non-frame bytes after idle timeout",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Noise without delimiter",
+          "request_body_hex": "99 88",
+          "encoding": "raw",
+          "tx_hex": "99 88",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "receive_timeout",
+      "title": "Discard incomplete frame after receive idle timeout",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Incomplete COBS frame",
+          "request_body_hex": "00 06 02",
+          "encoding": "raw",
+          "tx_hex": "00 06 02",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "byte_loss",
+      "title": "Reject an enable frame with one encoded byte removed",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable with a lost byte",
+          "request_body_hex": "00 07 01 EB 40 E8 04 00",
+          "encoding": "raw",
+          "tx_hex": "00 07 01 EB 40 E8 04 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "repeated_enable",
+      "title": "Repeated enable preserves running output",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "stop_restart",
+      "title": "Require complete new pose after disable and re-enable",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [-4500, 4500]",
+          "request_body_hex": "03 00 6C EE FF FF 94 11 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 07 6C EE FF FF 94 11 01 03 3F 68 02 DD 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 1: [0]",
+          "request_body_hex": "03 01 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 03 03 01 01 01 01 05 BD FA 36 0A 00",
+          "response_body_hex": "81 03 04",
+          "expected_rx_hex": "00 08 81 03 04 7F 3F F6 33 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 3",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 05 25 33 A7 80 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [0, 0]",
+          "request_body_hex": "03 00 00 00 00 00 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 01 01 01 01 01 01 01 01 05 75 D3 BD 08 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 7",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 07 00 00 00",
+          "expected_rx_hex": "00 04 80 01 07 01 01 05 72 A4 C5 0F 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "maximum_content",
+      "title": "Receive maximum-size valid frame then reject servo range",
+      "verification": "automated_hardware_confirmed",
+      "note": "",
+      "steps": [
+        {
+          "action": "Enable output permission",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set targets from servo 0: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+          "request_body_hex": "03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 03 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 05 67 73 4D 9E 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 3",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 05 25 33 A7 80 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Read Status 1",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 05 AE FB AE 2A 00",
+          "observe_ms": 1000
+        }
+      ]
+    }
+  ]
+}

@@ -45,6 +45,8 @@ pub use calibration_persistence::{
 
 pub mod command_service;
 
+pub mod command_processor;
+
 #[cfg(test)]
 mod test_support;
 

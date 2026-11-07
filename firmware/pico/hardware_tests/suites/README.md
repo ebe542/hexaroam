@@ -23,3 +23,16 @@ python tools/uart_test.py --port COM6 --suite uart_calibration_persistence
 ```
 
 It persists synthetic A, repeats A and persists changed B. The firmware checks journal data, sequence and backend counters. See the [procedure and separate restart verification](../../../../docs/uart-calibration-persistence.md). The owner reported the build passing 53 checks and subsequently all three cases passing on hardware after restart on 2026-11-04. A subsequent boot confirmed fixture B at sequence 28, slot 11.
+
+## COBS command protocol
+
+`uart_commands.json` contains 23 response/state/recovery cases for `uart_commands.rs`. `uart_commands_scope.json` is a separate one-case suite with five two-second observation phases. Both set `"framing": "cobs_crc32"`; suites without this field retain register framing.
+
+```bash
+python tools/uart_test.py --port COM6 --suite uart_commands
+python tools/uart_test.py --port COM6 --suite uart_commands_scope
+```
+
+Reset before each invocation. Use unloaded GP0/GP1 only. See [full instructions and verification record](../../../../docs/uart-command-tests.md). A failed run does not guarantee output cleanup; reset before retrying.
+
+On 2026-11-06 the owner reported all 23 COBS command cases passing, followed by the separate scope case passing with correct signal observations.

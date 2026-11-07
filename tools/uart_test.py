@@ -1,4 +1,4 @@
-"""Run the documented UART register scenarios against real hardware."""
+"""Run documented UART hardware scenarios with register or COBS framing."""
 
 import argparse
 import json
@@ -12,9 +12,7 @@ from pathlib import Path
 from dev import color_status
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SUITE_DIR = (
-    PROJECT_ROOT / "firmware" / "pico" / "hardware_tests" / "suites"
-)
+DEFAULT_SUITE_DIR = PROJECT_ROOT / "firmware" / "pico" / "hardware_tests" / "suites"
 
 # Detect trailing bytes briefly after a complete response without waiting
 # for the full response timeout on every successful step.
@@ -62,11 +60,60 @@ def with_crc(body: bytes) -> bytes:
     return body + struct.pack("<I", zlib.crc32(body))
 
 
+def cobs_encode(data: bytes) -> bytes:
+    """Encode without delimiters, matching the Rust encoder."""
+    output = bytearray([0])
+    code_index = 0
+    code = 1
+
+    for byte in data:
+        if byte == 0:
+            output[code_index] = code
+            code_index = len(output)
+            output.append(0)
+            code = 1
+        else:
+            output.append(byte)
+            code += 1
+
+            if code == 255:
+                output[code_index] = code
+                code_index = len(output)
+                output.append(0)
+                code = 1
+
+    output[code_index] = code
+    return bytes(output)
+
+
+def encode_wire(
+    body: bytes,
+    framing: str,
+    bad_crc: bool = False,
+) -> bytes:
+    """Add CRC and optionally COBS with both frame delimiters."""
+    if framing not in ("register_crc32", "cobs_crc32"):
+        raise ValueError(f"Unknown framing: {framing!r}")
+
+    if framing == "cobs_crc32" and not 1 <= len(body) <= 250:
+        raise ValueError("COBS content must contain 1..250 bytes")
+
+    encoded = with_crc(body)
+
+    if bad_crc:
+        encoded = encoded[:-1] + bytes([encoded[-1] ^ 0x80])
+
+    if framing == "cobs_crc32":
+        encoded = b"\x00" + cobs_encode(encoded) + b"\x00"
+
+    return encoded
+
+
 def hex_bytes(data: bytes) -> str:
     return data.hex(" ").upper() if data else "<empty>"
 
 
-def load_step(raw: dict) -> Step:
+def load_step(raw: dict, framing: str = "register_crc32") -> Step:
     action = raw["action"]
     body = bytes.fromhex(raw["request_body_hex"])
     encoding = raw["encoding"]
@@ -74,10 +121,9 @@ def load_step(raw: dict) -> Step:
     if encoding == "raw":
         transmit = body
     elif encoding == "crc":
-        transmit = with_crc(body)
+        transmit = encode_wire(body, framing)
     elif encoding == "bad_crc":
-        transmit = with_crc(body)
-        transmit = transmit[:-1] + bytes([transmit[-1] ^ 0x80])
+        transmit = encode_wire(body, framing, bad_crc=True)
     else:
         raise ValueError(f"{action}: unknown encoding {encoding!r}")
 
@@ -88,7 +134,11 @@ def load_step(raw: dict) -> Step:
         raise ValueError(f"{action}: stored TX bytes do not match generation")
 
     response_body = raw["response_body_hex"]
-    expected = None if response_body is None else with_crc(bytes.fromhex(response_body))
+    expected = (
+        None
+        if response_body is None
+        else encode_wire(bytes.fromhex(response_body), framing)
+    )
 
     stored_response = raw["expected_rx_hex"]
     stored_expected = (
@@ -127,8 +177,13 @@ def load_step(raw: dict) -> Step:
         )
 
     return Step(
-        action, transmit, expected, observe_ms / 1000,
-        retry_response, max_attempts, retry_delay_ms / 1000,
+        action,
+        transmit,
+        expected,
+        observe_ms / 1000,
+        retry_response,
+        max_attempts,
+        retry_delay_ms / 1000,
     )
 
 
@@ -137,6 +192,11 @@ def load_suite(path: Path) -> tuple[dict, list[Step], list[Case]]:
 
     if data["schema_version"] != 1:
         raise ValueError("Unsupported fixture schema")
+
+    # Existing suites retain their register framing when this is omitted.
+    framing = data.get("framing", "register_crc32")
+    if framing not in ("register_crc32", "cobs_crc32"):
+        raise ValueError(f"Unknown framing: {framing!r}")
 
     settings = data["serial"]
     if (
@@ -147,12 +207,14 @@ def load_suite(path: Path) -> tuple[dict, list[Step], list[Case]]:
     ):
         raise ValueError("This runner currently supports 8N1 without flow control")
 
-    baseline = [load_step(item) for item in data["before_each_case"]]
+    baseline = [
+        load_step(item, framing) for item in data["before_each_case"]
+    ]
     cases = [
         Case(
             item["id"],
             item["title"],
-            [load_step(step) for step in item["steps"]],
+            [load_step(step, framing) for step in item["steps"]],
         )
         for item in data["cases"]
     ]
@@ -172,6 +234,17 @@ def fixture_checks(data: dict) -> list[Step]:
     timeout = data["timing"]["read_response_timeout_ms"] / 1000
     if timeout <= 0:
         raise ValueError("Fixture response timeout must be positive")
+
+    if data.get("framing", "register_crc32") == "cobs_crc32":
+        status = struct.pack("<I", data["fixture"]["status"])
+        return [
+            Step(
+                "Check fixture status",
+                encode_wire(b"\x01", "cobs_crc32"),
+                encode_wire(b"\x80\x01" + status, "cobs_crc32"),
+                timeout,
+            )
+        ]
 
     checks = []
     for name, index, format_string in [
@@ -245,8 +318,7 @@ def execute_attempt(port, step: Step) -> bool:
         )
 
     replies = tuple(
-        reply for reply in (step.expected, step.retry_response)
-        if reply is not None
+        reply for reply in (step.expected, step.retry_response) if reply is not None
     )
     received = bytearray()
     deadline = time.monotonic() + step.observe_seconds
@@ -274,10 +346,7 @@ def execute_attempt(port, step: Step) -> bool:
                     bytes(received),
                 )
 
-        if (
-            any(received == reply for reply in replies)
-            and completion_deadline is None
-        ):
+        if any(received == reply for reply in replies) and completion_deadline is None:
             # Allow the full settling interval even when the response
             # completes close to its timeout. Extra bytes still fail above.
             completion_deadline = time.monotonic() + RESPONSE_SETTLE_SECONDS
