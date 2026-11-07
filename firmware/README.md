@@ -6,6 +6,10 @@ Rust firmware for the central Pico and optional future servo-output expansion mo
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
+## EEPROM calibration storage
+
+The [24xx256 EEPROM driver](eeprom/README.md) provides medium-specific byte reads and page writes through embedded-hal. The [calibration storage traits](servo-storage/README.md#medium-independent-calibration-storage) expose complete datasets separately. The owner reported 32 EEPROM tests and a full local result of 697 tests with all 19 checks passing. The calibration adapter, boot loading and physical EEPROM tests are pending; the normal Pico firmware has not been changed by this addition.
+
 ## Pico LED blink firmware
 
 The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. The normal firmware now initializes UART1 logging and selects the bounded UART panic handler; see [logging](logging/README.md). Its main loop services servo DMA before the logger. The periodic alive message belongs to this demo, not a general runtime logging policy.

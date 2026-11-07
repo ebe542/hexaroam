@@ -23,6 +23,7 @@ LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
 STORAGE_DIR = PROJECT_ROOT / "firmware" / "servo-storage"
 PROTOCOL_DIR = PROJECT_ROOT / "firmware" / "servo-protocol"
 REGISTERS_DIR = PROJECT_ROOT / "firmware" / "servo-registers"
+EEPROM_DIR = PROJECT_ROOT / "firmware" / "eeprom"
 
 DOC_TARGET = "thumbv6m-none-eabi"
 DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
@@ -36,6 +37,7 @@ DOC_PACKAGES = (
     (PROTOCOL_DIR, "hexaroam-servo-protocol"),
     (REGISTERS_DIR, "hexaroam-servo-registers"),
     (PICO_DIR, "hexaroam-pico"),
+    (EEPROM_DIR, "hexaroam-eeprom"),
 )
 
 RUNNER_TEST_COMMAND = [
@@ -52,12 +54,21 @@ RUNNER_TEST_COMMAND = [
 
 TASKS = {
     "doc": [
-        (directory, [
-            "cargo", "doc", "--locked", "--no-deps",
-            "--document-private-items", "--target", DOC_TARGET,
-            "--target-dir", str(DOC_TARGET_DIR),
-            *(["--bin", name] if directory == PICO_DIR else ["--lib"]),
-        ])
+        (
+            directory,
+            [
+                "cargo",
+                "doc",
+                "--locked",
+                "--no-deps",
+                "--document-private-items",
+                "--target",
+                DOC_TARGET,
+                "--target-dir",
+                str(DOC_TARGET_DIR),
+                *(["--bin", name] if directory == PICO_DIR else ["--lib"]),
+            ],
+        )
         for directory, name in DOC_PACKAGES
     ],
     "install": [
@@ -68,8 +79,16 @@ TASKS = {
         (PICO_DIR, ["rustup", "target", "add", "thumbv6m-none-eabi"]),
         (
             PICO_DIR,
-            ["cargo", "install", "elf2uf2-rs", "--version", "2.2.0",
-             "--locked", "--target", "host-tuple"],
+            [
+                "cargo",
+                "install",
+                "elf2uf2-rs",
+                "--version",
+                "2.2.0",
+                "--locked",
+                "--target",
+                "host-tuple",
+            ],
         ),
     ],
     "test": [
@@ -81,6 +100,7 @@ TASKS = {
         (STORAGE_DIR, ["cargo", "test", "--lib", "--locked"]),
         (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
@@ -91,6 +111,7 @@ TASKS = {
         (STORAGE_DIR, ["cargo", "fmt"]),
         (PROTOCOL_DIR, ["cargo", "fmt"]),
         (REGISTERS_DIR, ["cargo", "fmt"]),
+        (EEPROM_DIR, ["cargo", "fmt"]),
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
@@ -110,6 +131,8 @@ TASKS = {
         (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (REGISTERS_DIR, ["cargo", "fmt", "--check"]),
         (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (EEPROM_DIR, ["cargo", "fmt", "--check"]),
+        (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
@@ -128,6 +151,8 @@ TASKS = {
         (PROTOCOL_DIR, ["cargo", "check", "--locked"]),
         (REGISTERS_DIR, ["cargo", "fmt", "--check"]),
         (REGISTERS_DIR, ["cargo", "check", "--locked"]),
+        (EEPROM_DIR, ["cargo", "fmt", "--check"]),
+        (EEPROM_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
         (PICO_DIR, ["cargo", "build", "--locked"]),
@@ -260,8 +285,12 @@ def hardware_artifacts(output: str) -> list[Path]:
 def find_objdump(directory: Path) -> Path:
     """Find LLVM in the active Rust toolchain, including rustup overrides."""
     result = subprocess.run(
-        ["rustc", "--print", "sysroot"], cwd=directory,
-        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        ["rustc", "--print", "sysroot"],
+        cwd=directory,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
         shell=False,
     )
     if result.returncode != 0:
@@ -285,25 +314,38 @@ def find_objdump(directory: Path) -> Path:
 
 def hardware_reports(executable: Path, directory: Path) -> CommandResult:
     """Relink one example with a map and disassemble that exact ELF."""
-    executable = executable.resolve() if executable.is_absolute() else (
-        directory / executable
-    ).resolve()
+    executable = (
+        executable.resolve()
+        if executable.is_absolute()
+        else (directory / executable).resolve()
+    )
     try:
         objdump = find_objdump(directory)
         # A unique linker output forces Cargo to relink even when a previous
         # map was deleted. Reports replace their final files only on success.
         with tempfile.TemporaryDirectory(
-            prefix=".reports-", dir=executable.parent,
+            prefix=".reports-",
+            dir=executable.parent,
         ) as temporary:
             temporary = Path(temporary)
             map_file = temporary / "output.map"
             dump_file = temporary / "output.disasm"
-            build = run_command([
-                "cargo", "rustc", "--locked", "--example", executable.name,
-                "--features", "hardware-tests",
-                "--message-format=json-render-diagnostics", "--",
-                "-C", f"link-arg=-Map={map_file}",
-            ], directory)
+            build = run_command(
+                [
+                    "cargo",
+                    "rustc",
+                    "--locked",
+                    "--example",
+                    executable.name,
+                    "--features",
+                    "hardware-tests",
+                    "--message-format=json-render-diagnostics",
+                    "--",
+                    "-C",
+                    f"link-arg=-Map={map_file}",
+                ],
+                directory,
+            )
             if build.return_code != 0:
                 return build
             artifacts = hardware_artifacts(build.output)
@@ -315,15 +357,29 @@ def hardware_reports(executable: Path, directory: Path) -> CommandResult:
                 raise ValueError("Map build did not report the expected ELF")
             if not map_file.is_file() or map_file.stat().st_size == 0:
                 raise ValueError("Linker did not produce a nonempty map file")
-            command = [str(objdump), "--disassemble", "--demangle",
-                       "--section-headers", "--syms", str(executable)]
-            print(f"[{directory.name}] {' '.join(command)} -> "
-                  f"{executable.with_suffix('.disasm')}", flush=True)
+            command = [
+                str(objdump),
+                "--disassemble",
+                "--demangle",
+                "--section-headers",
+                "--syms",
+                str(executable),
+            ]
+            print(
+                f"[{directory.name}] {' '.join(command)} -> "
+                f"{executable.with_suffix('.disasm')}",
+                flush=True,
+            )
             with dump_file.open("w", encoding="utf-8", newline="\n") as output:
                 result = subprocess.run(
-                    command, cwd=directory, stdout=output,
-                    stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                    errors="replace", shell=False,
+                    command,
+                    cwd=directory,
+                    stdout=output,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    shell=False,
                 )
             if result.stderr:
                 print(result.stderr, end="", flush=True)
@@ -365,7 +421,6 @@ def color_status(text: str, success: bool) -> str:
     return f"\x1b[{code}m{text}\x1b[0m"
 
 
-
 def write_doc_index() -> CommandResult:
     """Publish an overview only when every expected package page exists."""
     try:
@@ -378,11 +433,11 @@ def write_doc_index() -> CommandResult:
         page = (
             '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<title>HexaRoam Rust documentation</title></head><body>'
-            '<h1>HexaRoam Rust documentation</h1>'
-            '<p>Modules, types, traits and implementations, including private items. '
-            'Generated for thumbv6m-none-eabi; hardware-test examples are excluded.</p>'
-            '<ul>' + ''.join(links) + '</ul></body></html>\n'
+            "<title>HexaRoam Rust documentation</title></head><body>"
+            "<h1>HexaRoam Rust documentation</h1>"
+            "<p>Modules, types, traits and implementations, including private items. "
+            "Generated for thumbv6m-none-eabi; hardware-test examples are excluded.</p>"
+            "<ul>" + "".join(links) + "</ul></body></html>\n"
         )
         index = DOC_OUTPUT_DIR / "index.html"
         index.write_text(page, encoding="utf-8", newline="\n")
@@ -415,9 +470,13 @@ def run_task(task: str) -> int:
                 continue
             for executable in artifacts:
                 reports = hardware_reports(executable, directory)
-                results.append((
-                    directory, ["hardware-reports", str(executable)], reports,
-                ))
+                results.append(
+                    (
+                        directory,
+                        ["hardware-reports", str(executable)],
+                        reports,
+                    )
+                )
                 if reports.return_code != 0:
                     continue
                 conversion = [

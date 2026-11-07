@@ -257,3 +257,16 @@ classDiagram
 [FrameProcessor](../../firmware/servo-registers/src/frame_processor.rs) coordinates the existing contracts without owning UART hardware. It services the register backend on every poll, transmits pending response bytes and processes requests only when response storage is available. Deferred receive timeouts preserve complete buffered requests. PC tests use a simulated transport and register backend. The uart_registers hardware example now connects the concrete Pico UART to FrameProcessor and RegisterService with a no-servo test backend; the owner verified all 21 version-2 UART scenarios on 2026-11-03, including ACK/NACK and discarded-header behavior.
 
 UartTransport maps empty receive FIFO and full transmit FIFO to nonblocking results. It exposes Overrun, Break, Parity and Framing as receive errors instead of delivering the faulty entry to the parser. The application remains responsible for deciding how to recover an incomplete frame after such errors. The current hardware test does not inject these errors.
+
+## Medium-independent calibration storage and EEPROM access
+
+| Contract | Current implementation / role | Source |
+| --- | --- | --- |
+| `CalibrationRead<N>` | Complete validated calibration dataset or None; storage errors remain errors. No adapter implemented yet. | [calibration_storage.rs](../../firmware/servo-storage/src/calibration_storage.rs) |
+| `CalibrationStorage<N>: CalibrationRead<N>` | Station-side save contract with unchanged-data suppression and readback verification. No adapter implemented yet. | [calibration_storage.rs](../../firmware/servo-storage/src/calibration_storage.rs) |
+| `embedded_hal::i2c::I2c` | Bus supplied to `Eeprom<I>`; no concrete Pico I2C integration yet. | [EEPROM driver](../../firmware/eeprom/src/lib.rs) |
+| `embedded_hal::delay::DelayNs` | Caller-supplied delays between write-readiness retries. | [EEPROM driver](../../firmware/eeprom/src/lib.rs) |
+
+The EEPROM driver accesses bytes, not calibration objects or journal slots. Storage management will own slot selection, CRC validation, sequence numbers, rotation and verified persistence. Existing flash-oriented JournalRead/JournalStorage contracts remain separate. The operating robot reads calibration only at startup; a separate station writes the detached EEPROM. See the [driver guide](../../firmware/eeprom/README.md) and [storage contracts](../../firmware/servo-storage/README.md#medium-independent-calibration-storage).
+
+The owner reported 697 passing tests and all 19 local verification checks passing. Hardware EEPROM access and implementing adapters remain pending; CI for this revision has not yet been reported.

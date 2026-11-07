@@ -2,6 +2,19 @@
 
 `hexaroam-servo-storage` is a hardware-independent, `no_std` library for encoding and decoding servo calibration records. It reuses `Calibration` from `hexaroam-servo-control`; it does not access flash, UART, DMA or servo outputs.
 
+## Medium-independent calibration storage
+
+`CalibrationRead<const N: usize>` and `CalibrationStorage<const N: usize>` in [calibration_storage.rs](src/calibration_storage.rs) define the application-facing storage boundary:
+
+- `load()` returns `Result<Option<[Calibration; N]>, Error>`: a complete validated dataset, no valid complete dataset, or a storage error. Missing data must not authorize servo output.
+- `save(&[Calibration; N])` saves a complete dataset and requires readback verification before success. Unchanged data must not cause another write.
+- Servo IDs are array indices. The interface exposes no slot index, sequence number, sector, byte address or erase operation.
+- The implementation owns encoding, integrity checks, sequence selection, rotation and any erasure required by its medium. A failed save may have partially modified storage.
+
+The operating controller uses read access only; writing belongs to the separate calibration station. These are currently contracts without an implementing adapter. The [EEPROM driver](../eeprom/README.md) provides the lower-level byte reads and writes but does not implement them directly.
+
+The existing `JournalRead`, `JournalStorage`, two-sector layout and journal functions below remain the earlier flash-oriented implementation. They are not the medium-independent application API and have not been migrated or removed. The existing binary format still permits missing entries; the new application contract requires a complete array. EEPROM slot layout and adapter validation remain to be implemented; no new active/validity flag was added.
+
 ## Version 1 representation
 
 All multibyte values are little endian. The record has no implicit padding.

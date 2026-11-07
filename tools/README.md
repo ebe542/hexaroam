@@ -5,7 +5,7 @@ Use Python 3.10 or newer. The development runner uses only the standard library;
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
-| `python tools/dev.py doc` | Generate combined HTML documentation for all eight Rust packages |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all nine Rust packages |
 | `python tools/dev.py test` | Python tooling tests and host tests for all registered Rust libraries |
 | `python tools/dev.py fmt` | Format all registered Rust packages; modifies source files |
 | `python tools/dev.py check` | Check formatting and run cargo check for all registered Rust packages; no unit tests or linked firmware image |
@@ -204,3 +204,9 @@ See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The 
 ## COBS command hardware suites
 
 Use `python tools/uart_test.py --port COM6 --suite uart_commands` with the matching firmware. The optional suite field `"framing": "cobs_crc32"` selects COBS/CRC32; omitted framing retains the register protocol. See [setup, scenarios, limits and separate oscilloscope suite](../docs/uart-command-tests.md). The owner reported all 23 command-suite cases and the separate scope case passing on real hardware, including correct signal observations, on 2026-11-06. These are manual hardware checks, not CI tests.
+
+## EEPROM driver integration
+
+`firmware/eeprom` is included in test, fmt, check, verify and doc. Its Cargo.lock is committed so CI can use `--locked`. The existing workflow already invokes the shared test/verify tasks and needs no package-specific change. The documentation task's expected package inventory in `test_doc.py` includes the EEPROM crate.
+
+The owner reported 697 passing tests and all 19 verification checks passing after adding the 32 EEPROM driver tests. These are PC tests; the driver has not been exercised against a physical EEPROM. See the [EEPROM guide](../firmware/eeprom/README.md) for API, write completion and verification limits. CI for this change is pending.

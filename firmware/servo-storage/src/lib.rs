@@ -34,3 +34,7 @@ pub use journal::{JournalError, append, load, save_if_changed};
 mod journal_layout;
 
 pub use journal_layout::{JournalLayout, LayoutError, StorageRange};
+
+mod calibration_storage;
+
+pub use calibration_storage::{CalibrationRead, CalibrationStorage};
