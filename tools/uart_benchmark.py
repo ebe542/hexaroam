@@ -1,4 +1,4 @@
-"""Measure COBS command throughput against the 18-servo benchmark firmware."""
+"""Measure COBS commands with simulated output or a real two-channel PIO fixture."""
 
 import argparse
 import math
@@ -10,7 +10,8 @@ import serial
 
 from uart_test import encode_wire
 
-SERVO_COUNT = 18
+FIXTURE_COUNTS = {"sink18": 18, "pio2": 2}
+FIXTURE_BATCHES = {"sink18": (1, 6, 18), "pio2": (1, 2)}
 MAX_ENCODED_SIZE = 256
 MAX_DECODED_SIZE = 254
 
@@ -20,7 +21,10 @@ class BenchmarkError(RuntimeError):
 
 
 class NackError(BenchmarkError):
-    pass
+    def __init__(self, command: int, code: int):
+        self.command = command
+        self.code = code
+        super().__init__(f"Command {command:#04x} rejected: error {code}")
 
 
 def frame(content: bytes) -> bytes:
@@ -142,9 +146,7 @@ def exchange(
     if content[0] == 0x81:
         if len(content) != 3:
             raise BenchmarkError("Unexpected NACK length")
-        raise NackError(
-            f"Command {command:#04x} rejected: error {content[2]}"
-        )
+        raise NackError(command, content[2])
 
     if content[0] != 0x80:
         raise BenchmarkError("Unexpected response opcode")
@@ -164,45 +166,102 @@ def check_status(port, expected: int, timeout: float) -> None:
         )
 
 
-def target_request(size: int, angle: int) -> bytes:
+def target_request(size: int, angle: int, opposed: bool = False) -> bytes:
     # SET_TARGETS, Servo 0, then signed little-endian centidegrees.
-    content = b"\x03\x00" + struct.pack("<" + "i" * size, *([angle] * size))
+    angles = [angle] * size
+    if opposed and size == 2:
+        angles[1] = -angle
+    content = b"\x03\x00" + struct.pack("<" + "i" * size, *angles)
     return frame(content)
 
 
-def prepare(port, timeout: float) -> None:
+def prepare(port, timeout: float, fixture: str) -> None:
     check_status(port, 1, timeout)
     print("[PASS] Boot status: calibrated and disabled")
-    print("Required fixture: uart_benchmark, 18 synthetic servos, no GPIO output")
+    if fixture == "pio2":
+        print("Required fixture: uart_commands, unloaded GP0/GP1, real PIO/DMA")
+    else:
+        print("Required fixture: uart_benchmark, 18 synthetic servos, no GPIO output")
 
     exchange(port, frame(b"\x02\x01"), 0x02, 0, timeout)
-    exchange(port, target_request(SERVO_COUNT, 0), 0x03, 0, timeout)
+    exchange(port, target_request(FIXTURE_COUNTS[fixture], 0), 0x03, 0, timeout)
     check_status(port, 7, timeout)
     print("[PASS] Enabled and complete initial target set accepted")
 
 
-def run_batch(port, size: int, duration: float, timeout: float) -> bool:
-    requests = [target_request(size, angle) for angle in (-1_000, 1_000)]
+def run_batch(
+    port,
+    size: int,
+    duration: float,
+    timeout: float,
+    fixture: str,
+    rate: float | None,
+) -> bool:
+    physical_output = fixture == "pio2"
+    amplitude = 4_500 if physical_output else 1_000
+    requests = [
+        target_request(size, angle, opposed=physical_output)
+        for angle in (-amplitude, amplitude)
+    ]
     count = 0
+    attempts = 0
+    busy = 0
+    other_nacks = 0
+    skipped = 0
+    next_slot = 0
+    last_send = None
+    interval = None if rate is None else 1.0 / rate
     total_latency = 0.0
     maximum_latency = 0.0
-    nacks = 0
     timeouts = 0
     invalid = 0
     transport_errors = 0
     failure = None
     started = time.perf_counter()
+    end = started + duration
 
     try:
-        while time.perf_counter() - started < duration:
-            _, latency = exchange(
-                port, requests[count % 2], 0x03, 0, timeout
-            )
+        while True:
+            now = time.perf_counter()
+            if now >= end:
+                break
+
+            if interval is not None and last_send is not None:
+                wait = last_send + interval - now
+                if wait > 0:
+                    # An intentional rate limit, never used in unlimited mode.
+                    # Do not sleep past the end of the measurement window.
+                    time.sleep(min(wait, end - now))
+                    continue
+
+            if interval is None:
+                sequence = attempts
+            else:
+                # Choose the current wall-clock pattern, not an old queued
+                # pose. Missing whole schedule slots are skipped, not replayed.
+                sequence = max(next_slot, int((now - started) / interval))
+                skipped += sequence - next_slot
+                next_slot = sequence + 1
+
+            last_send = now
+            attempts += 1
+            try:
+                _, latency = exchange(
+                    port, requests[sequence % 2], 0x03, 0, timeout
+                )
+            except NackError as error:
+                if physical_output and error.command == 0x03 and error.code == 0x05:
+                    # This request was rejected. Advance to a fresh pattern
+                    # on the next iteration; do not retry this stale request.
+                    busy += 1
+                    continue
+                raise
+
             count += 1
             total_latency += latency
             maximum_latency = max(maximum_latency, latency)
     except NackError as error:
-        nacks = 1
+        other_nacks = 1
         failure = str(error)
     except TimeoutError as error:
         timeouts = 1
@@ -216,6 +275,10 @@ def run_batch(port, size: int, duration: float, timeout: float) -> bool:
 
     elapsed = time.perf_counter() - started
 
+    # A run that only received Busy is not a successful update test.
+    if failure is None and count == 0:
+        failure = "No target request was accepted"
+
     # Status is checked outside the measured interval. It does not
     # read back target angles or verify physical pulse generation.
     if failure is None:
@@ -226,15 +289,22 @@ def run_batch(port, size: int, duration: float, timeout: float) -> bool:
 
     mean_ms = total_latency / count * 1_000 if count else 0.0
     requests_per_second = count / elapsed if elapsed else 0.0
+    busy_percent = busy / attempts * 100 if attempts else 0.0
+    rate_label = "unlimited" if rate is None else f"at most {rate:g}/s"
 
-    print(f"\nBaud: {port.baudrate} | Batch: {size} | Duration: {elapsed:.2f} s")
-    print(f"Requests: {count} ACK, {nacks} NACK")
+    print(f"\nFixture: {fixture} | Baud: {port.baudrate} | Batch: {size}")
+    print(f"Duration: {elapsed:.2f} s | Requested rate: {rate_label}")
     print(
-        f"Throughput: {requests_per_second:.1f} requests/s, "
+        f"Requests: {attempts} attempted, {count} ACK, "
+        f"{busy + other_nacks} NACK ({busy} Busy, {other_nacks} other)"
+    )
+    print(f"Busy: {busy_percent:.1f}% | Skipped schedule slots: {skipped}")
+    print(
+        f"Throughput: {requests_per_second:.1f} accepted requests/s, "
         f"{requests_per_second * size:.1f} targets/s"
     )
     print(
-        f"Round trip: mean {mean_ms:.3f} ms, "
+        f"ACK round trip: mean {mean_ms:.3f} ms, "
         f"max {maximum_latency * 1_000:.3f} ms"
     )
     print(
@@ -246,7 +316,8 @@ def run_batch(port, size: int, duration: float, timeout: float) -> bool:
         print(f"[FAIL] {failure}")
         return False
 
-    print("[PASS] Final status: calibrated, enabled, logically running")
+    state = "running" if physical_output else "logically running"
+    print(f"[PASS] Final status: calibrated, enabled, {state}")
     return True
 
 
@@ -261,12 +332,27 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", required=True)
     parser.add_argument(
+        "--fixture", choices=tuple(FIXTURE_COUNTS), default="sink18",
+        help="sink18: uart_benchmark; pio2: uart_commands with unloaded GP0/GP1",
+    )
+    parser.add_argument(
         "--baud", type=int, choices=(115200, 128000, 256000), default=115200
     )
     parser.add_argument("--duration", type=positive_seconds, default=30.0)
     parser.add_argument("--timeout", type=positive_seconds, default=1.0)
-    parser.add_argument("--batch-size", type=int, choices=(1, 6, 18))
+    parser.add_argument("--batch-size", type=int, choices=(1, 2, 6, 18))
+    parser.add_argument(
+        "--rate", type=positive_seconds,
+        help="Maximum requests/s for pio2; omit for an unlimited overload run",
+    )
     args = parser.parse_args()
+
+    if args.batch_size is not None and args.batch_size not in FIXTURE_BATCHES[args.fixture]:
+        parser.error("Batch size is not supported by the selected fixture")
+    if args.fixture == "pio2" and args.baud != 115200:
+        parser.error("The uart_commands firmware uses a fixed 115200 baud")
+    if args.rate is not None and args.fixture != "pio2":
+        parser.error("--rate is reserved for the pio2 sustained-output test")
 
     try:
         with serial.Serial(
@@ -281,11 +367,17 @@ def main() -> int:
             rtscts=False,
             dsrdtr=False,
         ) as port:
-            prepare(port, args.timeout)
+            prepare(port, args.timeout, args.fixture)
 
-            sizes = (args.batch_size,) if args.batch_size else (1, 6, 18)
+            sizes = (
+                (args.batch_size,)
+                if args.batch_size is not None
+                else FIXTURE_BATCHES[args.fixture]
+            )
             for size in sizes:
-                if not run_batch(port, size, args.duration, args.timeout):
+                if not run_batch(
+                    port, size, args.duration, args.timeout, args.fixture, args.rate
+                ):
                     print("Reset the Pico before another attempt.")
                     return 1
 

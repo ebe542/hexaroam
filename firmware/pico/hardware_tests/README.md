@@ -334,7 +334,7 @@ For the completed UART calibration persistence revision, the owner reported all 
 
 ## UART throughput benchmark
 
-`uart_benchmark` exercises COBS/CRC32 commands with synthetic calibration for 18 logical servos and a simulated active pulse sink, without physical output or flash/EEPROM access. The PC tool enables it and supplies a complete initial pose before measuring partial or full updates. Current COBS benchmark measurements remain pending. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
+`uart_benchmark` exercises COBS/CRC32 commands with synthetic calibration for 18 logical servos and a simulated active pulse sink, without physical output or flash/EEPROM access. The PC tool enables it and supplies a complete initial pose before measuring partial or full updates. The owner completed the documented sink18 measurements at all three baud rates. An explicit PC-tool `--fixture pio2` mode instead reuses uart_commands at 115200 baud for paced and overload output tests; the owner confirmed the 60-second paced and overload runs, including correct pulse behavior; the overload run accepted 50.0 updates/s with expected Busy backpressure and no other errors. Detailed results and limits are in the benchmark guide. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
 
 ## Inactive initialization and COBS commands
 

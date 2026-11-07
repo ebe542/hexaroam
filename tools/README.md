@@ -199,7 +199,7 @@ On 2026-11-04 the owner reported the complete three-case calibration suite passi
 
 ## UART throughput benchmark
 
-See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the COBS command protocol and an 18-servo bank with a simulated pulse sink on real Pico hardware. It measures no physical PIO/DMA output. The earlier register-protocol timeout remains unresolved; current COBS benchmark measurements are pending.
+See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the COBS command protocol and an 18-servo bank with a simulated pulse sink on real Pico hardware. It measures no physical PIO/DMA output. The owner completed the documented sink18 COBS measurements at all three rates; the earlier register-protocol timeout remains unresolved. The new explicit `--fixture pio2` mode reuses uart_commands firmware for real two-channel PIO/DMA, with optional `--rate` and expected Busy counting; the owner verified a 60-second paced run (1486 ACK, no Busy) and a 60-second overload run (3000 ACK, 7021 expected Busy, no other errors) and confirmed correct pulses. See the benchmark guide for scope limits and pending CI.
 
 ## COBS command hardware suites
 
