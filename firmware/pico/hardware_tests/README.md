@@ -334,7 +334,7 @@ For the completed UART calibration persistence revision, the owner reported all 
 
 ## UART throughput benchmark
 
-`uart_benchmark` uses synthetic calibration for 18 logical servos without physical output or flash access. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
+`uart_benchmark` exercises COBS/CRC32 commands with synthetic calibration for 18 logical servos and a simulated active pulse sink, without physical output or flash/EEPROM access. The PC tool enables it and supplies a complete initial pose before measuring partial or full updates. Current COBS benchmark measurements remain pending. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
 
 ## Inactive initialization and COBS commands
 

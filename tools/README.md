@@ -199,7 +199,7 @@ On 2026-11-04 the owner reported the complete three-case calibration suite passi
 
 ## UART throughput benchmark
 
-See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the existing register protocol and real hardware. Its initial response timeout remains under investigation.
+See [benchmark setup, commands and limitations](../docs/uart-benchmark.md). The benchmark uses the COBS command protocol and an 18-servo bank with a simulated pulse sink on real Pico hardware. It measures no physical PIO/DMA output. The earlier register-protocol timeout remains unresolved; current COBS benchmark measurements are pending.
 
 ## COBS command hardware suites
 

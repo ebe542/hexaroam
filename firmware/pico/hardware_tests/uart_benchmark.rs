@@ -16,11 +16,14 @@
 //! Pico physical pins: GP22 = 29, GND = 30, GP26 = 31.
 //! Debug UART1 TX: GP20, always 115200 baud.
 //!
-//! ProtocolVersion: 2, Status: 1, ServoCount: 18.
-//! All initial targets are zero degrees.
-//! Every valid request receives ACK or NACK.
-//!
-//! Physical signal output remains inactive. Flash is not accessed.
+//! COBS command protocol with CRC32.
+//! Status after boot: 1, calibrated and disabled.
+//! The PC enables output and supplies all 18 initial targets.
+//! RUNNING represents the simulated pulse sink lifecycle only.
+//! No physical servo pulses are generated.
+//! Incoming ACK/NACK and corrupted frames receive no reply.
+//! Flash and EEPROM are not accessed.
+//! Handled requests receive ACK/NACK; no unsolicited protocol messages.
 
 mod support;
 
@@ -44,11 +47,10 @@ use test_message::log_message;
 use discard_pulse_output::DiscardPulseOutput;
 use embedded_hal::digital::{InputPin, OutputPin};
 use hexaroam_logging::{LogLevel, Logger};
-use hexaroam_servo_control::{
-    Angle, Calibration, ServoBank, ServoId, ServoTarget,
-};
+use hexaroam_servo_control::{Angle, Calibration, ServoBank};
 use hexaroam_servo_registers::{
-    FrameProcessingError, FrameProcessor, RegisterService,
+    command_processor::{CommandProcessingError, CommandProcessor},
+    command_service::CommandService,
 };
 use hexaroam_servo_storage::{Checksum, SoftwareCrc32};
 use rp_pico::{
@@ -170,25 +172,18 @@ fn main() -> ! {
     )
     .expect("Valid synthetic calibration");
 
-    let mut bank = ServoBank::new([calibration; 18], DiscardPulseOutput);
+    let bank = ServoBank::new(
+        [calibration; 18],
+        DiscardPulseOutput::new(),
+    );
 
-    let initial_targets: [ServoTarget; 18] =
-        core::array::from_fn(|index| ServoTarget {
-            id: ServoId(index),
-            angle: Angle::from_centidegrees(0),
-        });
-
-    bank.prepare_targets(&initial_targets)
-        .expect("Valid initial targets");
-
-    let registers = RegisterService::new(2, 18, bank, true);
-    let mut processor =
-        FrameProcessor::new(registers).expect("Valid register map");
+    let service = CommandService::<_, 18>::new(bank, true);
+    let mut processor = CommandProcessor::new(service);
 
     logger
         .log(
             LogLevel::Info,
-            "UART benchmark ready: 18 servos, no physical output",
+            "COBS benchmark ready: 18 servos, no physical output",
         )
         .expect("Test message must fit");
 
@@ -205,6 +200,7 @@ fn main() -> ! {
     let mut transmitted_bytes = 0_u64;
     let mut receive_errors = 0_u64;
     let mut diagnostic_pending = false;
+    let mut discarded_events = 0_u64;
 
     loop {
         match processor.poll(
@@ -217,6 +213,7 @@ fn main() -> ! {
                 received_bytes += progress.received as u64;
                 processed_requests += progress.processed as u64;
                 transmitted_bytes += progress.transmitted as u64;
+                discarded_events += progress.discarded as u64;
 
                 if progress.received != 0
                     || progress.processed != 0
@@ -244,7 +241,7 @@ fn main() -> ! {
                     receive_timeout_armed = false;
                 }
             }
-            Err(FrameProcessingError::Receive(error)) => {
+            Err(CommandProcessingError::Receive(error)) => {
                 receive_errors += 1;
                 diagnostic_pending = true;
                 last_receive_us = board.timer.get_counter_low();
@@ -291,11 +288,12 @@ fn main() -> ! {
             if log_message(
                 &mut logger,
                 format_args!(
-                    "Poll totals: rx={} requests={} tx={} rx_errors={}",
+                    "rx={} req={} tx={} err={} drop={}",
                     received_bytes,
                     processed_requests,
                     transmitted_bytes,
                     receive_errors,
+                    discarded_events,
                 ),
             )
             .is_ok()

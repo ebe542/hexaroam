@@ -1,4 +1,4 @@
-"""Measure register-protocol throughput against real Pico hardware."""
+"""Measure COBS command throughput against the 18-servo benchmark firmware."""
 
 import argparse
 import math
@@ -7,6 +7,12 @@ import time
 import zlib
 
 import serial
+
+from uart_test import encode_wire
+
+SERVO_COUNT = 18
+MAX_ENCODED_SIZE = 256
+MAX_DECODED_SIZE = 254
 
 
 class BenchmarkError(RuntimeError):
@@ -17,36 +23,97 @@ class NackError(BenchmarkError):
     pass
 
 
-def frame(opcode: int, index: int, payload: bytes) -> bytes:
-    body = struct.pack("<BBH", opcode, index, len(payload)) + payload
-    return body + struct.pack("<I", zlib.crc32(body))
+def frame(content: bytes) -> bytes:
+    return encode_wire(content, "cobs_crc32")
 
 
-def read_request(index: int, length: int) -> bytes:
-    body = struct.pack("<BBH", 1, index, length)
-    return body + struct.pack("<I", zlib.crc32(body))
+def cobs_decode(encoded: bytes) -> bytes:
+    """Decode one response body without its zero delimiters."""
+    if not encoded:
+        raise BenchmarkError("Empty COBS content")
+
+    decoded = bytearray()
+    offset = 0
+
+    while offset < len(encoded):
+        code = encoded[offset]
+        if code == 0:
+            raise BenchmarkError("Zero inside COBS content")
+
+        offset += 1
+        end = offset + code - 1
+        if end > len(encoded):
+            raise BenchmarkError("Truncated COBS block")
+
+        block = encoded[offset:end]
+        if 0 in block:
+            raise BenchmarkError("Zero inside COBS block")
+
+        decoded.extend(block)
+        offset = end
+
+        if code != 255 and offset < len(encoded):
+            decoded.append(0)
+
+        if len(decoded) > MAX_DECODED_SIZE:
+            raise BenchmarkError("Decoded response too large")
+
+    return bytes(decoded)
 
 
-def read_exact(port, length: int, deadline: float) -> bytes:
-    received = bytearray()
+def receive_frame(port, deadline: float) -> tuple[bytes, float]:
+    started = False
+    encoded = bytearray()
+    original_timeout = port.timeout
 
-    while len(received) < length:
-        remaining = deadline - time.perf_counter()
-        if remaining <= 0:
-            raise TimeoutError(f"Incomplete response: {len(received)}/{length} bytes")
+    try:
+        while True:
+            remaining = deadline - time.perf_counter()
+            if remaining <= 0:
+                raise TimeoutError(
+                    f"Incomplete COBS response: {len(encoded)} encoded bytes"
+                )
 
-        port.timeout = remaining
-        part = port.read(length - len(received))
-        received.extend(part)
+            # Normally leave the driver's short read timeout unchanged.
+            # Only shorten it when the overall deadline is closer.
+            if port.timeout > remaining:
+                port.timeout = remaining
 
-    return bytes(received)
+            chunk = port.read(min(4096, max(1, port.in_waiting)))
+            received_at = time.perf_counter()
+            if received_at > deadline:
+                raise TimeoutError("Response deadline exceeded")
+
+            for index, byte in enumerate(chunk):
+                if not started:
+                    if byte != 0:
+                        raise BenchmarkError("Response lacks start delimiter")
+                    started = True
+                    continue
+
+                if byte != 0:
+                    if len(encoded) == MAX_ENCODED_SIZE:
+                        raise BenchmarkError("Encoded response too large")
+                    encoded.append(byte)
+                    continue
+
+                if not encoded:
+                    continue
+
+                if index + 1 != len(chunk) or port.in_waiting:
+                    raise BenchmarkError("Unexpected trailing response bytes")
+
+                return cobs_decode(bytes(encoded)), received_at
+    finally:
+        if port.timeout != original_timeout:
+            port.timeout = original_timeout
 
 
 def exchange(
     port,
     request: bytes,
-    index: int,
-    expected_length: int,
+    command: int,
+    result_length: int,
     timeout: float,
 ) -> tuple[bytes, float]:
     if port.in_waiting:
@@ -58,80 +125,79 @@ def exchange(
     if port.write(request) != len(request):
         raise BenchmarkError("Incomplete request transmission")
 
-    header = read_exact(port, 4, deadline)
-    opcode, response_index, length = struct.unpack("<BBH", header)
+    decoded, finished = receive_frame(port, deadline)
 
-    if response_index != index:
-        raise BenchmarkError("Unexpected response register")
+    # ACK/NACK, original command and CRC32 need at least six bytes.
+    if len(decoded) < 6:
+        raise BenchmarkError("Response too short")
 
-    if opcode == 0x80:
-        if length != expected_length:
-            raise BenchmarkError(f"Unexpected ACK length: {length}")
-    elif opcode == 0x81:
-        if length != 1:
-            raise BenchmarkError(f"Unexpected NACK length: {length}")
-    else:
-        raise BenchmarkError(f"Unexpected response opcode: {opcode:#04x}")
-
-    tail = read_exact(port, length + 4, deadline)
-    finished = time.perf_counter()
-    payload = tail[:-4]
-    received_crc = struct.unpack("<I", tail[-4:])[0]
-
-    if received_crc != zlib.crc32(header + payload):
+    content = decoded[:-4]
+    received_crc = struct.unpack("<I", decoded[-4:])[0]
+    if received_crc != zlib.crc32(content):
         raise BenchmarkError("Response CRC mismatch")
 
-    if port.in_waiting:
-        raise BenchmarkError("Unexpected trailing bytes")
+    if content[1] != command:
+        raise BenchmarkError("Unexpected response command")
 
-    if opcode == 0x81:
-        raise NackError(f"Controller rejected request: error {payload[0]}")
+    if content[0] == 0x81:
+        if len(content) != 3:
+            raise BenchmarkError("Unexpected NACK length")
+        raise NackError(
+            f"Command {command:#04x} rejected: error {content[2]}"
+        )
 
-    return payload, finished - started
+    if content[0] != 0x80:
+        raise BenchmarkError("Unexpected response opcode")
+
+    if len(content) != 2 + result_length:
+        raise BenchmarkError("Unexpected ACK length")
+
+    return content[2:], finished - started
 
 
-def read_register(port, index: int, length: int, timeout: float) -> bytes:
-    payload, _ = exchange(port, read_request(index, length), index, length, timeout)
-    return payload
+def check_status(port, expected: int, timeout: float) -> None:
+    payload, _ = exchange(port, frame(b"\x01"), 0x01, 4, timeout)
+    actual = struct.unpack("<I", payload)[0]
+    if actual != expected:
+        raise BenchmarkError(
+            f"Status: expected {expected:#010x}, received {actual:#010x}"
+        )
 
 
-def check_fixture(port, timeout: float) -> None:
-    expected = (
-        (0x00, struct.pack("<H", 2), "ProtocolVersion"),
-        (0x01, struct.pack("<I", 1), "Status"),
-        (0x04, bytes([18]), "ServoCount"),
-    )
+def target_request(size: int, angle: int) -> bytes:
+    # SET_TARGETS, Servo 0, then signed little-endian centidegrees.
+    content = b"\x03\x00" + struct.pack("<" + "i" * size, *([angle] * size))
+    return frame(content)
 
-    for index, value, name in expected:
-        actual = read_register(port, index, len(value), timeout)
-        if actual != value:
-            raise BenchmarkError(
-                f"{name}: expected {value.hex(' ')}, received {actual.hex(' ')}"
-            )
 
-    print("[PASS] Fixture check")
+def prepare(port, timeout: float) -> None:
+    check_status(port, 1, timeout)
+    print("[PASS] Boot status: calibrated and disabled")
+    print("Required fixture: uart_benchmark, 18 synthetic servos, no GPIO output")
+
+    exchange(port, frame(b"\x02\x01"), 0x02, 0, timeout)
+    exchange(port, target_request(SERVO_COUNT, 0), 0x03, 0, timeout)
+    check_status(port, 7, timeout)
+    print("[PASS] Enabled and complete initial target set accepted")
 
 
 def run_batch(port, size: int, duration: float, timeout: float) -> bool:
-    # Alternate between -10 and +10 degrees, within the synthetic limits.
-    payloads = [
-        struct.pack("<" + "i" * size, *([value] * size)) for value in (-1_000, 1_000)
-    ]
-    requests = [frame(2, 0x20, payload) for payload in payloads]
-
+    requests = [target_request(size, angle) for angle in (-1_000, 1_000)]
     count = 0
     total_latency = 0.0
     maximum_latency = 0.0
     nacks = 0
     timeouts = 0
     invalid = 0
+    transport_errors = 0
     failure = None
-
     started = time.perf_counter()
 
     try:
         while time.perf_counter() - started < duration:
-            _, latency = exchange(port, requests[count % 2], 0x20, 0, timeout)
+            _, latency = exchange(
+                port, requests[count % 2], 0x03, 0, timeout
+            )
             count += 1
             total_latency += latency
             maximum_latency = max(maximum_latency, latency)
@@ -144,32 +210,43 @@ def run_batch(port, size: int, duration: float, timeout: float) -> bool:
     except BenchmarkError as error:
         invalid = 1
         failure = str(error)
+    except (serial.SerialException, OSError) as error:
+        transport_errors = 1
+        failure = str(error)
 
     elapsed = time.perf_counter() - started
 
-    # Readback is outside the timed measurement.
-    if failure is None and count:
-        actual = read_register(port, 0x20, size * 4, timeout)
-        if actual != payloads[(count - 1) % 2]:
-            invalid += 1
-            failure = "Final target readback differs"
+    # Status is checked outside the measured interval. It does not
+    # read back target angles or verify physical pulse generation.
+    if failure is None:
+        try:
+            check_status(port, 7, timeout)
+        except (BenchmarkError, TimeoutError, serial.SerialException, OSError) as error:
+            failure = f"Final status check: {error}"
 
     mean_ms = total_latency / count * 1_000 if count else 0.0
+    requests_per_second = count / elapsed if elapsed else 0.0
 
     print(f"\nBaud: {port.baudrate} | Batch: {size} | Duration: {elapsed:.2f} s")
     print(f"Requests: {count} ACK, {nacks} NACK")
     print(
-        f"Throughput: {count / elapsed:.1f} requests/s, "
-        f"{count * size / elapsed:.1f} targets/s"
+        f"Throughput: {requests_per_second:.1f} requests/s, "
+        f"{requests_per_second * size:.1f} targets/s"
     )
-    print(f"Round trip: mean {mean_ms:.3f} ms, max {maximum_latency * 1_000:.3f} ms")
-    print(f"Errors: {timeouts} timeout, {invalid} invalid response")
+    print(
+        f"Round trip: mean {mean_ms:.3f} ms, "
+        f"max {maximum_latency * 1_000:.3f} ms"
+    )
+    print(
+        f"Errors during measurement: {timeouts} timeout, "
+        f"{invalid} invalid response, {transport_errors} transport"
+    )
 
     if failure:
         print(f"[FAIL] {failure}")
         return False
 
-    print("[PASS] Final target readback")
+    print("[PASS] Final status: calibrated, enabled, logically running")
     return True
 
 
@@ -198,21 +275,30 @@ def main() -> int:
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
-            timeout=args.timeout,
+            timeout=min(0.01, args.timeout),
             write_timeout=args.timeout,
             xonxoff=False,
             rtscts=False,
             dsrdtr=False,
         ) as port:
-            check_fixture(port, args.timeout)
+            prepare(port, args.timeout)
 
             sizes = (args.batch_size,) if args.batch_size else (1, 6, 18)
             for size in sizes:
                 if not run_batch(port, size, args.duration, args.timeout):
+                    print("Reset the Pico before another attempt.")
                     return 1
 
-    except (BenchmarkError, TimeoutError, serial.SerialException) as error:
+            exchange(port, frame(b"\x02\x00"), 0x02, 0, args.timeout)
+            check_status(port, 1, args.timeout)
+            print("\n[PASS] Output permission cleared")
+
+    except KeyboardInterrupt:
+        print("\nInterrupted. Reset the Pico before another attempt.")
+        return 130
+    except (BenchmarkError, TimeoutError, serial.SerialException, OSError) as error:
         print(f"[FAIL] {error}")
+        print("Reset the Pico before another attempt.")
         return 1
 
     return 0
