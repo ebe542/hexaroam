@@ -262,11 +262,13 @@ UartTransport maps empty receive FIFO and full transmit FIFO to nonblocking resu
 
 | Contract | Current implementation / role | Source |
 | --- | --- | --- |
-| `CalibrationRead<N>` | Complete validated calibration dataset or None; storage errors remain errors. No adapter implemented yet. | [calibration_storage.rs](../../firmware/servo-storage/src/calibration_storage.rs) |
+| `CalibrationRead<N>` | EepromCalibrationReader implements complete validated loading; an intact but incomplete newest record returns an error instead of falling back. | [calibration_storage.rs](../../firmware/servo-storage/src/calibration_storage.rs) |
 | `CalibrationStorage<N>: CalibrationRead<N>` | Station-side save contract with unchanged-data suppression and readback verification. No adapter implemented yet. | [calibration_storage.rs](../../firmware/servo-storage/src/calibration_storage.rs) |
 | `embedded_hal::i2c::I2c` | Bus supplied to `Eeprom<I>`; no concrete Pico I2C integration yet. | [EEPROM driver](../../firmware/eeprom/src/lib.rs) |
 | `embedded_hal::delay::DelayNs` | Caller-supplied delays between write-readiness retries. | [EEPROM driver](../../firmware/eeprom/src/lib.rs) |
 
-The EEPROM driver accesses bytes, not calibration objects or journal slots. Storage management will own slot selection, CRC validation, sequence numbers, rotation and verified persistence. Existing flash-oriented JournalRead/JournalStorage contracts remain separate. The operating robot reads calibration only at startup; a separate station writes the detached EEPROM. See the [driver guide](../../firmware/eeprom/README.md) and [storage contracts](../../firmware/servo-storage/README.md#medium-independent-calibration-storage).
+The EEPROM driver accesses bytes, not calibration objects or journal slots. SlotLayout and load_calibrations now provide checked addressing and incremental record validation/selection; EEPROM rotation and verified persistence remain pending. Existing flash-oriented JournalRead/JournalStorage contracts remain separate. The operating robot reads calibration only at startup; a separate station writes the detached EEPROM. See the [driver guide](../../firmware/eeprom/README.md) and [storage contracts](../../firmware/servo-storage/README.md#medium-independent-calibration-storage).
 
-The owner reported 697 passing tests and all 19 local verification checks passing. Hardware EEPROM access and implementing adapters remain pending; CI for this revision has not yet been reported.
+The [EEPROM reader adapter](../../firmware/servo-eeprom/README.md) owns an Eeprom and checksum implementation. Its internal EepromSlots implements JournalRead using SlotLayout; its public EepromCalibrationReader implements CalibrationRead by delegating to load_calibrations. The default is 64 slots of 512 bytes, starting at address zero. No additional validity flag was introduced.
+
+The owner reported 744 passing tests and all 21 local verification checks passing, including 124 storage and 15 adapter tests. Hardware EEPROM access, boot integration and the EEPROM save adapter remain pending; CI for this revision has not yet been reported.

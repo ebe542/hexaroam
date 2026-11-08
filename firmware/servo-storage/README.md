@@ -11,9 +11,19 @@
 - Servo IDs are array indices. The interface exposes no slot index, sequence number, sector, byte address or erase operation.
 - The implementation owns encoding, integrity checks, sequence selection, rotation and any erasure required by its medium. A failed save may have partially modified storage.
 
-The operating controller uses read access only; writing belongs to the separate calibration station. These are currently contracts without an implementing adapter. The [EEPROM driver](../eeprom/README.md) provides the lower-level byte reads and writes but does not implement them directly.
+The operating controller uses read access only; writing belongs to the separate calibration station. The [EEPROM calibration reader](../servo-eeprom/README.md) now implements CalibrationRead using the lower-level [EEPROM driver](../eeprom/README.md). CalibrationStorage still has no EEPROM implementation.
 
-The existing `JournalRead`, `JournalStorage`, two-sector layout and journal functions below remain the earlier flash-oriented implementation. They are not the medium-independent application API and have not been migrated or removed. The existing binary format still permits missing entries; the new application contract requires a complete array. EEPROM slot layout and adapter validation remain to be implemented; no new active/validity flag was added.
+The existing JournalStorage, two-sector layout and journal functions below remain the earlier flash-oriented implementation. JournalRead itself only requires a complete slot read and is reused by the EEPROM adapter. These lower-level contracts are not the medium-independent application API. The binary format still permits missing entries; the application contract requires a complete array. No new active/validity flag was added.
+
+## Slot layout and incremental loading
+
+`SlotLayout` describes a nonempty region with a start address aligned to SLOT_SIZE, a configurable slot count and a checked storage capacity. It detects range arithmetic overflow and invalid indices without assuming erase sectors. The EEPROM adapter uses 64 slots of 512 bytes starting at zero; the older JournalLayout remains for the flash implementation.
+
+`load_calibrations<N, SLOTS, S>()` accepts JournalRead and Checksum. It scans slots individually and records valid sequence numbers to reject duplicates, including duplicate older sequences. It retains one slot buffer and the newest decoded candidate instead of buffering all slot images. Storage errors abort; invalid records are skipped.
+
+The newest format/CRC-valid record is selected before checking completeness. Missing entries in that record return IncompleteCalibration with the first missing Servo ID; no older complete record is substituted. No valid record returns None. Zero slots and zero servos are rejected before storage access. The loader returns only complete calibrations; physical slot and sequence metadata remain internal to the storage path.
+
+The owner reported 124 storage tests passing: the earlier 92 tests plus 13 slot-layout tests and 19 loader tests. With the 15 EEPROM adapter tests included, full local verification passed 744 tests and all 21 checks. EEPROM hardware verification and write rotation remain pending.
 
 ## Version 1 representation
 

@@ -24,9 +24,10 @@ class DocumentationTests(unittest.TestCase):
                 dev.REGISTERS_DIR,
                 dev.PICO_DIR,
                 dev.EEPROM_DIR,
+                dev.SERVO_EEPROM_DIR,
             },
         )
-        self.assertEqual(len(dev.TASKS["doc"]), 9)
+        self.assertEqual(len(dev.TASKS["doc"]), 10)
         for directory, command in dev.TASKS["doc"]:
             self.assertEqual(command[:2], ["cargo", "doc"])
             for flag in ("--locked", "--no-deps", "--document-private-items"):

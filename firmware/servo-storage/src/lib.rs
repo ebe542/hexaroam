@@ -38,3 +38,11 @@ pub use journal_layout::{JournalLayout, LayoutError, StorageRange};
 mod calibration_storage;
 
 pub use calibration_storage::{CalibrationRead, CalibrationStorage};
+
+mod slot_layout;
+
+pub use slot_layout::{SlotLayout, SlotLayoutError};
+
+mod calibration_load;
+
+pub use calibration_load::{CalibrationLoadError, load_calibrations};

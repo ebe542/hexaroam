@@ -24,6 +24,7 @@ STORAGE_DIR = PROJECT_ROOT / "firmware" / "servo-storage"
 PROTOCOL_DIR = PROJECT_ROOT / "firmware" / "servo-protocol"
 REGISTERS_DIR = PROJECT_ROOT / "firmware" / "servo-registers"
 EEPROM_DIR = PROJECT_ROOT / "firmware" / "eeprom"
+SERVO_EEPROM_DIR = PROJECT_ROOT / "firmware" / "servo-eeprom"
 
 DOC_TARGET = "thumbv6m-none-eabi"
 DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
@@ -38,6 +39,7 @@ DOC_PACKAGES = (
     (REGISTERS_DIR, "hexaroam-servo-registers"),
     (PICO_DIR, "hexaroam-pico"),
     (EEPROM_DIR, "hexaroam-eeprom"),
+    (SERVO_EEPROM_DIR, "hexaroam-servo-eeprom"),
 )
 
 RUNNER_TEST_COMMAND = [
@@ -101,6 +103,7 @@ TASKS = {
         (PROTOCOL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
         (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
@@ -112,6 +115,7 @@ TASKS = {
         (PROTOCOL_DIR, ["cargo", "fmt"]),
         (REGISTERS_DIR, ["cargo", "fmt"]),
         (EEPROM_DIR, ["cargo", "fmt"]),
+        (SERVO_EEPROM_DIR, ["cargo", "fmt"]),
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
@@ -133,6 +137,8 @@ TASKS = {
         (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
         (EEPROM_DIR, ["cargo", "fmt", "--check"]),
         (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (SERVO_EEPROM_DIR, ["cargo", "fmt", "--check"]),
+        (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
@@ -153,6 +159,8 @@ TASKS = {
         (REGISTERS_DIR, ["cargo", "check", "--locked"]),
         (EEPROM_DIR, ["cargo", "fmt", "--check"]),
         (EEPROM_DIR, ["cargo", "check", "--locked"]),
+        (SERVO_EEPROM_DIR, ["cargo", "fmt", "--check"]),
+        (SERVO_EEPROM_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
         (PICO_DIR, ["cargo", "build", "--locked"]),

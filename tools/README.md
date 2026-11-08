@@ -5,7 +5,7 @@ Use Python 3.10 or newer. The development runner uses only the standard library;
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
-| `python tools/dev.py doc` | Generate combined HTML documentation for all nine Rust packages |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all ten Rust packages |
 | `python tools/dev.py test` | Python tooling tests and host tests for all registered Rust libraries |
 | `python tools/dev.py fmt` | Format all registered Rust packages; modifies source files |
 | `python tools/dev.py check` | Check formatting and run cargo check for all registered Rust packages; no unit tests or linked firmware image |
@@ -209,4 +209,10 @@ Use `python tools/uart_test.py --port COM6 --suite uart_commands` with the match
 
 `firmware/eeprom` is included in test, fmt, check, verify and doc. Its Cargo.lock is committed so CI can use `--locked`. The existing workflow already invokes the shared test/verify tasks and needs no package-specific change. The documentation task's expected package inventory in `test_doc.py` includes the EEPROM crate.
 
-The owner reported 697 passing tests and all 19 verification checks passing after adding the 32 EEPROM driver tests. These are PC tests; the driver has not been exercised against a physical EEPROM. See the [EEPROM guide](../firmware/eeprom/README.md) for API, write completion and verification limits. CI for this change is pending.
+The owner reported 697 passing tests and all 19 verification checks passing after adding the 32 EEPROM driver tests. These are PC tests; the driver has not been exercised against a physical EEPROM. See the [EEPROM guide](../firmware/eeprom/README.md) for API, write completion and verification limits. The owner subsequently reported CI green for the driver revision.
+
+## EEPROM calibration reader integration
+
+`firmware/servo-eeprom` is included in test, fmt, check, verify and doc with a committed Cargo.lock. The documentation inventory and its test include ten Rust packages. Existing CI uses the shared test/verify tasks without a workflow change.
+
+The owner reported 744 passing tests and all 21 local verification checks passing, including 124 storage tests and 15 adapter tests. The [reader guide](../firmware/servo-eeprom/README.md) explains the end-to-end PC test coverage and remaining hardware checks. CI for this revision is pending.
