@@ -7,7 +7,7 @@ Pin,Module signal,Port A GPIO,Port B GPIO,Port C GPIO,Electrical role
 6,GND,GND,GND,GND,Ground reference only
 7,S3,GP3,GP9,GP15,3.3V logic
 8,GND,GND,GND,GND,Ground reference only
-9,S4,GP4,GP10,GP16,3.3V logic
+9,S4,GP4,GP10,GP22,3.3V logic
 10,GND,GND,GND,GND,Ground reference only
-11,S5,GP5,GP11,GP17,3.3V logic
+11,S5,GP5,GP11,GP26,3.3V logic
 12,GND,GND,GND,GND,Ground reference only

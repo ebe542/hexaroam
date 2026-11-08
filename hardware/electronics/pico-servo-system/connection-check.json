@@ -1,36 +1,51 @@
 {
-  "date": "2026-10-27",
-  "revision": "C - PROPOSAL",
+  "date": "2026-11-08",
+  "revision": "D",
   "tool": "KiCad 10.0.7",
   "erc_errors": 0,
   "erc_warnings": 0,
-  "schematic_components": 110,
+  "erc_item_exclusions": 0,
+  "erc_disabled_checks": [
+    "single_global_label",
+    "four_way_junction",
+    "simulation_model_issue",
+    "footprint_filter"
+  ],
+  "schematic_components": 114,
   "reserved_dnp_components": 55,
   "nets": 75,
   "checks": [
-    "18 distinct Pico GPIO-to-port assignments; IDC even pins ground",
-    "Port A cable and six complete NPN-buffer topologies",
-    "External Pico diode direction; VBUS/VSYS/servo rail isolation",
-    "UART1 and expansion mappings",
-    "Complete power-card pin partitions, no unintended shorts",
-    "TL431 REF/cathode tie and anode ground; ST-compatible TO-92 mapping",
-    "LM393 active/unused/power units belong to one DIP-8 IC",
-    "Positive feedback from comparator output before the gate resistor",
-    "MOSFET G/D/S; dump resistor; flyback diode cathode to servo rail",
-    "Resistor values and off-board dump-resistor mounting",
-    "No Pololu component in the current netlist"
+    "U2 VCC and WP at Pico 3V3; GND and A0/A1/A2 grounded; seven-bit address 0x50",
+    "U2 SDA/SCL at GP18/GP19 I2C1 with separate 2k pull-ups; C1 100nF across VCC/GND",
+    "U2 DIP-8 footprint and new passive footprint library entries exist; passive physical dimensions provisional",
+    "UART0 GP16/GP17 at J6 pins 3/4; UART1 GP20/GP21 at J5 pins 1/2",
+    "J6 pins 1/2 EEPROM bus; 5/6 GP27/GP28; 7/8 3V3/GND",
+    "18 distinct servo GPIOs: GP0..GP15, GP22, GP26; J4 pins 9/11 remapped; all IDC even pins GND",
+    "Servo and UART/I2C signal nets distinct from each other, 3V3 and GND",
+    "Pico external diode polarity; VBUS/VSYS/external 5V/3V3/servo-positive/GND separation",
+    "Output-module and power-sheet pin-to-net partitions and component values match prior published revision C netlist",
+    "Three-page PDF exported and rendered for visual review; output-sheet content shifted left 7.62mm without net topology changes",
+    "BOM and port pinout updated from checked netlist"
   ],
   "limits": [
-    "No hardware build, SPICE transient analysis or thermal qualification",
-    "Current-limited startup and dynamic voltage maximum remain unverified",
-    "One-servo supply only; five output channels DNP",
-    "No routed PCB or drilling template"
+    "No physical build, I2C rise-time measurement, EEPROM programming or servo commissioning",
+    "400kHz is a design target; C1 and resistor mechanical footprints need actual-part confirmation",
+    "No new transient, current-limit or thermal qualification; supply remains a one-servo proposal",
+    "Previous RE200-LF controller wire list is not updated for EEPROM or port-C/J6 remapping",
+    "No routed PCB or drilling template; no firmware tests run for drawing changes"
   ],
+  "baseline_netlist_sha256": "f77e6ca3135d9e7d7a5d0443e58c36bdcce0a7b1a6cf2c647a2afc05efcf752a",
   "sha256": {
-    "pico-servo-system.kicad_sch": "fc104c1f37a0a826091cdf0b4070496d884b47f38bac8ad07b188b02b824d71e",
-    "servo-output-module.kicad_sch": "783754809564d4a5da17f8de9e034409e3673b4ceb2355a6d302d317600d75a8",
-    "bench-power.kicad_sch": "1b3a3c0fe14a78eb84c7930958283bc9607c05b77b91a0071b69b6ce21b7eed0",
-    "pico-servo-system.net": "f77e6ca3135d9e7d7a5d0443e58c36bdcce0a7b1a6cf2c647a2afc05efcf752a",
-    "pico-servo-system.pdf": "19f967358bf7c9c142bf5f41da08c4a93f2b11076a2dc23db5fb46e6bc632a0c"
-  }
+    "pico-servo-system.kicad_sch": "e790a9aa14066e98ebde7526291dbe4aed8f3600d9c75282fdf4ef83abcfc584",
+    "servo-output-module.kicad_sch": "f10f5eb4901e724d09b561b7b7db5998499704accae635ef4704c5583f749cf6",
+    "bench-power.kicad_sch": "131795d76eb5b0cee5b13050d39e8205883435a866dca9f38c9ef5dc0e183054",
+    "pico-servo-system.kicad_pro": "2091f7b43355cdbe837909f0886aa4b29689361cbd979a424d6544501b16d3d6",
+    "pico-servo-system.net": "dc7f19b05cba64539239f79fdfc99529e241bc310cf7e42a061393dc01529f0e",
+    "pico-servo-system.pdf": "5a7b58c8eef25366767568b650434fc7a636db614ee5ddc042079392a56498ca",
+    "erc-report.json": "65ed6523827cf38b66fdff0a60f220f003008304e6724459ee6ddef844796679",
+    "bom.csv": "c81ddf1d7fd31d8443e3c29d23ee984fbcbd0e21fff21e535fdc85a0a3abf05f",
+    "port-pinout.csv": "17afa3016d5a87010c0450cf23fdd5224231503c918d34f9065cc1b3a40b5fdb",
+    "placement-concept.svg": "f0767f844194ef13331b2ae6bd64226574b591d3ba2e097a67432b9b2612569c"
+  },
+  "status": "Unbuilt proposal"
 }

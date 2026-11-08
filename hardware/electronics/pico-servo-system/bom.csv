@@ -12,6 +12,10 @@ TP3,1,GP0,/,Fit,
 TP4,1,GP1,/,Fit,
 TP5,1,GND,/,Fit,
 U1,1,Raspberry Pi Pico,/,Fit,Module:RaspberryPi_Pico_Common_Unspecified
+C1,1,100nF,/,Fit,Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm
+R1,1,2k,/,Fit,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+R2,1,2k,/,Fit,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+U2,1,24LC256-I/P,/,Fit,Package_DIP:DIP-8_W7.62mm
 C100,1,470uF / 35V,/Six-channel output module/,Fit,
 C101,1,100nF,/Six-channel output module/,Fit,
 C102,1,100nF,/Six-channel output module/,DNP - reserved,
@@ -120,3 +124,4 @@ MECH-HEATSINK,1,<=1.5 K/W open-air heatsink candidate; e.g. SK 08 100 SA; mounti
 MECH-THERMAL,1,Resistor mounting screws and thermal compound; keep wiring clear of hot parts,Off-schematic,Required / mechanical qualification pending,
 MECH-DIP8,1,DIP-8 socket for U202,Off-schematic,Optional,
 MECH-SETUP-R,1,1k >=0.25W setup resistor; not fitted in normal circuit,Off-schematic,Required / commissioning tool,
+MECH-EEPROM-SOCKET,1,DIP-8 socket for removable U2; 7.62mm row spacing,Off-schematic,Fit / mechanical proposal,

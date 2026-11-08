@@ -2,14 +2,14 @@
 <export version="E">
   <design>
     <source>C:\Users\fox\Sandbox\Robotic\hexaroam\hardware\electronics\pico-servo-system\pico-servo-system.kicad_sch</source>
-    <date>2026-10-27T18:07:05</date>
+    <date>2026-11-08T11:45:47</date>
     <tool>Eeschema 10.0.7</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>Pico baseboard - 18 servo signals</title>
         <company>HexaRoam</company>
-        <rev>C - PROPOSAL</rev>
-        <date>2026-10-27</date>
+        <rev>D</rev>
+        <date>2026-11-08</date>
         <source>pico-servo-system.kicad_sch</source>
         <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
         <comment number="2" value=""/>
@@ -26,8 +26,8 @@
       <title_block>
         <title>Six-channel signal output module</title>
         <company>HexaRoam</company>
-        <rev>C - PROPOSAL</rev>
-        <date>2026-10-27</date>
+        <rev>D</rev>
+        <date>2026-11-08</date>
         <source>servo-output-module.kicad_sch</source>
         <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
         <comment number="2" value=""/>
@@ -44,8 +44,8 @@
       <title_block>
         <title>ONE-servo supply - discrete energy dump</title>
         <company>HexaRoam</company>
-        <rev>C - PROPOSAL</rev>
-        <date>2026-10-27</date>
+        <rev>D</rev>
+        <date>2026-11-08</date>
         <source>bench-power.kicad_sch</source>
         <comment number="1" value="Modular bench system; unbuilt; no routed PCB"/>
         <comment number="2" value=""/>
@@ -60,6 +60,31 @@
     </sheet>
   </design>
   <components>
+    <comp ref="C1">
+      <value>100nF</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>754c5343-04c7-4e34-9b76-5686f62eea43</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
     <comp ref="D2">
       <value>1N5819</value>
       <fields>
@@ -261,6 +286,56 @@
         </unit>
       </units>
     </comp>
+    <comp ref="R1">
+      <value>2k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e3576d25-bf55-4164-b218-883638906d92</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R2">
+      <value>2k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ccde70fe-4cd3-4142-8bc5-05a0e062f5cb</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
     <comp ref="TP1">
       <value>VSYS</value>
       <fields>
@@ -430,6 +505,38 @@
             <pin num="32"/>
             <pin num="34"/>
             <pin num="33"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U2">
+      <value>24LC256-I/P</value>
+      <footprint>Package_DIP:DIP-8_W7.62mm</footprint>
+      <datasheet>${KIPRJMOD}/../../references/eeprom/24AA256-MIC.pdf</datasheet>
+      <description>I2C Serial EEPROM, 256Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8</description>
+      <fields>
+        <field name="Footprint">Package_DIP:DIP-8_W7.62mm</field>
+        <field name="Datasheet">${KIPRJMOD}/../../references/eeprom/24AA256-MIC.pdf</field>
+        <field name="Description">I2C Serial EEPROM, 256Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8</field>
+      </fields>
+      <libsource lib="Memory_EEPROM" part="24LC256" description="I2C Serial EEPROM, 256Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8"/>
+      <property name="Sheetname" value="pico-servo-system"/>
+      <property name="Sheetfile" value="pico-servo-system.kicad_sch"/>
+      <property name="ki_keywords" value="I2C Serial EEPROM"/>
+      <property name="ki_fp_filters" value="DIP*W7.62mm* SOIC*3.9x4.9mm* TSSOP*4.4x3mm*P0.65mm* DFN*3x2mm*P0.5mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9408f21a-fa94-4758-9ae4-f93491db5985</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="8"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
           </pins>
         </unit>
       </units>
@@ -2763,7 +2870,7 @@
       <property name="ki_keywords" value="cmp open collector"/>
       <property name="ki_fp_filters" value="SOIC*3.9x4.9mm*P1.27mm* DIP*W7.62mm* SOP*5.28x5.23mm*P1.27mm* VSSOP*3x3mm*P0.65mm* TSSOP*4.4x3mm*P0.65mm*"/>
       <sheetpath names="/ONE-SERVO protected supply/" tstamps="/c6aaec8e-1d45-4374-8e72-98a85c4695c4/"/>
-      <tstamps>95390c08-3a78-41d1-8f8f-58819b7e9371 85bd7d1d-7b31-4946-a585-914941d32420 55cae382-4bc6-4102-ab41-34944367ff47</tstamps>
+      <tstamps>85bd7d1d-7b31-4946-a585-914941d32420 95390c08-3a78-41d1-8f8f-58819b7e9371 55cae382-4bc6-4102-ab41-34944367ff47</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3064,6 +3171,33 @@
         <pin num="40" name="VBUS" type="power_out"/>
       </pins>
     </libpart>
+    <libpart lib="Memory_EEPROM" part="24LC256">
+      <description>I2C Serial EEPROM, 256Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8</description>
+      <docs>http://ww1.microchip.com/downloads/en/devicedoc/21203m.pdf</docs>
+      <footprints>
+        <fp>DIP*W7.62mm*</fp>
+        <fp>SOIC*3.9x4.9mm*</fp>
+        <fp>TSSOP*4.4x3mm*P0.65mm*</fp>
+        <fp>DFN*3x2mm*P0.5mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">24LC256</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">http://ww1.microchip.com/downloads/en/devicedoc/21203m.pdf</field>
+        <field name="Description">I2C Serial EEPROM, 256Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A0" type="input"/>
+        <pin num="2" name="A1" type="input"/>
+        <pin num="3" name="A2" type="input"/>
+        <pin num="4" name="GND" type="power_in"/>
+        <pin num="5" name="SDA" type="bidirectional"/>
+        <pin num="6" name="SCL" type="input"/>
+        <pin num="7" name="WP" type="input"/>
+        <pin num="8" name="VCC" type="power_in"/>
+      </pins>
+    </libpart>
     <libpart lib="Reference_Voltage" part="TL431LP">
       <description>Shunt Regulator, TO-92</description>
       <docs>http://www.ti.com/lit/ds/symlink/tl431.pdf</docs>
@@ -3154,6 +3288,9 @@
     <library logical="MCU_Module">
       <uri>${KICAD10_SYMBOL_DIR}/MCU_Module.kicad_sym</uri>
     </library>
+    <library logical="Memory_EEPROM">
+      <uri>${KICAD10_SYMBOL_DIR}/Memory_EEPROM.kicad_sym</uri>
+    </library>
     <library logical="Reference_Voltage">
       <uri>${KICAD10_SYMBOL_DIR}/Reference_Voltage.kicad_sym</uri>
     </library>
@@ -3168,68 +3305,64 @@
     </library>
   </libraries>
   <nets>
-    <net code="1" name="/GP18" class="Default">
-      <node ref="J6" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
-      <node ref="U1" pin="24" pinfunction="GPIO18_24" pintype="bidirectional"/>
-    </net>
-    <net code="2" name="/GP19" class="Default">
+    <net code="1" name="/EEPROM_SCL" class="Default">
       <node ref="J6" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
       <node ref="U1" pin="25" pinfunction="GPIO19_25" pintype="bidirectional"/>
+      <node ref="U2" pin="6" pinfunction="SCL_6" pintype="input"/>
     </net>
-    <net code="3" name="/GP22" class="Default">
-      <node ref="J6" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
-      <node ref="U1" pin="29" pinfunction="GPIO22_29" pintype="bidirectional"/>
+    <net code="2" name="/EEPROM_SDA" class="Default">
+      <node ref="J6" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="U1" pin="24" pinfunction="GPIO18_24" pintype="bidirectional"/>
+      <node ref="U2" pin="5" pinfunction="SDA_5" pintype="bidirectional"/>
     </net>
-    <net code="4" name="/GP26" class="Default">
-      <node ref="J6" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
-      <node ref="U1" pin="31" pinfunction="GPIO26_ADC0_31" pintype="bidirectional"/>
-    </net>
-    <net code="5" name="/GP27" class="Default">
+    <net code="3" name="/GP27" class="Default">
       <node ref="J6" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="U1" pin="32" pinfunction="GPIO27_ADC1_32" pintype="bidirectional"/>
     </net>
-    <net code="6" name="/GP28" class="Default">
+    <net code="4" name="/GP28" class="Default">
       <node ref="J6" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
       <node ref="U1" pin="34" pinfunction="GPIO28_ADC2_34" pintype="bidirectional"/>
     </net>
-    <net code="7" name="/ONE-SERVO protected supply/DUMP_DRAIN" class="Default">
+    <net code="5" name="/ONE-SERVO protected supply/DUMP_DRAIN" class="Default">
       <node ref="D202" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="Q201" pin="2" pinfunction="D_2" pintype="passive"/>
       <node ref="R208" pin="2" pintype="passive"/>
       <node ref="TP206" pin="1" pinfunction="1_1" pintype="passive"/>
     </net>
-    <net code="8" name="/ONE-SERVO protected supply/DUMP_GATE" class="Default">
+    <net code="6" name="/ONE-SERVO protected supply/DUMP_GATE" class="Default">
       <node ref="Q201" pin="1" pinfunction="G_1" pintype="input"/>
       <node ref="R206" pin="2" pintype="passive"/>
       <node ref="R207" pin="1" pintype="passive"/>
       <node ref="TP205" pin="1" pinfunction="1_1" pintype="passive"/>
     </net>
-    <net code="9" name="/ONE-SERVO protected supply/DUMP_OUT" class="Default">
+    <net code="7" name="/ONE-SERVO protected supply/DUMP_OUT" class="Default">
       <node ref="R204" pin="2" pintype="passive"/>
       <node ref="R205" pin="2" pintype="passive"/>
       <node ref="R206" pin="1" pintype="passive"/>
       <node ref="U202" pin="1" pintype="open_collector"/>
     </net>
-    <net code="10" name="/ONE-SERVO protected supply/FUSED_POS" class="Default">
+    <net code="8" name="/ONE-SERVO protected supply/FUSED_POS" class="Default">
       <node ref="F201" pin="2" pintype="passive"/>
       <node ref="SW201" pin="1" pinfunction="A_1" pintype="passive"/>
     </net>
-    <net code="11" name="/ONE-SERVO protected supply/PSU_POS" class="Default">
+    <net code="9" name="/ONE-SERVO protected supply/PSU_POS" class="Default">
       <node ref="F201" pin="1" pintype="passive"/>
       <node ref="J201" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
     </net>
-    <net code="12" name="/ONE-SERVO protected supply/SENSE" class="Default">
+    <net code="10" name="/ONE-SERVO protected supply/SENSE" class="Default">
       <node ref="R202" pin="2" pintype="passive"/>
       <node ref="R203" pin="1" pintype="passive"/>
       <node ref="R204" pin="1" pintype="passive"/>
       <node ref="TP204" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U202" pin="3" pinfunction="+_3" pintype="input"/>
     </net>
-    <net code="13" name="/ONE-SERVO protected supply/SWITCHED_POS" class="Default">
+    <net code="11" name="/ONE-SERVO protected supply/SWITCHED_POS" class="Default">
       <node ref="D201" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="SW201" pin="2" pinfunction="B_2" pintype="passive"/>
     </net>
-    <net code="14" name="/ONE-SERVO protected supply/VREF" class="Default">
+    <net code="12" name="/ONE-SERVO protected supply/VREF" class="Default">
       <node ref="R201" pin="2" pintype="passive"/>
       <node ref="TP203" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U201" pin="1" pinfunction="REF_1" pintype="passive"/>
@@ -3237,106 +3370,111 @@
       <node ref="U202" pin="2" pinfunction="-_2" pintype="input"/>
       <node ref="U202" pin="6" pinfunction="-_6" pintype="input"/>
     </net>
-    <net code="15" name="/PICO_3V3" class="Default">
+    <net code="13" name="/PICO_3V3" class="Default">
+      <node ref="C1" pin="1" pintype="passive"/>
       <node ref="J6" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
       <node ref="U1" pin="36" pinfunction="3V3_36" pintype="power_out"/>
+      <node ref="U2" pin="7" pinfunction="WP_7" pintype="input"/>
+      <node ref="U2" pin="8" pinfunction="VCC_8" pintype="power_in"/>
     </net>
-    <net code="16" name="/PICO_EXT_5V" class="Default">
+    <net code="14" name="/PICO_EXT_5V" class="Default">
       <node ref="D2" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="J1" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
     </net>
-    <net code="17" name="/PICO_VSYS" class="Default">
+    <net code="15" name="/PICO_VSYS" class="Default">
       <node ref="D2" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="TP1" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U1" pin="39" pinfunction="VSYS_39" pintype="power_in"/>
     </net>
-    <net code="18" name="/SERVO0_3V3" class="Default">
+    <net code="16" name="/SERVO0_3V3" class="Default">
       <node ref="J101" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
       <node ref="J2" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
       <node ref="R101" pin="1" pintype="passive"/>
       <node ref="TP3" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U1" pin="1" pinfunction="GPIO0_1" pintype="bidirectional"/>
     </net>
-    <net code="19" name="/SERVO1_3V3" class="Default">
+    <net code="17" name="/SERVO1_3V3" class="Default">
       <node ref="J101" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
       <node ref="J2" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
       <node ref="R111" pin="1" pintype="passive"/>
       <node ref="TP4" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U1" pin="2" pinfunction="GPIO1_2" pintype="bidirectional"/>
     </net>
-    <net code="20" name="/SERVO2_3V3" class="Default">
+    <net code="18" name="/SERVO2_3V3" class="Default">
       <node ref="J101" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="J2" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="R121" pin="1" pintype="passive"/>
       <node ref="U1" pin="4" pinfunction="GPIO2_4" pintype="bidirectional"/>
     </net>
-    <net code="21" name="/SERVO3_3V3" class="Default">
+    <net code="19" name="/SERVO3_3V3" class="Default">
       <node ref="J101" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
       <node ref="J2" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
       <node ref="R131" pin="1" pintype="passive"/>
       <node ref="U1" pin="5" pinfunction="GPIO3_5" pintype="bidirectional"/>
     </net>
-    <net code="22" name="/SERVO4_3V3" class="Default">
+    <net code="20" name="/SERVO4_3V3" class="Default">
       <node ref="J101" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
       <node ref="J2" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
       <node ref="R141" pin="1" pintype="passive"/>
       <node ref="U1" pin="6" pinfunction="GPIO4_6" pintype="bidirectional"/>
     </net>
-    <net code="23" name="/SERVO5_3V3" class="Default">
+    <net code="21" name="/SERVO5_3V3" class="Default">
       <node ref="J101" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
       <node ref="J2" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
       <node ref="R151" pin="1" pintype="passive"/>
       <node ref="U1" pin="7" pinfunction="GPIO5_7" pintype="bidirectional"/>
     </net>
-    <net code="24" name="/SERVO6_3V3" class="Default">
+    <net code="22" name="/SERVO6_3V3" class="Default">
       <node ref="J3" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
       <node ref="U1" pin="9" pinfunction="GPIO6_9" pintype="bidirectional"/>
     </net>
-    <net code="25" name="/SERVO7_3V3" class="Default">
+    <net code="23" name="/SERVO7_3V3" class="Default">
       <node ref="J3" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
       <node ref="U1" pin="10" pinfunction="GPIO7_10" pintype="bidirectional"/>
     </net>
-    <net code="26" name="/SERVO8_3V3" class="Default">
+    <net code="24" name="/SERVO8_3V3" class="Default">
       <node ref="J3" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="U1" pin="11" pinfunction="GPIO8_11" pintype="bidirectional"/>
     </net>
-    <net code="27" name="/SERVO9_3V3" class="Default">
+    <net code="25" name="/SERVO9_3V3" class="Default">
       <node ref="J3" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
       <node ref="U1" pin="12" pinfunction="GPIO9_12" pintype="bidirectional"/>
     </net>
-    <net code="28" name="/SERVO10_3V3" class="Default">
+    <net code="26" name="/SERVO10_3V3" class="Default">
       <node ref="J3" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
       <node ref="U1" pin="14" pinfunction="GPIO10_14" pintype="bidirectional"/>
     </net>
-    <net code="29" name="/SERVO11_3V3" class="Default">
+    <net code="27" name="/SERVO11_3V3" class="Default">
       <node ref="J3" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
       <node ref="U1" pin="15" pinfunction="GPIO11_15" pintype="bidirectional"/>
     </net>
-    <net code="30" name="/SERVO12_3V3" class="Default">
+    <net code="28" name="/SERVO12_3V3" class="Default">
       <node ref="J4" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
       <node ref="U1" pin="16" pinfunction="GPIO12_16" pintype="bidirectional"/>
     </net>
-    <net code="31" name="/SERVO13_3V3" class="Default">
+    <net code="29" name="/SERVO13_3V3" class="Default">
       <node ref="J4" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
       <node ref="U1" pin="17" pinfunction="GPIO13_17" pintype="bidirectional"/>
     </net>
-    <net code="32" name="/SERVO14_3V3" class="Default">
+    <net code="30" name="/SERVO14_3V3" class="Default">
       <node ref="J4" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="U1" pin="19" pinfunction="GPIO14_19" pintype="bidirectional"/>
     </net>
-    <net code="33" name="/SERVO15_3V3" class="Default">
+    <net code="31" name="/SERVO15_3V3" class="Default">
       <node ref="J4" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
       <node ref="U1" pin="20" pinfunction="GPIO15_20" pintype="bidirectional"/>
     </net>
-    <net code="34" name="/SERVO16_3V3" class="Default">
+    <net code="32" name="/SERVO16_3V3" class="Default">
       <node ref="J4" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
-      <node ref="U1" pin="21" pinfunction="GPIO16_21" pintype="bidirectional"/>
+      <node ref="U1" pin="29" pinfunction="GPIO22_29" pintype="bidirectional"/>
     </net>
-    <net code="35" name="/SERVO17_3V3" class="Default">
+    <net code="33" name="/SERVO17_3V3" class="Default">
       <node ref="J4" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
-      <node ref="U1" pin="22" pinfunction="GPIO17_22" pintype="bidirectional"/>
+      <node ref="U1" pin="31" pinfunction="GPIO26_ADC0_31" pintype="bidirectional"/>
     </net>
-    <net code="36" name="/SERVO_VS" class="Default">
+    <net code="34" name="/SERVO_VS" class="Default">
       <node ref="C100" pin="1" pintype="passive"/>
       <node ref="C101" pin="1" pintype="passive"/>
       <node ref="C102" pin="1" pintype="passive"/>
@@ -3376,6 +3514,14 @@
       <node ref="TP201" pin="1" pinfunction="1_1" pintype="passive"/>
       <node ref="U202" pin="8" pinfunction="V+_8" pintype="power_in"/>
     </net>
+    <net code="35" name="/UART0_RX" class="Default">
+      <node ref="J6" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U1" pin="22" pinfunction="GPIO17_22" pintype="bidirectional"/>
+    </net>
+    <net code="36" name="/UART0_TX" class="Default">
+      <node ref="J6" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U1" pin="21" pinfunction="GPIO16_21" pintype="bidirectional"/>
+    </net>
     <net code="37" name="/UART1_RX" class="Default">
       <node ref="J5" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
       <node ref="U1" pin="27" pinfunction="GPIO21_27" pintype="bidirectional"/>
@@ -3389,6 +3535,7 @@
       <node ref="U1" pin="40" pinfunction="VBUS_40" pintype="power_out"/>
     </net>
     <net code="40" name="GND" class="Default">
+      <node ref="C1" pin="2" pintype="passive"/>
       <node ref="C100" pin="2" pintype="passive"/>
       <node ref="C101" pin="2" pintype="passive"/>
       <node ref="C102" pin="2" pintype="passive"/>
@@ -3472,6 +3619,10 @@
       <node ref="U1" pin="3" pinfunction="GND_3" pintype="power_out"/>
       <node ref="U1" pin="38" pinfunction="GND_38" pintype="passive"/>
       <node ref="U1" pin="8" pinfunction="GND_8" pintype="passive"/>
+      <node ref="U2" pin="1" pinfunction="A0_1" pintype="input"/>
+      <node ref="U2" pin="2" pinfunction="A1_2" pintype="input"/>
+      <node ref="U2" pin="3" pinfunction="A2_3" pintype="input"/>
+      <node ref="U2" pin="4" pinfunction="GND_4" pintype="power_in"/>
       <node ref="U201" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U202" pin="4" pinfunction="V-_4" pintype="power_in"/>
       <node ref="U202" pin="5" pinfunction="+_5" pintype="input"/>
