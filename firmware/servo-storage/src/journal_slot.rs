@@ -2,7 +2,7 @@
 
 use hexaroam_servo_control::Calibration;
 
-use crate::{Checksum, FormatError};
+use crate::{Checksum, FormatError, SlotWrite, SlotWriteError};
 
 pub const SLOT_SIZE: usize = 512;
 
@@ -126,6 +126,81 @@ pub fn decode_slot<const N: usize>(
         calibrations,
     })
 }
+
+/// Performs one verified write attempt for a complete dataset.
+///
+/// Encodes the complete candidate before modifying storage.
+/// Invalidates and verifies the target magic, writes the remaining
+/// bytes, then restores the valid magic as the final write.
+///
+/// Success requires an exact readback of the complete slot.
+/// No retries or rotation are performed here.
+/// The caller must select a slot that may be overwritten.
+pub fn write_calibration_slot<const N: usize, S: SlotWrite>(
+    storage: &mut S,
+    slot_index: usize,
+    sequence: u64,
+    calibrations: &[Calibration; N],
+    checksum: &mut impl Checksum,
+) -> Result<(), SlotWriteError<S::Error>> {
+    if N == 0 {
+        return Err(SlotWriteError::InvalidServoCount);
+    }
+
+    // Encode before modifying storage, including checking slot capacity.
+    let mut candidate = [0xFF; SLOT_SIZE];
+
+    encode_slot(
+        sequence,
+        &(*calibrations).map(Some),
+        &mut candidate,
+        checksum,
+    )
+    .map_err(SlotWriteError::Slot)?;
+
+    let invalid_magic = [0_u8; MAGIC.len()];
+    let mut readback = [0_u8; SLOT_SIZE];
+
+    storage
+        .write_slot_bytes(slot_index, 0, &invalid_magic)
+        .map_err(SlotWriteError::Storage)?;
+
+    storage
+        .read_slot(slot_index, &mut readback)
+        .map_err(SlotWriteError::Storage)?;
+
+    if readback[..MAGIC.len()] != invalid_magic {
+        return Err(SlotWriteError::InvalidationFailed);
+    }
+
+    // Keep the identifier invalid while replacing the remaining bytes.
+    storage
+        .write_slot_bytes(
+            slot_index,
+            MAGIC.len(),
+            &candidate[MAGIC.len()..],
+        )
+        .map_err(SlotWriteError::Storage)?;
+
+    // Restore the valid identifier only after the body write completed.
+    storage
+        .write_slot_bytes(slot_index, 0, &candidate[..MAGIC.len()])
+        .map_err(SlotWriteError::Storage)?;
+
+    storage
+        .read_slot(slot_index, &mut readback)
+        .map_err(SlotWriteError::Storage)?;
+
+    if readback != candidate {
+        return Err(SlotWriteError::VerificationFailed);
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+#[path = "test_journal_slot_write.rs"]
+mod write_tests;
 
 #[cfg(test)]
 #[path = "test_journal_slot.rs"]

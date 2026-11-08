@@ -30,7 +30,7 @@ A successful `write()` means transfers completed and the device became ready; it
 
 The operating servo controller will read calibration at startup only. EEPROM programming belongs to a separate PC-controlled calibration station using another Pico; it is not exposed by the robot's command protocol. The EEPROM is disconnected from the unpowered robot before station access. Hardware write protection in the robot is planned; the driver does not configure WP.
 
-The separate [calibration storage contracts](../servo-storage/README.md#medium-independent-calibration-storage) expose complete datasets. The [EEPROM calibration reader](../servo-eeprom/README.md) now connects CalibrationRead to this byte driver using the existing slot format and a default 64-slot layout. EEPROM write rotation, station firmware and boot integration remain pending. Existing flash journal tests remain separate.
+The separate [calibration storage contracts](../servo-storage/README.md#medium-independent-calibration-storage) expose complete datasets. The [EEPROM calibration reader](../servo-eeprom/README.md) now connects CalibrationRead to this byte driver using the existing slot format and a default 64-slot layout. The [station storage adapter](../servo-eeprom/README.md) now adds verified writes and bounded rotation above this byte driver. Station firmware and boot integration remain pending. Existing flash journal tests remain separate.
 
 ## Verification
 

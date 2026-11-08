@@ -1,6 +1,6 @@
 #![no_std]
 
-//! Read-only EEPROM adapter for complete servo calibration.
+//! EEPROM calibration adapters for the controller and separate station.
 
 use embedded_hal::i2c::I2c;
 use hexaroam_eeprom::{CAPACITY, Eeprom, EepromError};
@@ -10,10 +10,19 @@ use hexaroam_servo_storage::{
     SlotLayout, SlotLayoutError, load_calibrations,
 };
 
+mod slot_writer;
+pub use slot_writer::EepromSlotWriter;
+
+mod calibration_storage;
+pub use calibration_storage::{
+    EepromCalibrationStorage, EepromCalibrationStorageError,
+};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EepromSlotError<E> {
     Layout(SlotLayoutError),
     Device(EepromError<E>),
+    RangeOutOfBounds,
 }
 
 struct EepromSlots<I> {

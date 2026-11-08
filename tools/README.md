@@ -211,8 +211,8 @@ Use `python tools/uart_test.py --port COM6 --suite uart_commands` with the match
 
 The owner reported 697 passing tests and all 19 verification checks passing after adding the 32 EEPROM driver tests. These are PC tests; the driver has not been exercised against a physical EEPROM. See the [EEPROM guide](../firmware/eeprom/README.md) for API, write completion and verification limits. The owner subsequently reported CI green for the driver revision.
 
-## EEPROM calibration reader integration
+## EEPROM calibration storage integration
 
 `firmware/servo-eeprom` is included in test, fmt, check, verify and doc with a committed Cargo.lock. The documentation inventory and its test include ten Rust packages. Existing CI uses the shared test/verify tasks without a workflow change.
 
-The owner reported 744 passing tests and all 21 local verification checks passing, including 124 storage tests and 15 adapter tests. The [reader guide](../firmware/servo-eeprom/README.md) explains the end-to-end PC test coverage and remaining hardware checks. CI for this revision is pending.
+The owner reported CI green for the original reader revision. The current writer revision passed 837 tests and all 21 local verification checks, including 186 storage tests and 46 adapter tests. The [storage adapter guide](../firmware/servo-eeprom/README.md) explains the end-to-end PC coverage, retry behavior and remaining hardware checks. CI for this writer revision is pending.

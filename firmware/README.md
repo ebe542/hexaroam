@@ -8,7 +8,9 @@ See [development setup](../docs/development-setup.md) for prerequisites and [har
 
 ## EEPROM calibration storage
 
-The [24xx256 EEPROM driver](eeprom/README.md) provides medium-specific byte reads and page writes through embedded-hal. The [calibration storage traits](servo-storage/README.md#medium-independent-calibration-storage) expose complete datasets separately. The [EEPROM calibration reader](servo-eeprom/README.md) now implements CalibrationRead through checked slot addressing and incremental validated loading. The owner reported 124 storage tests, 15 adapter tests and full local verification of 744 tests with all 21 checks passing. CI was green for the preceding byte-driver revision; CI for the reader revision is pending. Boot loading, EEPROM write rotation and physical EEPROM tests remain pending; the normal Pico firmware has not been changed by this addition.
+The [24xx256 EEPROM driver](eeprom/README.md) provides byte reads and page writes. The [shared storage layer](servo-storage/README.md) provides format validation, incremental scanning, write planning and bounded verified rotation. The [EEPROM adapters](servo-eeprom/README.md) expose a read-only controller path and a writable station path through CalibrationRead and CalibrationStorage.
+
+The owner reported 186 storage tests, 46 adapter tests and full local verification of 837 tests with all 21 checks passing. CI was green for the preceding reader revision; CI for this writer revision is pending. Physical EEPROM tests, boot/protocol integration and the station application remain pending. The normal Pico firmware has not been connected to this storage path.
 
 ## Pico LED blink firmware
 

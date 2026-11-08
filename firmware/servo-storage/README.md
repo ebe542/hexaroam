@@ -11,7 +11,7 @@
 - Servo IDs are array indices. The interface exposes no slot index, sequence number, sector, byte address or erase operation.
 - The implementation owns encoding, integrity checks, sequence selection, rotation and any erasure required by its medium. A failed save may have partially modified storage.
 
-The operating controller uses read access only; writing belongs to the separate calibration station. The [EEPROM calibration reader](../servo-eeprom/README.md) now implements CalibrationRead using the lower-level [EEPROM driver](../eeprom/README.md). CalibrationStorage still has no EEPROM implementation.
+The operating controller uses the read-only EepromCalibrationReader. The separate station uses EepromCalibrationStorage, which implements both CalibrationRead and CalibrationStorage. See the [EEPROM adapters](../servo-eeprom/README.md); both delegate to shared algorithms in this crate and the lower-level [EEPROM driver](../eeprom/README.md).
 
 The existing JournalStorage, two-sector layout and journal functions below remain the earlier flash-oriented implementation. JournalRead itself only requires a complete slot read and is reused by the EEPROM adapter. These lower-level contracts are not the medium-independent application API. The binary format still permits missing entries; the application contract requires a complete array. No new active/validity flag was added.
 
@@ -23,7 +23,19 @@ The existing JournalStorage, two-sector layout and journal functions below remai
 
 The newest format/CRC-valid record is selected before checking completeness. Missing entries in that record return IncompleteCalibration with the first missing Servo ID; no older complete record is substituted. No valid record returns None. Zero slots and zero servos are rejected before storage access. The loader returns only complete calibrations; physical slot and sequence metadata remain internal to the storage path.
 
-The owner reported 124 storage tests passing: the earlier 92 tests plus 13 slot-layout tests and 19 loader tests. With the 15 EEPROM adapter tests included, full local verification passed 744 tests and all 21 checks. EEPROM hardware verification and write rotation remain pending.
+The original reader revision passed 124 storage tests and CI. The owner now reports 186 storage tests, 46 adapter tests and full local verification of 837 tests with all 21 checks passing. Hardware verification and application integration remain pending; CI for the writer revision is pending.
+
+## Verified writes and bounded rotation
+
+scan_calibrations exposes LocatedRecord metadata for storage management; load_calibrations delegates scanning and separately checks completeness. plan_calibration_write compares complete datasets, handles unchanged data, and chooses the next slot/sequence without I/O.
+
+SlotWrite extends JournalRead with byte-range overwrite, without an erase operation. Its backend validates the requested range, changes no bytes outside it and waits for write completion; errors may leave partial changes. write_calibration_slot performs one attempt: encode, invalidate identifier, verify invalidation, write body, restore identifier, then compare a complete readback. Format constants remain in journal_slot.rs.
+
+save_calibrations requires at least two slots. It protects the original newest valid slot and permits at most three different targets. Only invalidation/readback mismatches permit retry; bus/encoding errors abort. Retry scans do not apply the unchanged-data shortcut, skip protected/attempted slots, and allocate a sequence greater than both the scan maximum and the previous attempt. The u64 sequence never wraps. An incomplete latest dataset may be replaced by a complete one.
+
+A failed save can leave a new valid record, so it does not promise rollback or that the next load returns the original record. For example, padding is ignored by decoding but checked during exact write verification. The caller must treat save errors as errors and verify the medium before returning it to use. The EEPROM adapters expose the shared logic through CalibrationRead and CalibrationStorage.
+
+The 62 new core tests comprise 14 incremental scan, 15 write-planning, 11 single-attempt and 22 save-management tests, increasing the package total from 124 to 186.
 
 ## Version 1 representation
 

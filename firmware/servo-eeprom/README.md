@@ -1,12 +1,36 @@
-# EEPROM calibration reader
+# EEPROM calibration storage
 
 `hexaroam-servo-eeprom` connects the medium-independent calibration storage API to the 24xx256 byte driver. This separate `no_std` crate keeps the [EEPROM driver](../eeprom/README.md) independent of servo data and [servo-storage](../servo-storage/README.md) independent of I2C devices.
 
 ## Ownership and interfaces
 
-`EepromCalibrationReader<I, C, N, SLOTS = 64>` owns an `Eeprom<I>` and a checksum implementation `C`. It implements `CalibrationRead<N>` and returns a complete `[Calibration; N]`, None for no valid record, or an error. Array indices are Servo IDs.
+| Type | Ownership and role |
+| --- | --- |
+| `EepromCalibrationReader<I, C, N, SLOTS = 64>` | Owns an EEPROM and checksum; implements only CalibrationRead for the operating controller |
+| `EepromSlotWriter<I, D, SLOTS = 64>` | Owns the slot backend and DelayNs; implements JournalRead and SlotWrite |
+| `EepromCalibrationStorage<I, D, C, N, SLOTS = 64>` | Owns the slot writer and checksum; implements CalibrationRead and CalibrationStorage for the separate station |
 
-Construction validates `SlotLayout::new(0, SLOTS, CAPACITY)` without bus access. A zero-slot or oversized region is rejected. The internal `EepromSlots` implements `JournalRead`: it maps a slot index to a byte address and delegates the complete 512-byte read to the EEPROM driver. Invalid indices are rejected before bus access. `load()` delegates to `load_calibrations`; it does not duplicate format or CRC logic.
+Construction checks the region without bus access. Zero slots and regions larger than the EEPROM are rejected. One-slot regions can be read, but saving requires at least two slots. Invalid servo counts are rejected when loading/saving before bus access.
+
+The internal EepromSlots maps slot indices to byte addresses through SlotLayout. EepromSlotWriter additionally checks the relative byte range before writing; empty writes at offsets 0 through 512 perform no bus access. Writes cannot cross a logical slot boundary. Physical 64-byte page splitting and readiness polling are delegated to the byte driver.
+
+```mermaid
+flowchart TD
+    Controller[Operating controller] --> Reader[EepromCalibrationReader]
+    Station[Separate calibration station] --> Store[EepromCalibrationStorage]
+    Reader --> Load[load_calibrations]
+    Store --> Load
+    Store --> Save[save_calibrations]
+    Load --> Scan[scan_calibrations]
+    Save --> Scan
+    Save --> Plan[plan_calibration_write]
+    Save --> Attempt[write_calibration_slot]
+    Reader --> ReadSlots[Internal EepromSlots]
+    Store --> Writer[EepromSlotWriter]
+    Writer --> ReadSlots
+    ReadSlots --> Device[Eeprom byte driver]
+    Writer --> Device
+```
 
 ## EEPROM layout
 
@@ -19,30 +43,43 @@ Construction validates `SlotLayout::new(0, SLOTS, CAPACITY)` without bus access.
 | Last slot | address 32,256 through 32,767 |
 | Representation | Existing version-1 journal slot, unchanged |
 
-The adapter can use a smaller nonempty region starting at zero. A slot holds up to 24 calibration entries in the existing format; all entries required by N must be present to load a complete dataset. Configuring N does not enlarge a slot.
+Adapters can use a smaller nonempty region starting at zero. A slot holds up to 24 calibration entries in the existing format; all entries required by N must be present to load a complete dataset. Configuring N does not enlarge a slot. No active/validity flag was added.
 
-The newest valid record is selected by its u64 sequence, not physical slot order. Each slot is read once in ascending order on a successful scan. RAM holds one slot buffer, the latest candidate and a table of sequence numbers, rather than the entire EEPROM image.
+## Loading and validation
 
-## Validation and errors
+scan_calibrations reads slots individually in ascending order, returning the newest format/CRC-valid record with its physical slot and u64 sequence. It retains one slot buffer, a latest candidate and a sequence-number table rather than the whole EEPROM image. Duplicate sequences among valid records are errors, including identical records and older duplicates. Invalid records are skipped; a storage read error aborts because the unreadable slot might contain newer data.
 
-Format and CRC-invalid records are skipped. Any storage read error aborts loading, even if an earlier slot was valid: an unreadable slot might contain newer data. Duplicate sequences among valid records are errors, including identical records and duplicates older than the highest sequence.
+load_calibrations uses this scan and then checks completeness. An intact but incomplete newest record returns IncompleteCalibration with the first missing Servo ID, without falling back to older data. An empty valid record is therefore an error for N greater than zero, not None. No valid record returns None. Format checks cannot prove correct physical mounting or application-specific pulse limits.
 
-Only after selecting the newest valid record does the loader require complete calibration. A missing entry returns `IncompleteCalibration` with its Servo ID; an intact but incomplete newest record must not fall back to an older complete record. An empty, valid record is therefore an error for N greater than zero, not None. Zero servos are rejected before bus access. Format checks do not prove mechanical mounting or application-specific pulse compatibility.
+## Saving and rotation
 
-`EepromSlotError` preserves layout errors and underlying EEPROM errors. `CalibrationRead::Error` wraps these in `CalibrationLoadError`, preserving bus errors and distinguishing them from duplicate sequences and incomplete calibration.
+The station calls CalibrationStorage::save with a complete array. Initially identical data succeeds without programming or sequence increment, including at the maximum sequence. An incomplete latest record can be replaced. The first record uses slot zero and sequence one; changed data uses the next slot in the ring and the next sequence. Sequence overflow is an error.
+
+Each attempt encodes before modifying storage, writes an invalid identifier and verifies it, writes the remaining body/CRC/padding, and restores the valid identifier last. Success requires an exact readback of all 512 bytes, including padding. No EEPROM sector erase is needed. The original newest valid slot remains protected throughout the call.
+
+Only readable invalidation or final-content mismatches permit another attempt. Storage errors, including readiness timeouts, abort immediately. At most three distinct targets are tried; fewer may be available because protected and attempted slots are excluded. Before retrying, storage is rescanned, the newly highest valid slot is also avoided, and the next sequence exceeds both the scan result and the previous attempted sequence. The unchanged-data shortcut is not applied during retries.
+
+A failed save is not a rollback guarantee. A transfer may partially modify a target; a readback mismatch or read error may occur after a new valid record exists. The original protected slot is preserved under the backend's range-write contract, but a later load still selects the newest valid record. In particular, padding is ignored by decoding even though exact write verification checks it. The station must report save errors and verify storage before handing it back to the robot. Faulty hardware changing bytes outside a requested range is outside that contract.
+
+## Errors
+
+EepromSlotError distinguishes invalid slot layout, relative-range errors and underlying EEPROM errors. The read-only reader returns CalibrationLoadError. The station adapter uses EepromCalibrationStorageError::Load or ::Save so read and persistence errors remain distinguishable. AttemptsExhausted retains the number of attempts and last verification error.
+
+WP may acknowledge writes without storing data. The station's readback/invalidation checks must therefore succeed before save reports success; an ACK alone is insufficient. Existing tests cover a write-protected erased device. Real WP behavior has not yet been checked.
 
 ## Verification and remaining work
 
 From the repository root:
 
 ```bash
+cargo test --manifest-path firmware/servo-storage/Cargo.toml
 cargo test --manifest-path firmware/servo-eeprom/Cargo.toml
 python tools/dev.py fmt
 python tools/dev.py verify
 ```
 
-The owner reported all 15 adapter tests passing, then 744 tests and all 21 full local checks passing. Adapter tests use the actual EEPROM driver, encoder and loader with a scripted I2C bus supplying prepared slot contents. They cover address mapping, all 64 slots, invalid regions/indices, record selection, corruption, completeness, duplicate sequences and bus error propagation.
+The owner reported 186 storage tests, 46 EEPROM adapter tests, then 837 tests and all 21 full local checks passing. Adapter coverage comprises the original 15 reader tests, 15 slot-writer tests and 16 station-storage tests. The end-to-end station tests use an in-memory I2C EEPROM model with the actual byte driver, format, scan, planner, write verification and storage traits. They cover round trips, reconstructed adapters, unchanged data, rotation, incomplete records, bus errors and simulated WP. Core tests cover retries, partial modifications, protected slots and sequence exhaustion. They do not verify physical EEPROM timing or power-loss behavior.
 
-The package and Cargo.lock are registered for the development runner's test, fmt, check, verify and doc tasks. Existing CI invokes the shared tasks; CI for this revision has not yet been reported.
+The package and Cargo.lock remain registered in test, fmt, check, verify and doc; no workflow change was needed. The owner reported CI green for the preceding reader revision; CI for this writer revision is pending.
 
-No real EEPROM or Pico I2C hardware test has run for this adapter. Boot integration, the EEPROM writer/rotation and calibration-station application remain pending. The operating robot will only read calibration during startup; the station writes the EEPROM separately while it is disconnected from the unpowered robot. The existing flash journal and hardware tests remain separate.
+No real EEPROM/Pico I2C hardware test has run. Boot/protocol integration and the PC-controlled programming/calibration-station application remain pending. The robot reads calibration at startup only; the station writes the detached EEPROM while the robot is unpowered. Existing flash journal tests remain separate.
