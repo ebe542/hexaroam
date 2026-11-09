@@ -17,6 +17,7 @@ from result_parser import TestCounts, parse_python_summary, parse_rust_summary
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 APP_SERVO_CONTROLLER_DIR = PROJECT_ROOT / "firmware" / "apps" / "servo-controller"
+APP_CALIBRATION_STATION_DIR = PROJECT_ROOT / "firmware" / "apps" / "calibration-station"
 
 SIGNAL_DIR = PROJECT_ROOT / "firmware" / "servo-signal"
 CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
@@ -32,6 +33,8 @@ DOC_TARGET = "thumbv6m-none-eabi"
 DOC_TARGET_DIR = PROJECT_ROOT / "target" / "rustdoc"
 DOC_OUTPUT_DIR = DOC_TARGET_DIR / DOC_TARGET / "doc"
 DOC_PACKAGES = (
+    (APP_SERVO_CONTROLLER_DIR, "servo-controller"),
+    (APP_CALIBRATION_STATION_DIR, "calibration-station"),
     (SIGNAL_DIR, "hexaroam-servo-signal"),
     (CONTROL_DIR, "hexaroam-servo-control"),
     (SERVO_PIO_DIR, "hexaroam-servo-pio"),
@@ -39,7 +42,6 @@ DOC_PACKAGES = (
     (STORAGE_DIR, "hexaroam-servo-storage"),
     (PROTOCOL_DIR, "hexaroam-servo-protocol"),
     (REGISTERS_DIR, "hexaroam-servo-registers"),
-    (APP_SERVO_CONTROLLER_DIR, "servo-controller"),
     (EEPROM_DIR, "hexaroam-eeprom"),
     (SERVO_EEPROM_DIR, "hexaroam-servo-eeprom"),
 )
@@ -72,7 +74,11 @@ TASKS = {
                 str(DOC_TARGET_DIR),
                 *(
                     ["--bin", name]
-                    if directory == APP_SERVO_CONTROLLER_DIR
+                    if directory
+                    in (
+                        APP_SERVO_CONTROLLER_DIR,
+                        APP_CALIBRATION_STATION_DIR,
+                    )
                     else ["--lib"]
                 ),
             ],
@@ -112,9 +118,10 @@ TASKS = {
         (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "fmt": [
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt"]),
+        (APP_CALIBRATION_STATION_DIR, ["cargo", "fmt"]),
         (SIGNAL_DIR, ["cargo", "fmt"]),
         (CONTROL_DIR, ["cargo", "fmt"]),
-        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt"]),
         (SERVO_PIO_DIR, ["cargo", "fmt"]),
         (LOGGING_DIR, ["cargo", "fmt"]),
         (STORAGE_DIR, ["cargo", "fmt"]),
@@ -125,13 +132,15 @@ TASKS = {
     ],
     "verify": [
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "build", "--locked"]),
+        (APP_CALIBRATION_STATION_DIR, ["cargo", "fmt", "--check"]),
+        (APP_CALIBRATION_STATION_DIR, ["cargo", "build", "--locked"]),
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
-        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
         (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
-        (APP_SERVO_CONTROLLER_DIR, ["cargo", "build", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
         (LOGGING_DIR, ["cargo", "fmt", "--check"]),
         (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
@@ -147,13 +156,15 @@ TASKS = {
         (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
     ],
     "check": [
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "check", "--locked"]),
+        (APP_CALIBRATION_STATION_DIR, ["cargo", "fmt", "--check"]),
+        (APP_CALIBRATION_STATION_DIR, ["cargo", "check", "--locked"]),
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
-        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
         (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "check", "--locked"]),
         (CONTROL_DIR, ["cargo", "check", "--locked"]),
-        (APP_SERVO_CONTROLLER_DIR, ["cargo", "check", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "check", "--locked"]),
         (LOGGING_DIR, ["cargo", "fmt", "--check"]),
         (LOGGING_DIR, ["cargo", "check", "--locked"]),
@@ -463,9 +474,70 @@ def write_doc_index() -> CommandResult:
         return CommandResult(1, message)
 
 
-def run_task(task: str) -> int:
+def select_tasks(
+    task: str,
+    app: str | None,
+) -> list[tuple[Path, list[str]]]:
+    """Select task commands without executing them."""
+    if task not in TASKS:
+        raise ValueError(f"Unknown task: {task}")
+
+    applications = {
+        "servo-controller": APP_SERVO_CONTROLLER_DIR,
+        "calibration-station": APP_CALIBRATION_STATION_DIR,
+    }
+
+    if app is not None and app not in applications:
+        raise ValueError(f"Unknown application: {app}")
+
+    commands = {
+        "build": ["cargo", "build", "--locked"],
+        "uf2": ["cargo", "run", "--locked"],
+        "hardware-build": [
+            "cargo",
+            "build",
+            "--locked",
+            "--examples",
+            "--features",
+            "hardware-tests",
+            "--message-format=json-render-diagnostics",
+        ],
+    }
+
+    if task not in commands:
+        if app is not None:
+            raise ValueError(f"Task {task!r} does not support application selection")
+        return TASKS[task]
+
+    if app is not None:
+        selected = [applications[app]]
+    elif task == "hardware-build":
+        selected = list(applications.values())
+    else:
+        selected = [APP_SERVO_CONTROLLER_DIR]
+
+    return [(directory, commands[task].copy()) for directory in selected]
+
+
+def has_hardware_tests(directory: Path) -> bool:
+    """Check for test sources directly inside hardware_tests."""
+    return any(
+        source.is_file() for source in (directory / "hardware_tests").glob("*.rs")
+    )
+
+
+def run_task(task: str, app: str | None = None) -> int:
     results = []
-    for directory, arguments in TASKS[task]:
+    skipped_applications = []
+    for directory, arguments in select_tasks(task, app):
+        if task == "hardware-build" and not has_hardware_tests(directory):
+            print(
+                f"[SKIP] {directory.name}: no hardware-test sources",
+                flush=True,
+            )
+            skipped_applications.append(directory.name)
+            continue
+
         result = run_command(arguments, directory)
         results.append((directory, arguments, result))
 
@@ -543,6 +615,12 @@ def run_task(task: str) -> int:
         skipped += counts.skipped
         filtered_out += counts.filtered_out
 
+    for name in skipped_applications:
+        print(
+            f"[SKIP] {name}: no hardware-test sources",
+            flush=True,
+        )
+
     if test_groups:
         label = "Known subtotal" if unknown_groups else "Total"
         totals = TestCounts(passed, failed, skipped, filtered_out)
@@ -568,8 +646,23 @@ def main() -> int:
         description="Run HexaRoam development tasks.",
     )
     parser.add_argument("task", choices=sorted(TASKS))
+    parser.add_argument(
+        "--app",
+        choices=("servo-controller", "calibration-station"),
+        help=(
+            "Application for build, uf2 or hardware-build. "
+            "Defaults to servo-controller for build/uf2 "
+            "and both applications for hardware-build."
+        ),
+    )
     args = parser.parse_args()
-    return run_task(args.task)
+
+    try:
+        select_tasks(args.task, args.app)
+    except ValueError as error:
+        parser.error(str(error))
+
+    return run_task(args.task, args.app)
 
 
 if __name__ == "__main__":

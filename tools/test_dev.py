@@ -452,17 +452,14 @@ class HardwareBuildTests(RunnerTestCase):
         with (
             patch.object(
                 dev,
-                "TASKS",
-                {
-                    "hardware-build": [
-                        (Path("apps/servo-controller"), ["cargo", "build"])
-                    ],
-                },
+                "select_tasks",
+                return_value=[(Path("apps/servo-controller"), ["cargo", "build"])],
             ),
             patch.object(dev, "run_command", side_effect=results) as command,
             patch.object(
                 dev, "hardware_reports", return_value=dev.CommandResult(0, "")
             ),
+            patch.object(dev, "has_hardware_tests", return_value=True),
             redirect_stdout(io.StringIO()) as output,
         ):
             code = dev.run_task("hardware-build")

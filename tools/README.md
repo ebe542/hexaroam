@@ -5,16 +5,37 @@ Use Python 3.10 or newer. The development runner uses only the standard library;
 | Command | Task |
 | --- | --- |
 | `python tools/dev.py install` | Install Rust components, the Pico target and elf2uf2-rs for the active toolchain |
-| `python tools/dev.py doc` | Generate combined HTML documentation for all ten Rust packages |
+| `python tools/dev.py doc` | Generate combined HTML documentation for all eleven Rust packages |
 | `python tools/dev.py test` | Python tooling tests and host tests for all registered Rust libraries |
 | `python tools/dev.py fmt` | Format all registered Rust packages; modifies source files |
 | `python tools/dev.py check` | Check formatting and run cargo check for all registered Rust packages; no unit tests or linked firmware image |
-| `python tools/dev.py build` | Build the Pico ELF firmware; no UF2 conversion |
-| `python tools/dev.py verify` | Full verification: Python tests, registered Rust formatting/host tests, and Pico build |
+| `python tools/dev.py build` | Build servo-controller ELF by default; select another application with --app; no UF2 conversion |
+| `python tools/dev.py verify` | Full verification: Python tests, registered Rust formatting/host tests, and builds of both firmware applications |
 | `python tools/dev.py hardware-build` | Build all registered Pico hardware tests with ELF, UF2, linker map and disassembly; no execution or upload |
 | `python tools/dev.py uf2` | Build and convert firmware with the Cargo runner; no automatic upload |
 
 On Ubuntu use python3 if python is unavailable. Cargo must be on PATH. check and verify require rustfmt and thumbv6m-none-eabi. build requires the embedded target. uf2 additionally requires elf2uf2-rs.
+
+## Application selection
+
+Two independent Pico binaries live under `firmware/apps/`: `servo-controller` and [calibration-station](../firmware/apps/calibration-station/README.md). Shared libraries remain directly under `firmware/`.
+
+From the repository root:
+
+```bash
+python tools/dev.py build --app calibration-station
+python tools/dev.py uf2 --app calibration-station
+python tools/dev.py hardware-build --app calibration-station
+python tools/dev.py hardware-build --app servo-controller
+```
+
+`build` and `uf2` default to `servo-controller`. `hardware-build` defaults to both applications and skips those without hardware-test sources. The calibration station currently has no hardware tests. A detected source must also be registered as an example in the application's Cargo.toml, with the `hardware-tests` feature available; source detection does not validate Cargo registration.
+
+`fmt`, `check`, `verify` and `doc` cover both applications and reject `--app`. Library tests remain shared and run once per registered library. `test` and `install` also reject `--app`; tool installation remains shared.
+
+UF2 output for the station is `firmware/apps/calibration-station/target/thumbv6m-none-eabi/debug/calibration-station.uf2`. The runner converts firmware without uploading it.
+
+The owner reported 854 tests with zero failures and all 23 verify checks passing, plus all 63 hardware-build checks passing. The station's upload, blinking LED and UART1 startup message were confirmed on the Pico. CI for this application/tooling revision has not yet been reported.
 
 ## Output and totals
 
@@ -62,7 +83,7 @@ From the repository root:
 python tools/dev.py hardware-build
 ```
 
-This runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics` in firmware/apps/servo-controller. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
+By default this considers both firmware applications. For each application with a direct `hardware_tests/*.rs` source file, it runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics`. Applications without such sources are skipped before Cargo is invoked; the `[SKIP]` message appears immediately and again in the Summary, without adding a check or unit-test skip count. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
 
 The task produces ELF executables under firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target, elf2uf2-rs and llvm-tools-preview in the active Rust toolchain. It does not execute tests or add them to unit-test totals. Hardware-test programs are not built or executed by test, check, or verify; hardware-build remains explicit.
 
@@ -213,6 +234,6 @@ The owner reported 697 passing tests and all 19 verification checks passing afte
 
 ## EEPROM calibration storage integration
 
-`firmware/servo-eeprom` is included in test, fmt, check, verify and doc with a committed Cargo.lock. The documentation inventory and its test include ten Rust packages. Existing CI uses the shared test/verify tasks without a workflow change.
+`firmware/servo-eeprom` is included in test, fmt, check, verify and doc with a committed Cargo.lock. The documentation inventory and its test include eleven Rust packages. Existing CI uses the shared test/verify tasks without a workflow change.
 
 The owner reported CI green for the original reader revision. The current writer revision passed 837 tests and all 21 local verification checks, including 186 storage tests and 46 adapter tests. The [storage adapter guide](../firmware/servo-eeprom/README.md) explains the end-to-end PC coverage, retry behavior and remaining hardware checks. CI for this writer revision is pending.

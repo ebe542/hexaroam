@@ -1,0 +1,12 @@
+[package]
+name = "calibration-station"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+hexaroam-logging = { path = "../../logging" }
+rp-pico = "0.9"

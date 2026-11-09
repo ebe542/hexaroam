@@ -6,11 +6,24 @@ Rust firmware for the central Pico and optional future servo-output expansion mo
 
 See [development setup](../docs/development-setup.md) for prerequisites and [hardware references](../hardware/references/README.md) for archived datasheets.
 
+## Firmware applications
+
+Applications are independent Cargo packages under `apps/`; reusable libraries remain directly under `firmware/`.
+
+| Application | Current scope |
+| --- | --- |
+| `apps/servo-controller` | Existing Pico servo-output application and manual hardware-test examples |
+| [apps/calibration-station](apps/calibration-station/README.md) | Separate calibration-station startup firmware: LED heartbeat and UART1 logging |
+
+Use `python tools/dev.py build --app calibration-station` or `python tools/dev.py uf2 --app calibration-station` from the repository root. Without `--app`, these commands select `servo-controller`. Shared checks and documentation include both applications; see [development tools](../tools/README.md#application-selection).
+
+The owner confirmed the station's UF2 upload, blinking LED and UART1 output. Local verification passed 854 tests and all 23 checks; hardware builds passed all 63 checks. Servo control, PC command handling and EEPROM access are not yet implemented in the station.
+
 ## EEPROM calibration storage
 
 The [24xx256 EEPROM driver](eeprom/README.md) provides byte reads and page writes. The [shared storage layer](servo-storage/README.md) provides format validation, incremental scanning, write planning and bounded verified rotation. The [EEPROM adapters](servo-eeprom/README.md) expose a read-only controller path and a writable station path through CalibrationRead and CalibrationStorage.
 
-The owner reported 186 storage tests, 46 adapter tests and full local verification of 837 tests with all 21 checks passing. CI was green for the preceding reader revision; CI for this writer revision is pending. Physical EEPROM tests, boot/protocol integration and the station application remain pending. The normal Pico firmware has not been connected to this storage path.
+The owner reported 186 storage tests, 46 adapter tests and full local verification of 837 tests with all 21 checks passing. CI was green for the preceding reader revision; CI for this writer revision is pending. Physical EEPROM tests, boot/protocol integration and station EEPROM integration remain pending. The normal Pico firmware has not been connected to this storage path.
 
 ## EEPROM hardware-test firmware
 

@@ -15,6 +15,8 @@ class DocumentationTests(unittest.TestCase):
         self.assertEqual(
             {directory for directory, _ in dev.TASKS["doc"]},
             {
+                dev.APP_SERVO_CONTROLLER_DIR,
+                dev.APP_CALIBRATION_STATION_DIR,
                 dev.SIGNAL_DIR,
                 dev.CONTROL_DIR,
                 dev.SERVO_PIO_DIR,
@@ -22,12 +24,11 @@ class DocumentationTests(unittest.TestCase):
                 dev.STORAGE_DIR,
                 dev.PROTOCOL_DIR,
                 dev.REGISTERS_DIR,
-                dev.APP_SERVO_CONTROLLER_DIR,
                 dev.EEPROM_DIR,
                 dev.SERVO_EEPROM_DIR,
             },
         )
-        self.assertEqual(len(dev.TASKS["doc"]), 10)
+        self.assertEqual(len(dev.TASKS["doc"]), 11)
         for directory, command in dev.TASKS["doc"]:
             self.assertEqual(command[:2], ["cargo", "doc"])
             for flag in ("--locked", "--no-deps", "--document-private-items"):
@@ -39,8 +40,16 @@ class DocumentationTests(unittest.TestCase):
                 command[command.index("--target-dir") + 1], str(dev.DOC_TARGET_DIR)
             )
             self.assertNotIn("--open", command)
-            if directory == dev.APP_SERVO_CONTROLLER_DIR:
-                self.assertEqual(command[-2:], ["--bin", "servo-controller"])
+            applications = {
+                dev.APP_SERVO_CONTROLLER_DIR: "servo-controller",
+                dev.APP_CALIBRATION_STATION_DIR: "calibration-station",
+            }
+
+            if directory in applications:
+                self.assertEqual(
+                    command[-2:],
+                    ["--bin", applications[directory]],
+                )
             else:
                 self.assertEqual(command[-1], "--lib")
 
