@@ -4,9 +4,21 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 
+[[example]]
+bench = false
+name = "single_servo_output"
+path = "hardware_tests/single_servo_output.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1.0"
 hexaroam-logging = { path = "../../logging" }
+hexaroam-servo-pio = { path = "../../servo-pio" }
+hexaroam-servo-signal = { path = "../../servo-signal" }
 rp-pico = "0.9"
+
+[features]
+hardware-tests = ["hexaroam-servo-pio/hardware-tests"]

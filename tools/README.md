@@ -29,13 +29,13 @@ python tools/dev.py hardware-build --app calibration-station
 python tools/dev.py hardware-build --app servo-controller
 ```
 
-`build` and `uf2` default to `servo-controller`. `hardware-build` defaults to both applications and skips those without hardware-test sources. The calibration station currently has no hardware tests. A detected source must also be registered as an example in the application's Cargo.toml, with the `hardware-tests` feature available; source detection does not validate Cargo registration.
+`build` and `uf2` default to `servo-controller`. `hardware-build` defaults to both applications and skips those without hardware-test sources. The calibration station provides the [single-channel output test](../firmware/apps/calibration-station/hardware_tests/README.md). A detected source must also be registered as an example in the application's Cargo.toml, with the `hardware-tests` feature available; source detection does not validate Cargo registration.
 
 `fmt`, `check`, `verify` and `doc` cover both applications and reject `--app`. Library tests remain shared and run once per registered library. `test` and `install` also reject `--app`; tool installation remains shared.
 
 UF2 output for the station is `firmware/apps/calibration-station/target/thumbv6m-none-eabi/debug/calibration-station.uf2`. The runner converts firmware without uploading it.
 
-The owner reported 854 tests with zero failures and all 23 verify checks passing, plus all 63 hardware-build checks passing. The station's upload, blinking LED and UART1 startup message were confirmed on the Pico. CI for this application/tooling revision has not yet been reported.
+The owner reported 854 tests with zero failures and all 23 verify checks passing, plus all 63 hardware-build checks passing. The station's upload, blinking LED and UART1 startup message were confirmed on the Pico. CI was subsequently reported green for this application/tooling revision. The later single-channel station hardware test has separate verification notes in its guide.
 
 ## Output and totals
 

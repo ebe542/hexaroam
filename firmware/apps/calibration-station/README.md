@@ -12,7 +12,7 @@ INFO Calibration station ready
 
 The main loop services the logger continuously without periodic log messages. Panic output uses the copied bounded UART1 handler. The UART driver and panic handler are currently local copies from the controller application.
 
-Servo output, PC protocol commands and EEPROM access are not implemented yet. No servo signal is generated; this revision is a startup check rather than a calibration procedure.
+The main application does not generate servo signals yet; PC protocol commands and EEPROM access remain pending. A separate manual hardware test now exercises single-channel PIO/DMA output without angle calibration.
 
 ## Build and upload
 
@@ -42,8 +42,8 @@ python tools/dev.py verify
 python tools/dev.py hardware-build --app calibration-station
 ```
 
-`verify` includes both applications and the shared library/tool tests. No station hardware-test sources exist yet, so hardware-build reports `[SKIP] calibration-station: no hardware-test sources` immediately and in its Summary. This is not a hardware test execution.
+`verify` includes both applications and the shared library/tool tests. `hardware-build --app calibration-station` builds the registered single_servo_output example and generates ELF, UF2, map and disassembly artifacts. It does not upload or execute the test. See the [manual hardware procedure](hardware_tests/README.md).
 
-The owner reported 854 tests, zero failures, all 23 verify checks and all 63 controller hardware-build checks passing. CI for this revision is pending.
+The owner reported 854 tests, zero failures and all 23 verify checks passing after adding the single-channel example, and confirmed the expected GP0 and UART1 behavior. CI was green for the preceding application/tooling commit; CI for this hardware-test addition has not yet been reported.
 
 See [development tools](../../../tools/README.md#application-selection) and the [firmware overview](../../README.md).

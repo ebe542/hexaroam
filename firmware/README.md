@@ -13,11 +13,11 @@ Applications are independent Cargo packages under `apps/`; reusable libraries re
 | Application | Current scope |
 | --- | --- |
 | `apps/servo-controller` | Existing Pico servo-output application and manual hardware-test examples |
-| [apps/calibration-station](apps/calibration-station/README.md) | Separate calibration-station startup firmware: LED heartbeat and UART1 logging |
+| [apps/calibration-station](apps/calibration-station/README.md) | Separate calibration-station startup firmware and a manual single-channel PIO/DMA test |
 
 Use `python tools/dev.py build --app calibration-station` or `python tools/dev.py uf2 --app calibration-station` from the repository root. Without `--app`, these commands select `servo-controller`. Shared checks and documentation include both applications; see [development tools](../tools/README.md#application-selection).
 
-The owner confirmed the station's UF2 upload, blinking LED and UART1 output. Local verification passed 854 tests and all 23 checks; hardware builds passed all 63 checks. Servo control, PC command handling and EEPROM access are not yet implemented in the station.
+The owner confirmed the station's UF2 upload, blinking LED and UART1 output. Local verification passed 854 tests and all 23 checks; hardware builds passed all 63 checks. The station now also has a [manual single-channel output test](apps/calibration-station/hardware_tests/README.md), confirmed on unloaded GP0 with UART1 phase messages; the main application still only performs startup logging and LED heartbeat. PC command handling and EEPROM access remain pending.
 
 ## EEPROM calibration storage
 
