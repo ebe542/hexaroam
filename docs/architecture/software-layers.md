@@ -4,7 +4,7 @@
 
 ## Angle command to servo signal
 
-This path is implemented and exercised by the separate [servo_bank_angles hardware test](../../firmware/pico/hardware_tests/servo_bank_angles.rs). Its calibrations are synthetic; the signal test does not establish measured servo positions. The normal firmware follows the shorter fixed-plan path below.
+This path is implemented and exercised by the separate [servo_bank_angles hardware test](../../firmware/apps/servo-controller/hardware_tests/servo_bank_angles.rs). Its calibrations are synthetic; the signal test does not establish measured servo positions. The normal firmware follows the shorter fixed-plan path below.
 
 ```mermaid
 flowchart TD
@@ -62,7 +62,7 @@ flowchart LR
     Logger --> UART["UART1 TX on GP20"]
 ```
 
-[main.rs](../../firmware/pico/src/main.rs) starts [servo_demo.rs](../../firmware/pico/src/servo_demo.rs). The demo constructs a fixed two-channel pulse plan and starts FixedOutput. It does not construct ServoBank, load calibration from flash, or receive a command protocol. PreparedOutput is the resource-preparation step used before starting an output driver, not a new application control layer. FixedOutput is not an implementation of SignalPlanOutput.
+[main.rs](../../firmware/apps/servo-controller/src/main.rs) starts [servo_demo.rs](../../firmware/apps/servo-controller/src/servo_demo.rs). The demo constructs a fixed two-channel pulse plan and starts FixedOutput. It does not construct ServoBank, load calibration from flash, or receive a command protocol. PreparedOutput is the resource-preparation step used before starting an output driver, not a new application control layer. FixedOutput is not an implementation of SignalPlanOutput.
 
 ## Calibration persistence
 
@@ -92,7 +92,7 @@ flowchart TD
     ROM -->|"program or erase"| Flash
 ```
 
-The [storage library](../../firmware/servo-storage/README.md) already implements encoding, CRC validation, latest-record selection and append/sector rotation over storage traits. The [Pico reader](../../firmware/pico/src/flash_journal.rs) implements JournalRead. Separate [RAM routines](../../firmware/pico/src/flash_xip.rs) and manual hardware tests exercise slot programming and sector erasure. The [FlashJournalStorage backend](../../firmware/pico/src/flash_journal_storage.rs) now implements JournalRead and JournalStorage around those routines. Its isolated read/program/erase tests passed. The separate [flash_journal_persistence test](../../firmware/pico/hardware_tests/flash_journal_persistence.rs) now verifies append/load of a valid synthetic eighteen-servo record and loading it after restart without rewriting. The separate [flash_journal_rotation test](../../firmware/pico/hardware_tests/flash_journal_rotation.rs) verifies twenty-five appends, sector switches at sequences 9/17/25, preservation of the previous sector and loading sequence 25 after restart. Its updated test-only restart cycle appends completion marker 26 after verifying sequence 25; the next startup verifies marker 26 and repeats the destructive test preparation. The owner confirmed the automatic-repeat cycle and progress output on hardware on 2026-10-30. Interrupted-operation and power-loss recovery remain unverified on hardware. FlashJournalReader remains as a separate read-only type, but the flash_journal_read test now uses FlashJournalStorage.
+The [storage library](../../firmware/servo-storage/README.md) already implements encoding, CRC validation, latest-record selection and append/sector rotation over storage traits. The [Pico reader](../../firmware/apps/servo-controller/src/flash_journal.rs) implements JournalRead. Separate [RAM routines](../../firmware/apps/servo-controller/src/flash_xip.rs) and manual hardware tests exercise slot programming and sector erasure. The [FlashJournalStorage backend](../../firmware/apps/servo-controller/src/flash_journal_storage.rs) now implements JournalRead and JournalStorage around those routines. Its isolated read/program/erase tests passed. The separate [flash_journal_persistence test](../../firmware/apps/servo-controller/hardware_tests/flash_journal_persistence.rs) now verifies append/load of a valid synthetic eighteen-servo record and loading it after restart without rewriting. The separate [flash_journal_rotation test](../../firmware/apps/servo-controller/hardware_tests/flash_journal_rotation.rs) verifies twenty-five appends, sector switches at sequences 9/17/25, preservation of the previous sector and loading sequence 25 after restart. Its updated test-only restart cycle appends completion marker 26 after verifying sequence 25; the next startup verifies marker 26 and repeats the destructive test preparation. The owner confirmed the automatic-repeat cycle and progress output on hardware on 2026-10-30. Interrupted-operation and power-loss recovery remain unverified on hardware. FlashJournalReader remains as a separate read-only type, but the flash_journal_read test now uses FlashJournalStorage.
 
 A missing valid record is `Ok(None)`; that does not authorize normal operation. Loading a complete configuration, startup-mode enforcement, service invalidation and UART configuration transfer still need integration. A FlashJournalReader must not remain alive during program/erase or XIP reconfiguration.
 
@@ -107,7 +107,7 @@ A missing valid record is `Ok(None)`; that does not authorize normal operation. 
 | hexaroam-logging | Buffered logging and bounded formatting over a byte-output contract |
 | hexaroam-servo-protocol | Header/frame codec, register-map plausibility and stream parsing with CRC/resynchronization |
 | hexaroam-servo-registers | Fixed and target register dispatch, ACK/NACK, control transitions and output-backend contract |
-| hexaroam-pico | Board setup, concrete UART/flash access, normal demo and separately registered hardware tests |
+| servo-controller | Board setup, concrete UART/flash access, normal demo and separately registered hardware tests |
 
 Behavior, navigation, gait generation, inverse kinematics remain future layers. Protocol framing and register handling are host-tested; UART integration passed the version-2 no-servo hardware suite. Protocol-to-real-PIO and normal-firmware integration remain pending. They are not additional implemented boxes in the current command path. The [project design](../architecture.md) describes their intended roles.
 
@@ -141,13 +141,13 @@ SignalPlanLifecycle extends SignalPlanOutput with complete-plan startup, explici
 
 SwitchingOutput now has inherent stop/state methods backed by exclusive running or stopped DMA resources. Successful stop leaves assigned pins Low, confirms DMA shutdown and discards pending replacements; timeout retains the transfer and its source buffer. service and submission explicitly handle stopped output. The owner confirmed the stop hardware test and both existing fault-restart tests on 2026-11-01, with 405 unit tests and all 17 verification checks passing. Regular start after stop and the production SignalPlanLifecycle trait implementation are now available and hardware-tested; the register-service adapter is not connected. See the [driver guide](../../firmware/servo-pio/README.md#regular-output-stop).
 
-The owner confirmed start_after_stop on 2026-11-01: initial 1 ms/2 ms pulses, a Low pause and subsequent 2 ms/1 ms pulses with the expected success message. Complete plans are validated before stopped resources are moved; FIFO and DMA are prepared before PIO is enabled. The full verification reported 405 tests and all 17 checks passing. CI for this startup revision is pending. See the [startup procedure](../../firmware/pico/hardware_tests/README.md#regular-start-after-stop-test).
+The owner confirmed start_after_stop on 2026-11-01: initial 1 ms/2 ms pulses, a Low pause and subsequent 2 ms/1 ms pulses with the expected success message. Complete plans are validated before stopped resources are moved; FIFO and DMA are prepared before PIO is enabled. The full verification reported 405 tests and all 17 checks passing. CI for this startup revision is pending. See the [startup procedure](../../firmware/apps/servo-controller/hardware_tests/README.md#regular-start-after-stop-test).
 
 ## ServoBank lifecycle integration
 
 For PulseBankLifecycle backends, ServoBank now starts the complete prepared target set, stops without clearing targets and reports backend state directly. ServoSignalOutput implements the optional trait over SignalPlanLifecycle. Pulse conversion is shared across ordinary submission and startup while retaining distinct error types. The owner reported 84 servo-control tests, 415 tests overall and all 17 verification checks passing on 2026-11-01. The full bank/adapter/PIO lifecycle chain was subsequently accepted in the separate hardware test below; lower-level driver lifecycle tests were verified separately. The register-service OutputBackend adapter and zero-degree initialization remain future work. The owner subsequently confirmed green CI for this bank-lifecycle revision. See the [trait map](interfaces.md#servobank-lifecycle-bridge).
 
-The owner accepted the [ServoBank lifecycle hardware test](../../firmware/pico/hardware_tests/README.md#servobank-lifecycle-hardware-test) on 2026-11-01 after all 47 hardware-build checks passed and further starts followed the expected signal sequence. The test uses unloaded GPIOs and synthetic calibration; no repeated-cycle endurance or inactive-from-boot behavior is established. The register-service backend adapter remains future work.
+The owner accepted the [ServoBank lifecycle hardware test](../../firmware/apps/servo-controller/hardware_tests/README.md#servobank-lifecycle-hardware-test) on 2026-11-01 after all 47 hardware-build checks passed and further starts followed the expected signal sequence. The test uses unloaded GPIOs and synthetic calibration; no repeated-cycle endurance or inactive-from-boot behavior is established. The register-service backend adapter remains future work.
 
 ## Register service connected to ServoBank
 
@@ -167,7 +167,7 @@ UartTransport in pico/src implements ByteTransport over an exclusively owned HAL
 
 ## Physical UART register reads
 
-The uart_registers manual example now connects UartTransport -> FrameProcessor -> RegisterService -> NoServoOutput, with binary replies returned over UART0. On 2026-11-02 the owner confirmed Version=1, Status=0 and ServoCount=0 responses with their exact CRC bytes in HTerm, then reported 451 tests and all 17 verification checks passing. The example has no calibrated servo backend; protocol-driven PIO output and journal integration remain separate work. Damaged-frame and timeout recovery have not yet been verified on this physical link. See the [procedure and wire vectors](../../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).
+The uart_registers manual example now connects UartTransport -> FrameProcessor -> RegisterService -> NoServoOutput, with binary replies returned over UART0. On 2026-11-02 the owner confirmed Version=1, Status=0 and ServoCount=0 responses with their exact CRC bytes in HTerm, then reported 451 tests and all 17 verification checks passing. The example has no calibrated servo backend; protocol-driven PIO output and journal integration remain separate work. Damaged-frame and timeout recovery have not yet been verified on this physical link. See the [procedure and wire vectors](../../firmware/apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test).
 
 ## Current protocol verification (2026-11-03)
 

@@ -24,22 +24,22 @@ The onboard LED on GPIO25 alternates between on and off approximately every 500 
 
 | File | Purpose |
 | --- | --- |
-| pico/Cargo.toml | Package metadata and dependencies |
-| pico/Cargo.lock | Resolved dependency versions; commit this file |
-| pico/.cargo/config.toml | Embedded target and linker flags |
-| pico/memory.x | Flash, bootloader, and RAM layout |
-| pico/build.rs | Makes the memory layout available to the linker |
-| pico/src/main.rs | Board clock, GPIO, and timer initialization; starts the demo |
-| pico/src/uart_logging.rs | Nonblocking HAL UART backend for the shared logger |
-| pico/src/panic_uart.rs | Bounded direct UART1 panic output; selected only by uart_panic |
+| apps/servo-controller/Cargo.toml | Package metadata and dependencies |
+| apps/servo-controller/Cargo.lock | Resolved dependency versions; commit this file |
+| apps/servo-controller/.cargo/config.toml | Embedded target and linker flags |
+| apps/servo-controller/memory.x | Flash, bootloader, and RAM layout |
+| apps/servo-controller/build.rs | Makes the memory layout available to the linker |
+| apps/servo-controller/src/main.rs | Board clock, GPIO, and timer initialization; starts the demo |
+| apps/servo-controller/src/uart_logging.rs | Nonblocking HAL UART backend for the shared logger |
+| apps/servo-controller/src/panic_uart.rs | Bounded direct UART1 panic output; selected only by uart_panic |
 | logging/src/lib.rs | Hardware-independent buffered logging |
 | logging/src/bounded_writer.rs | Direct formatted output with a shared attempt budget |
-| pico/src/servo_demo.rs | Fixed plan construction, static buffer allocation, DMA servicing, and LED updates |
+| apps/servo-controller/src/servo_demo.rs | Fixed plan construction, static buffer allocation, DMA servicing, and LED updates |
 | servo-pio/src/output.rs | Prepared PIO output, fixed DMA transfer, and polling service |
 | servo-pio/src/program.rs | Checked multi-channel PIO assembly |
 | servo-pio/src/encoding.rs | Internal mask/counter encoding |
 | servo-pio/src/buffer.rs | Complete encoded-plan storage |
-| pico/src/drivers/servo_pio.rs | Historical per-channel driver; no longer compiled by main.rs |
+| apps/servo-controller/src/drivers/servo_pio.rs | Historical per-channel driver; no longer compiled by main.rs |
 | servo-signal/src/lib.rs | Hardware-independent limits and submission logic |
 | servo-signal/src/tests.rs | Host unit tests using a test transport |
 | ../rustfmt.toml | Repository-wide Rust formatting rules |
@@ -49,12 +49,12 @@ The onboard LED on GPIO25 alternates between on and off approximately every 500 
 From the repository root:
 
 ```bash
-cd firmware/pico
+cd firmware/apps/servo-controller
 cargo check
 cargo build
 ```
 
-Run Cargo from this directory so its local `.cargo/config.toml` is loaded. `cargo check` checks code without producing a linked firmware image. `cargo build` produces the ELF executable at `target/thumbv6m-none-eabi/debug/hexaroam-pico`, without a filename extension.
+Run Cargo from this directory so its local `.cargo/config.toml` is loaded. `cargo check` checks code without producing a linked firmware image. `cargo build` produces the ELF executable at `target/thumbv6m-none-eabi/debug/servo-controller`, without a filename extension.
 
 ### Convert to UF2
 
@@ -67,12 +67,12 @@ elf2uf2-rs --help
 
 This tool is installed for the host, separately from firmware dependencies. See its [versioned documentation](https://docs.rs/crate/elf2uf2-rs/2.2.0).
 
-From `firmware/pico`:
+From `firmware/apps/servo-controller`:
 
 ```bash
 elf2uf2-rs \
-  target/thumbv6m-none-eabi/debug/hexaroam-pico \
-  target/thumbv6m-none-eabi/debug/hexaroam-pico.uf2
+  target/thumbv6m-none-eabi/debug/servo-controller \
+  target/thumbv6m-none-eabi/debug/servo-controller.uf2
 ```
 
 ### Transfer over USB
@@ -85,7 +85,7 @@ elf2uf2-rs \
 
 On Windows, use File Explorer to copy the file. On Ubuntu, use the file manager to copy it to the mounted RPI-RP2 volume; the Ubuntu workflow has not yet been verified in this project.
 
-The configured Cargo runner is `elf2uf2-rs`. From `firmware/pico`, run:
+The configured Cargo runner is `elf2uf2-rs`. From `firmware/apps/servo-controller`, run:
 
 ```bash
 cargo run --locked
@@ -119,7 +119,7 @@ See the [PIO driver guide](servo-pio/README.md) for encoding and timing details.
 
 ## Separate hardware tests
 
-The [hardware-test guide](pico/hardware_tests/README.md) describes independently selectable firmware for continuous fixed output and both underflow cases. Build all ELF and UF2 files with python tools/dev.py hardware-build from the repository root. Upload and evaluation remain manual. Tests are stored under hardware_tests and registered as Cargo example targets; the normal application does not need editing to select a fault experiment.
+The [hardware-test guide](apps/servo-controller/hardware_tests/README.md) describes independently selectable firmware for continuous fixed output and both underflow cases. Build all ELF and UF2 files with python tools/dev.py hardware-build from the repository root. Upload and evaluation remain manual. Tests are stored under hardware_tests and registered as Cargo example targets; the normal application does not need editing to select a fault experiment.
 
 The owner reported a successful missing-entry experiment and immediate fault behavior in the missing-counter experiment, with no visible startup edges. The local check passed 121 unit tests and all hardware-test UF2 files were created. Exact period/fault timing and controlled recovery remain unverified. CI for this revision is pending.
 
@@ -127,13 +127,13 @@ The owner reported a successful missing-entry experiment and immediate fault beh
 
 SwitchingOutput is a separate public driver that accepts complete replacement SignalPlan values with the startup period and output set. It uses one DMA channel and two exclusive static buffers. A prepared plan is selected after the current transfer completes; FIFO ordering keeps complete plans consecutive. submit_plan confirms acceptance only, not GPIO activation. The normal servo_demo remains fixed-plan.
 
-The switching_signal_plans hardware test alternates the GP0/GP1 pulse assignments and checks Busy on an immediate second submission. On 2026-10-17 the owner reported expected operation, synchronous rising edges, and alternating High durations. Full verification passed 128 unit tests. See the [driver guide](servo-pio/README.md#two-buffer-signal-plan-replacement) and [hardware-test guide](pico/hardware_tests/README.md). Exact period/update timing, fault recovery, and 18-channel verification remain open; CI for this revision is pending.
+The switching_signal_plans hardware test alternates the GP0/GP1 pulse assignments and checks Busy on an immediate second submission. On 2026-10-17 the owner reported expected operation, synchronous rising edges, and alternating High durations. Full verification passed 128 unit tests. See the [driver guide](servo-pio/README.md#two-buffer-signal-plan-replacement) and [hardware-test guide](apps/servo-controller/hardware_tests/README.md). Exact period/update timing, fault recovery, and 18-channel verification remain open; CI for this revision is pending.
 
 ## Persistent switching-output fault
 
 SwitchingOutput detects and latches the reserved PIO underflow flag through is_faulted, submit_plan, and service. Once detected, new submissions return Faulted before Busy or validation, and service does not rearm DMA. Clearing the hardware flag does not resume PIO or clear the driver state. Existing DMA resources remain bound until an explicit restart safely aborts the transfer; service alone does not recover output. See [controlled restart](servo-pio/README.md#explicit-restart-after-a-fault).
 
-On 2026-10-17 the owner reported all checks passing and faulted_signal_output running as expected. It checks fault precedence with a ready plan, persistence after hardware-flag clearing, and continued Low outputs during subsequent servicing. See the [hardware-test guide](pico/hardware_tests/README.md#persistent-driver-fault-test). The unit-test total remains 128; remote CI for this revision is pending.
+On 2026-10-17 the owner reported all checks passing and faulted_signal_output running as expected. It checks fault precedence with a ready plan, persistence after hardware-flag clearing, and continued Low outputs during subsequent servicing. See the [hardware-test guide](apps/servo-controller/hardware_tests/README.md#persistent-driver-fault-test). The unit-test total remains 128; remote CI for this revision is pending.
 
 ## Historical per-channel PIO driver
 
@@ -201,7 +201,7 @@ On 2026-10-14 the owner reported a successful full check, UF2 generation/upload,
 
 ## UART logging and panic diagnostics
 
-The [logging guide](logging/README.md) describes nonblocking Info, Debug, and Error output, whole-message rejection when the buffer is full, and bounded direct panic output. The [hardware-test guide](pico/hardware_tests/README.md#uart-connection-and-terminal) documents UART1 on GP20, the Waveshare TTL adapter, HTerm settings, and separate uart_diagnostics and uart_panic programs.
+The [logging guide](logging/README.md) describes nonblocking Info, Debug, and Error output, whole-message rejection when the buffer is full, and bounded direct panic output. The [hardware-test guide](apps/servo-controller/hardware_tests/README.md#uart-connection-and-terminal) documents UART1 on GP20, the Waveshare TTL adapter, HTerm settings, and separate uart_diagnostics and uart_panic programs.
 
 On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests in the full runner. Buffered output with LF-only line endings was received in HTerm. In uart_panic, the panic message appeared after approximately five seconds and the LED stayed on. These manual checks are additional to the unit tests. The owner subsequently confirmed simultaneous UART output and servo pulses in the regular demo, which now selects the UART panic handler. Early panic without UART initialization and a stalled UART have not been separately tested. The owner reported green CI for the earlier logging revision.
 
@@ -209,7 +209,7 @@ On 2026-10-17 the owner reported 17 passing logging tests and 145 passing tests 
 
 SwitchingOutput now offers explicit restart with a validated complete SignalPlan after a latched fault. It rejects healthy-state restart and invalid replacement plans, aborts its owned DMA channel with bounded polling, discards old FIFO contents, and starts the supplied plan from the beginning. An abort timeout leaves resources bound and the driver faulted. The normal application continues to use FixedOutput; its logging integration does not automatically switch it to this driver.
 
-On 2026-10-17 the owner reported 149 passing unit tests and successful execution of restart_signal_output and restart_active_dma. Both showed initial pulses, a Low interval, successful restart, and expected LED phases. The second test additionally asserts that DMA is still active immediately before restart. See the [driver contract](servo-pio/README.md#explicit-restart-after-a-fault) and [hardware procedures](pico/hardware_tests/README.md#controlled-restart-tests). Forced abort-timeout verification remains pending, and CI for this recovery revision has not yet been reported.
+On 2026-10-17 the owner reported 149 passing unit tests and successful execution of restart_signal_output and restart_active_dma. Both showed initial pulses, a Low interval, successful restart, and expected LED phases. The second test additionally asserts that DMA is still active immediately before restart. See the [driver contract](servo-pio/README.md#explicit-restart-after-a-fault) and [hardware procedures](apps/servo-controller/hardware_tests/README.md#controlled-restart-tests). Forced abort-timeout verification remains pending, and CI for this recovery revision has not yet been reported.
 
 ## Calibration storage format
 
@@ -217,19 +217,19 @@ The [servo-storage library](servo-storage/README.md) provides hardware-independe
 
 ### Reserved calibration flash
 
-`pico/memory.x` excludes `0x101FE000..0x10200000` from firmware FLASH and exposes the journal boundaries as linker symbols. The two 4-KiB sectors contain no initialized firmware section. The owner reported the full 13-check verification passing after this change; read-only ELF inspection confirmed the boundaries and absence of overlapping segments. No hardware storage operation or upload was performed. See the [storage guide](servo-storage/README.md#pico-flash-reservation) for addresses, limits and the verification record.
+`apps/servo-controller/memory.x` excludes `0x101FE000..0x10200000` from firmware FLASH and exposes the journal boundaries as linker symbols. The two 4-KiB sectors contain no initialized firmware section. The owner reported the full 13-check verification passing after this change; read-only ELF inspection confirmed the boundaries and absence of overlapping segments. No hardware storage operation or upload was performed. See the [storage guide](servo-storage/README.md#pico-flash-reservation) for addresses, limits and the verification record.
 
 ### Read-only journal hardware test
 
-The Pico now has a `JournalRead` backend in `pico/src/flash_journal.rs`; writing and erasing are not exposed by this reader. The [flash_journal_read procedure](pico/hardware_tests/README.md#read-only-calibration-journal-test) exercises the linker-reserved region separately from the normal servo demo. On 2026-10-28 the owner received `INFO Journal read OK: no valid record` and subsequently reported 244 passing tests and all 13 checks passing. This confirms the no-valid-record read path, not an erased-region check or persistence/write validation. The storage library has 72 host tests; the owner subsequently reported green CI for the read-only integration.
+The Pico now has a `JournalRead` backend in `apps/servo-controller/src/flash_journal.rs`; writing and erasing are not exposed by this reader. The [flash_journal_read procedure](apps/servo-controller/hardware_tests/README.md#read-only-calibration-journal-test) exercises the linker-reserved region separately from the normal servo demo. On 2026-10-28 the owner received `INFO Journal read OK: no valid record` and subsequently reported 244 passing tests and all 13 checks passing. This confirms the no-valid-record read path, not an erased-region check or persistence/write validation. The storage library has 72 host tests; the owner subsequently reported green CI for the read-only integration.
 
 ### RAM-execution preparation
 
-The [RAM routine probe](pico/hardware_tests/README.md#ram-routine-probe) places a small non-inlined routine in `.data.ram_func`, using the existing startup copy into RAM. Debug ELF inspection verified its RAM execution address, flash load image and absence of helper calls in the probe body. On 2026-10-29 the owner received `INFO RAM routine OK` on the Pico and reported 244 passing tests and all 13 checks passing. XIP stayed enabled and flash contents were not modified by the running test. The owner subsequently reported green CI for the RAM probe. The next no-write XIP transition is recorded below; flash programming/erase tests remain future work.
+The [RAM routine probe](apps/servo-controller/hardware_tests/README.md#ram-routine-probe) places a small non-inlined routine in `.data.ram_func`, using the existing startup copy into RAM. Debug ELF inspection verified its RAM execution address, flash load image and absence of helper calls in the probe body. On 2026-10-29 the owner received `INFO RAM routine OK` on the Pico and reported 244 passing tests and all 13 checks passing. XIP stayed enabled and flash contents were not modified by the running test. The owner subsequently reported green CI for the RAM probe. The next no-write XIP transition is recorded below; flash programming/erase tests remain future work.
 
 ### XIP transition preparation
 
-The [flash_xip_cycle hardware test](pico/hardware_tests/README.md#xip-exit-and-restoration-test) prepares ROM function pointers and a RAM Boot2 copy, calls a RAM-resident transition with interrupts masked, leaves XIP and restores it before returning to normal flash execution. It performs no flash programming/erase, starts no second core or DMA and leaves servo output inactive. On 2026-10-29 the owner received `INFO XIP cycle OK` and reported 244 passing tests and all 13 checks passing. Debug ELF review found four indirect calls and no extra helper calls/flash literals in the 38-byte RAM routine. This verifies the standalone no-write transition; the storage writer, runtime exclusion and persistence remain future work. The owner subsequently reported green CI for the XIP-transition revision.
+The [flash_xip_cycle hardware test](apps/servo-controller/hardware_tests/README.md#xip-exit-and-restoration-test) prepares ROM function pointers and a RAM Boot2 copy, calls a RAM-resident transition with interrupts masked, leaves XIP and restores it before returning to normal flash execution. It performs no flash programming/erase, starts no second core or DMA and leaves servo output inactive. On 2026-10-29 the owner received `INFO XIP cycle OK` and reported 244 passing tests and all 13 checks passing. Debug ELF review found four indirect calls and no extra helper calls/flash literals in the 38-byte RAM routine. This verifies the standalone no-write transition; the storage writer, runtime exclusion and persistence remain future work. The owner subsequently reported green CI for the XIP-transition revision.
 
 ### Shared journal range validation
 
@@ -237,25 +237,25 @@ The [JournalLayout geometry helper](servo-storage/README.md#checked-journal-geom
 
 ### Journal slot programming preparation
 
-The standalone [flash_program_slot test](pico/hardware_tests/README.md#journal-slot-programming-test) writes a test pattern to an erased reserved slot through a RAM routine, restores XIP and checks every byte. On 2026-10-29 the owner received `INFO Journal slot program OK`, followed by `ERROR Journal slot 0 is not erased` after restarting. The owner reported 254 passing tests and all 13 checks passing. The pattern is not a valid calibration record; sector erasure, a Pico JournalStorage writer and runtime exclusion remain future work. The owner subsequently reported green CI for this programming revision. The preceding geometry/reader revision passed CI.
+The standalone [flash_program_slot test](apps/servo-controller/hardware_tests/README.md#journal-slot-programming-test) writes a test pattern to an erased reserved slot through a RAM routine, restores XIP and checks every byte. On 2026-10-29 the owner received `INFO Journal slot program OK`, followed by `ERROR Journal slot 0 is not erased` after restarting. The owner reported 254 passing tests and all 13 checks passing. The pattern is not a valid calibration record; sector erasure, a Pico JournalStorage writer and runtime exclusion remain future work. The owner subsequently reported green CI for this programming revision. The preceding geometry/reader revision passed CI.
 
 ### Journal sector erase preparation
 
-The [flash_erase_sector test](pico/hardware_tests/README.md#journal-sector-erase-test) erases reserved journal sector 0 from RAM, checks all 4096 bytes and verifies sector 1 is unchanged. The owner observed `INFO Journal sector erase OK` and `ERROR Journal sector 0 is already erased` after restart on 2026-10-29, with 269 passing tests, all 13 verification checks and all 33 hardware-build checks passing. The 58-byte RAM routine was reviewed using the generated map and disassembly. The test deliberately removes sector 0 contents; it is not the automatic journal writer. Backend integration and runtime exclusion remain future work. CI for this erase revision is pending.
+The [flash_erase_sector test](apps/servo-controller/hardware_tests/README.md#journal-sector-erase-test) erases reserved journal sector 0 from RAM, checks all 4096 bytes and verifies sector 1 is unchanged. The owner observed `INFO Journal sector erase OK` and `ERROR Journal sector 0 is already erased` after restart on 2026-10-29, with 269 passing tests, all 13 verification checks and all 33 hardware-build checks passing. The 58-byte RAM routine was reviewed using the generated map and disassembly. The test deliberately removes sector 0 contents; it is not the automatic journal writer. Backend integration and runtime exclusion remain future work. CI for this erase revision is pending.
 
 ### Pico calibration storage backend
 
-[FlashJournalStorage](pico/src/flash_journal_storage.rs) now implements the existing JournalRead and JournalStorage contracts. It validates reserved ranges, requires program sources in RAM without an additional payload copy, checks erased slots, uses the reviewed RAM/ROM operations and verifies written/erased contents. The caller must uphold its unsafe exclusion contract; normal interrupt masking is internal.
+[FlashJournalStorage](apps/servo-controller/src/flash_journal_storage.rs) now implements the existing JournalRead and JournalStorage contracts. It validates reserved ranges, requires program sources in RAM without an additional payload copy, checks erased slots, uses the reviewed RAM/ROM operations and verifies written/erased contents. The caller must uphold its unsafe exclusion contract; normal interrupt masking is internal.
 
-On 2026-10-30 the owner confirmed backend read, program/repeat-rejection and erase hardware tests, followed by 275 passing tests and all 13 checks passing. All 37 hardware-build checks passed. See the [hardware procedures](pico/hardware_tests/README.md#flashjournalstorage-backend-tests) and updated [architecture maps](../docs/architecture/README.md). The normal fixed-plan servo demo is unchanged. Valid-record append/load across restart, sector rotation and service/startup integration remain future work. The owner subsequently reported green CI for this backend revision.
+On 2026-10-30 the owner confirmed backend read, program/repeat-rejection and erase hardware tests, followed by 275 passing tests and all 13 checks passing. All 37 hardware-build checks passed. See the [hardware procedures](apps/servo-controller/hardware_tests/README.md#flashjournalstorage-backend-tests) and updated [architecture maps](../docs/architecture/README.md). The normal fixed-plan servo demo is unchanged. Valid-record append/load across restart, sector rotation and service/startup integration remain future work. The owner subsequently reported green CI for this backend revision.
 
 ### Complete journal persistence test
 
-On 2026-10-30 the owner confirmed [flash_journal_persistence](pico/hardware_tests/README.md#journal-persistence-test): append stored a valid synthetic eighteen-servo calibration record; load verified it immediately and after restart without rewriting. Both sequence 1 and all calibration values match the fixture. The owner reported 275 passing tests, all 13 verification checks and all 39 hardware-build checks passing. The normal servo demo remains unchanged, and the fixture is not a real robot calibration. Sector rotation, interrupted operations and runtime/service integration remain pending. CI for this persistence revision is pending; the preceding backend revision passed CI.
+On 2026-10-30 the owner confirmed [flash_journal_persistence](apps/servo-controller/hardware_tests/README.md#journal-persistence-test): append stored a valid synthetic eighteen-servo calibration record; load verified it immediately and after restart without rewriting. Both sequence 1 and all calibration values match the fixture. The owner reported 275 passing tests, all 13 verification checks and all 39 hardware-build checks passing. The normal servo demo remains unchanged, and the fixture is not a real robot calibration. Sector rotation, interrupted operations and runtime/service integration remain pending. CI for this persistence revision is pending; the preceding backend revision passed CI.
 
 ### Journal sector rotation on hardware
 
-On 2026-10-30 the owner confirmed [flash_journal_rotation](pico/hardware_tests/README.md#journal-rotation-test): twenty-five records were appended/reloaded, both sectors were reclaimed through the existing journal policy, and previous-sector preservation was checked at every switch. Restart loaded sequence 25 and its complete fixture without further writes. The owner reported 275 passing tests, all 13 verification checks and all 41 hardware-build checks passing. The test deliberately clears both sectors during initial preparation. Interrupted-operation recovery, power-loss behavior and normal firmware/service integration remain future work. CI for this rotation revision is pending; the preceding persistence revision passed CI.
+On 2026-10-30 the owner confirmed [flash_journal_rotation](apps/servo-controller/hardware_tests/README.md#journal-rotation-test): twenty-five records were appended/reloaded, both sectors were reclaimed through the existing journal policy, and previous-sector preservation was checked at every switch. Restart loaded sequence 25 and its complete fixture without further writes. The owner reported 275 passing tests, all 13 verification checks and all 41 hardware-build checks passing. The test deliberately clears both sectors during initial preparation. Interrupted-operation recovery, power-loss behavior and normal firmware/service integration remain future work. CI for this rotation revision is pending; the preceding persistence revision passed CI.
 
 The rotation hardware test also reports sequence, sector and sector-local slot before each append and after verification. Its test-only automatic restart cycle verifies sequence 25 and appends marker 26, then prepares both sectors and reruns rotation on the following startup. The owner confirmed this behavior on 2026-10-30 and again reported 275 passing tests, all 13 verification checks and all 41 hardware-build checks passing. See the hardware-test guide for the current startup procedure. No manual repeat flag remains. CI for this combined rotation/progress/repeat revision is pending.
 
@@ -289,11 +289,11 @@ The optional [SignalPlanLifecycle](servo-signal/src/signal_plan_lifecycle.rs) co
 
 ## Regular PIO/DMA stop
 
-SwitchingOutput now supports explicit stop with Low outputs, confirmed DMA abort and retained stopped resources. Repeated stop is harmless; servicing stopped output does nothing, pending replacements are discarded and ordinary submissions are rejected. Fault recovery remains explicit. On 2026-11-01 the owner confirmed the [stop hardware procedure](pico/hardware_tests/README.md#regular-output-stop-test), reran both restart_active_dma and restart_abort_timeout successfully, and reported 405 tests and all 17 verification checks passing. The internal hardware-test-only helper was subsequently feature-gated to remove a dead-code warning. Ordinary start after stop, a production SignalPlanLifecycle implementation and stop-specific timeout injection remain future work. CI for this revision is pending.
+SwitchingOutput now supports explicit stop with Low outputs, confirmed DMA abort and retained stopped resources. Repeated stop is harmless; servicing stopped output does nothing, pending replacements are discarded and ordinary submissions are rejected. Fault recovery remains explicit. On 2026-11-01 the owner confirmed the [stop hardware procedure](apps/servo-controller/hardware_tests/README.md#regular-output-stop-test), reran both restart_active_dma and restart_abort_timeout successfully, and reported 405 tests and all 17 verification checks passing. The internal hardware-test-only helper was subsequently feature-gated to remove a dead-code warning. Ordinary start after stop, a production SignalPlanLifecycle implementation and stop-specific timeout injection remain future work. CI for this revision is pending.
 
 ## Regular PIO/DMA startup after stop
 
-SwitchingOutput now implements SignalPlanLifecycle and can start a complete validated plan from retained stopped resources. Invalid starts preserve stopped output; ordinary start rejects faults and does not clear them. On 2026-11-01 the owner confirmed [start_after_stop](pico/hardware_tests/README.md#regular-start-after-stop-test), including the Low pause and replacement signal widths, and reported 405 tests and all 17 verification checks passing. The preceding stop revision passed CI; CI for this startup revision is pending. The register-service adapter and normal firmware-loop integration remain future work.
+SwitchingOutput now implements SignalPlanLifecycle and can start a complete validated plan from retained stopped resources. Invalid starts preserve stopped output; ordinary start rejects faults and does not clear them. On 2026-11-01 the owner confirmed [start_after_stop](apps/servo-controller/hardware_tests/README.md#regular-start-after-stop-test), including the Low pause and replacement signal widths, and reported 405 tests and all 17 verification checks passing. The preceding stop revision passed CI; CI for this startup revision is pending. The register-service adapter and normal firmware-loop integration remain future work.
 
 ## ServoBank lifecycle integration
 
@@ -301,7 +301,7 @@ ServoBank now conditionally exposes start_prepared, stop and state through Pulse
 
 ## ServoBank lifecycle hardware verification
 
-On 2026-11-01 the owner accepted [servo_bank_lifecycle](pico/hardware_tests/README.md#servobank-lifecycle-hardware-test), confirming the principal Low -> 1/2 ms -> Low -> 1.5/2 ms sequence after all 47 hardware-build checks passed. The example uses unloaded GPIOs and a test-only running bootstrap followed by immediate stop. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending; no endurance-test result is claimed.
+On 2026-11-01 the owner accepted [servo_bank_lifecycle](apps/servo-controller/hardware_tests/README.md#servobank-lifecycle-hardware-test), confirming the principal Low -> 1/2 ms -> Low -> 1.5/2 ms sequence after all 47 hardware-build checks passed. The example uses unloaded GPIOs and a test-only running bootstrap followed by immediate stop. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending; no endurance-test result is claimed.
 
 ## Register service connected to ServoBank
 
@@ -317,8 +317,8 @@ The combined revision includes ByteTransport, a bounded single-response buffer a
 
 ## Protocol UART driver and loopback
 
-The [UART byte transport](pico/src/uart_transport.rs) implements ByteTransport without blocking and reports receive errors explicitly. Shared hardware-test initialization now exposes UART0 separately from UART1 diagnostics. On 2026-11-02 the owner confirmed [uart_loopback](pico/hardware_tests/README.md#protocol-uart-byte-transport-loopback): the two expected messages prove the test verified all 1024 bytes over the GP16/GP17 jumper. Full verification reported 451 tests and all 17 checks passing. The FrameProcessor is not connected to UART yet; the normal Pico firmware is unchanged. CI for this revision is pending.
+The [UART byte transport](apps/servo-controller/src/uart_transport.rs) implements ByteTransport without blocking and reports receive errors explicitly. Shared hardware-test initialization now exposes UART0 separately from UART1 diagnostics. On 2026-11-02 the owner confirmed [uart_loopback](apps/servo-controller/hardware_tests/README.md#protocol-uart-byte-transport-loopback): the two expected messages prove the test verified all 1024 bytes over the GP16/GP17 jumper. Full verification reported 451 tests and all 17 checks passing. The FrameProcessor is not connected to UART yet; the normal Pico firmware is unchanged. CI for this revision is pending.
 
 ## UART register hardware verification
 
-On 2026-11-03 the owner confirmed all 21 protocol-version-2 [UART register scenarios](pico/hardware_tests/README.md#uart-register-requestresponse-test) on real hardware. The no-servo example uses UART0 GP16/GP17 for binary ACK/NACK, with diagnostics on UART1 GP20. Full local verification passed 462 tests and all 17 checks. CI for the current revision has not yet been reported. Real protocol-driven servo output, calibration transfer and watchdog/restart integration remain future work.
+On 2026-11-03 the owner confirmed all 21 protocol-version-2 [UART register scenarios](apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test) on real hardware. The no-servo example uses UART0 GP16/GP17 for binary ACK/NACK, with diagnostics on UART1 GP20. Full local verification passed 462 tests and all 17 checks. CI for the current revision has not yet been reported. Real protocol-driven servo output, calibration transfer and watchdog/restart integration remain future work.

@@ -121,7 +121,7 @@ Calibration remains an off-robot procedure. Protocol persistence does not measur
 
 The current RAM-request step passed 489 local tests and all 17 checks as recorded above; no hardware calibration transfer or CI result is claimed yet. The following counts describe earlier protocol revisions.
 
-On 2026-11-03 the owner reported **82 protocol host tests**, **75 register host tests**, and full local verification with **462 passed, 0 failed; all 17 checks passed**. The owner also reported **21 passing UART hardware scenarios** for protocol version 2. See [current vectors and suite](uart-register-test-vectors.md) and the [hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test).
+On 2026-11-03 the owner reported **82 protocol host tests**, **75 register host tests**, and full local verification with **462 passed, 0 failed; all 17 checks passed**. The owner also reported **21 passing UART hardware scenarios** for protocol version 2. See [current vectors and suite](uart-register-test-vectors.md) and the [hardware procedure](../firmware/apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test).
 
 The previous version-1 UART suite passed on 2026-11-02; its bytes do not establish version-2 compatibility. CI for the current ACK/NACK revision has not yet been reported. Host tests, no-servo UART hardware tests and real servo output tests are separate evidence. Physical UART error injection, arbitrary EMI recovery, protocol-to-real-PIO output, journal-backed runtime initialization and longer-operation completion remain unverified in this combined path.
 

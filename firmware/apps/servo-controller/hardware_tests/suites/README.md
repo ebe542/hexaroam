@@ -4,7 +4,7 @@ JSON suites in this directory describe tests against real Pico hardware. They ar
 
 The runner resolves a bare suite name such as `uart_registers` or `uart_registers.json` in this directory, independently of the working directory. An explicit relative or absolute JSON path selects a suite elsewhere.
 
-`uart_registers.json` targets `firmware/pico/hardware_tests/uart_registers.rs`. Its verification fields record the actual verification status; moving the suite does not constitute a hardware test.
+`uart_registers.json` targets `firmware/apps/servo-controller/hardware_tests/uart_registers.rs`. Its verification fields record the actual verification status; moving the suite does not constitute a hardware test.
 
 From the repository root, with the hardware dependencies installed and the matching firmware flashed:
 
@@ -12,7 +12,7 @@ From the repository root, with the hardware dependencies installed and the match
 python tools/uart_test.py --port COM5 --suite uart_registers
 ```
 
-See [UART hardware suite instructions](../../../../tools/README.md#uart-hardware-suites) for Windows/Ubuntu setup, wiring, port selection and individual scenarios.
+See [UART hardware suite instructions](../../../../../tools/README.md#uart-hardware-suites) for Windows/Ubuntu setup, wiring, port selection and individual scenarios.
 
 ## Calibration persistence
 
@@ -22,7 +22,7 @@ See [UART hardware suite instructions](../../../../tools/README.md#uart-hardware
 python tools/uart_test.py --port COM6 --suite uart_calibration_persistence
 ```
 
-It persists synthetic A, repeats A and persists changed B. The firmware checks journal data, sequence and backend counters. See the [procedure and separate restart verification](../../../../docs/uart-calibration-persistence.md). The owner reported the build passing 53 checks and subsequently all three cases passing on hardware after restart on 2026-11-04. A subsequent boot confirmed fixture B at sequence 28, slot 11.
+It persists synthetic A, repeats A and persists changed B. The firmware checks journal data, sequence and backend counters. See the [procedure and separate restart verification](../../../../../docs/uart-calibration-persistence.md). The owner reported the build passing 53 checks and subsequently all three cases passing on hardware after restart on 2026-11-04. A subsequent boot confirmed fixture B at sequence 28, slot 11.
 
 ## COBS command protocol
 
@@ -33,6 +33,6 @@ python tools/uart_test.py --port COM6 --suite uart_commands
 python tools/uart_test.py --port COM6 --suite uart_commands_scope
 ```
 
-Reset before each invocation. Use unloaded GP0/GP1 only. See [full instructions and verification record](../../../../docs/uart-command-tests.md). A failed run does not guarantee output cleanup; reset before retrying.
+Reset before each invocation. Use unloaded GP0/GP1 only. See [full instructions and verification record](../../../../../docs/uart-command-tests.md). A failed run does not guarantee output cleanup; reset before retrying.
 
 On 2026-11-06 the owner reported all 23 COBS command cases passing, followed by the separate scope case passing with correct signal observations.

@@ -104,7 +104,7 @@ python tools/dev.py doc
 
 ## Physical UART verification
 
-The [uart_registers example](../pico/hardware_tests/README.md#uart-register-requestresponse-test) connects UartTransport and FrameProcessor to NoServoOutput. It reports version 2, Status=0 and ServoCount=0; there is no physical servo backend or journal-loaded calibration. The example applies a provisional 100-ms receive-idle timeout. On 2026-11-03 the owner reported all 21 scenarios passing on real hardware; see [wire vectors](../../docs/uart-register-test-vectors.md).
+The [uart_registers example](../apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test) connects UartTransport and FrameProcessor to NoServoOutput. It reports version 2, Status=0 and ServoCount=0; there is no physical servo backend or journal-loaded calibration. The example applies a provisional 100-ms receive-idle timeout. On 2026-11-03 the owner reported all 21 scenarios passing on real hardware; see [wire vectors](../../docs/uart-register-test-vectors.md).
 
 The owner also reported all 75 package tests, 82 protocol-package tests, and full local verification with 462 tests and 17 checks passing. CI for this revision has not yet been reported. These results do not establish protocol-to-real-PIO integration, flash-operation timing, UART hardware-error injection or normal-application behavior.
 

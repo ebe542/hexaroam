@@ -8,7 +8,7 @@ The separate `uart_commands` firmware connects UART0, COBS/CRC32, CommandProcess
 python tools/dev.py hardware-build
 ```
 
-Flash `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_commands.uf2`. Reset before each suite invocation. Expect `UART COBS commands ready` on debug UART GP20 at 115200 baud. LED blinking indicates main-loop activity, not active servo output.
+Flash `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/uart_commands.uf2`. Reset before each suite invocation. Expect `UART COBS commands ready` on debug UART GP20 at 115200 baud. LED blinking indicates main-loop activity, not active servo output.
 
 Connect a 3.3-V TTL adapter: TX to GP17, RX to GP16, common GND, 115200 baud, 8N1 without flow control. Remove any GP16/17 loopback. Observe unloaded GP0/GP1 against Pico GND; do not connect servos. Close HTerm on the protocol port before starting the runner. A second receiver can monitor GP20 independently.
 

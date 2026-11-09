@@ -381,28 +381,6 @@ name = "hexaroam-logging"
 version = "0.1.0"
 
 [[package]]
-name = "hexaroam-pico"
-version = "0.1.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embedded-hal 1.0.0",
- "hexaroam-eeprom",
- "hexaroam-logging",
- "hexaroam-servo-control",
- "hexaroam-servo-pio",
- "hexaroam-servo-protocol",
- "hexaroam-servo-registers",
- "hexaroam-servo-signal",
- "hexaroam-servo-storage",
- "nb 1.1.0",
- "panic-halt",
- "pio",
- "pio-proc",
- "rp-pico",
-]
-
-[[package]]
 name = "hexaroam-servo-control"
 version = "0.1.0"
 dependencies = [
@@ -901,6 +879,28 @@ name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
+
+[[package]]
+name = "servo-controller"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embedded-hal 1.0.0",
+ "hexaroam-eeprom",
+ "hexaroam-logging",
+ "hexaroam-servo-control",
+ "hexaroam-servo-pio",
+ "hexaroam-servo-protocol",
+ "hexaroam-servo-registers",
+ "hexaroam-servo-signal",
+ "hexaroam-servo-storage",
+ "nb 1.1.0",
+ "panic-halt",
+ "pio",
+ "pio-proc",
+ "rp-pico",
+]
 
 [[package]]
 name = "siphasher"

@@ -82,7 +82,7 @@ Controlled recovery, independent stale-flag startup testing, and exact fault lat
 
 The owner confirmed Info, Debug, and Error output in HTerm from the UART1/GP20 hardware test. The separate uart_panic program emitted its message after approximately five seconds and left the LED permanently on. Its handler bypasses the runtime software queue and then holds the CPU in a permanent loop. The attempt budget is not a calibrated time limit.
 
-See the [logging guide](../firmware/logging/README.md) for contracts and the [hardware-test guide](../firmware/pico/hardware_tests/README.md#uart-connection-and-terminal) for reproduction. The regular servo firmware still uses panic-halt; UART integration with running servo DMA and controlled output recovery remain pending. CI for this revision has not yet been reported.
+See the [logging guide](../firmware/logging/README.md) for contracts and the [hardware-test guide](../firmware/apps/servo-controller/hardware_tests/README.md#uart-connection-and-terminal) for reproduction. The regular servo firmware still uses panic-halt; UART integration with running servo DMA and controlled output recovery remain pending. CI for this revision has not yet been reported.
 
 ## Controlled restart and active-DMA abort
 

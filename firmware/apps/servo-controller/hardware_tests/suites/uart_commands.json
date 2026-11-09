@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "framing": "cobs_crc32",
-  "firmware": "firmware/pico/hardware_tests/uart_commands.rs",
+  "firmware": "firmware/apps/servo-controller/hardware_tests/uart_commands.rs",
   "fixture": {
     "status": 1,
     "servo_count": 2,

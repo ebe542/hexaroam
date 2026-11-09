@@ -1,6 +1,6 @@
 # UART calibration persistence hardware test
 
-This manual test uses [uart_calibration_persistence.rs](../firmware/pico/hardware_tests/uart_calibration_persistence.rs) and its [JSON suite](../firmware/pico/hardware_tests/suites/uart_calibration_persistence.json). It connects real UART requests, ACK/NACK, the RAM calibration request, response-buffer readiness and the reserved Pico flash journal. NoServoOutput keeps physical servo outputs inactive; no core1 or DMA is started.
+This manual test uses [uart_calibration_persistence.rs](../firmware/apps/servo-controller/hardware_tests/uart_calibration_persistence.rs) and its [JSON suite](../firmware/apps/servo-controller/hardware_tests/suites/uart_calibration_persistence.json). It connects real UART requests, ACK/NACK, the RAM calibration request, response-buffer readiness and the reserved Pico flash journal. NoServoOutput keeps physical servo outputs inactive; no core1 or DMA is started.
 
 ## Build and connection
 
@@ -10,7 +10,7 @@ The owner reported all **53 hardware-build checks passing** on 2026-11-04. On 20
 python tools/dev.py hardware-build
 ```
 
-Flash `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_calibration_persistence.uf2` using BOOTSEL. The firmware appends synthetic records to the reserved calibration journal and may rotate/erase a sector under the normal journal policy; it does not erase the whole journal as preparation. Existing journal data must therefore be test data appropriate to this experiment.
+Flash `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/uart_calibration_persistence.uf2` using BOOTSEL. The firmware appends synthetic records to the reserved calibration journal and may rotate/erase a sector under the normal journal policy; it does not erase the whole journal as preparation. Existing journal data must therefore be test data appropriate to this experiment.
 
 Connect the 3.3-V TTL adapter: Pico GP16/TX -> adapter RXD, GP17/RX <- adapter TXD, common GND. Remove the GP16-GP17 loopback jumper. Protocol uses 115200 baud, 8N1, no flow control; diagnostic UART1 TX remains GP20. Close HTerm or any other application using the protocol port.
 

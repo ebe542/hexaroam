@@ -62,11 +62,11 @@ From the repository root:
 python tools/dev.py hardware-build
 ```
 
-This runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics` in firmware/pico. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
+This runs `cargo build --locked --examples --features hardware-tests --message-format=json-render-diagnostics` in firmware/apps/servo-controller. Cargo discovers the registered example targets in Cargo.toml, including those stored under hardware_tests. Adding another registered hardware test does not require listing its name in dev.py.
 
-The task produces ELF executables under firmware/pico/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target, elf2uf2-rs and llvm-tools-preview in the active Rust toolchain. It does not execute tests or add them to unit-test totals. Hardware-test programs are not built or executed by test, check, or verify; hardware-build remains explicit.
+The task produces ELF executables under firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples. It requires the Pico Rust target, elf2uf2-rs and llvm-tools-preview in the active Rust toolchain. It does not execute tests or add them to unit-test totals. Hardware-test programs are not built or executed by test, check, or verify; hardware-build remains explicit.
 
-To build and convert one selected hardware test to UF2, run from firmware/pico:
+To build and convert one selected hardware test to UF2, run from firmware/apps/servo-controller:
 
 ```bash
 cargo run --locked --example underflow_missing_counter --features hardware-tests
@@ -74,7 +74,7 @@ cargo run --locked --example underflow_missing_counter --features hardware-tests
 
 The configured Cargo runner performs conversion only; transfer to the Pico and evaluation remain manual. hardware-build reads Cargo compiler-artifact messages and invokes elf2uf2-rs directly for each reported example executable, including unchanged/fresh artifacts. UF2 files are written beside their ELF files. A failed build skips all conversions; a conversion failure keeps the task failed even if later conversions succeed. No executable artifacts after a successful build are treated as an error. Existing UF2 files can remain after a failed run; use only results from a fully successful run.
 
-The owner reported a full local check with 121 passing unit tests and successful creation of the hardware-test UF2 files. Seven runner tests cover Cargo artifact discovery, cached artifacts, build-failure conversion suppression, per-artifact conversion, conversion failure propagation, missing artifacts, and diagnostic display. See the [manual hardware-test guide](../firmware/pico/hardware_tests/README.md) for setup and expected signals. Remote CI for this revision is pending.
+The owner reported a full local check with 121 passing unit tests and successful creation of the hardware-test UF2 files. Seven runner tests cover Cargo artifact discovery, cached artifacts, build-failure conversion suppression, per-artifact conversion, conversion failure propagation, missing artifacts, and diagnostic display. See the [manual hardware-test guide](../firmware/apps/servo-controller/hardware_tests/README.md) for setup and expected signals. Remote CI for this revision is pending.
 
 ## Linker maps and disassembly
 
@@ -98,7 +98,7 @@ After the [Windows or Ubuntu prerequisites](../docs/development-setup.md) are av
 python tools/dev.py install
 ```
 
-The command installs rustfmt, clippy and llvm-tools-preview for the active Rust toolchain, the thumbv6m-none-eabi target, and elf2uf2-rs version 2.2.0 with its packaged lockfile. Commands run from firmware/pico to respect the same rustup overrides as hardware builds. The converter explicitly targets the host architecture, not the Pico. Existing matching installations can be reused without forcing reinstallation. It does not install or update Rust itself or change the default toolchain.
+The command installs rustfmt, clippy and llvm-tools-preview for the active Rust toolchain, the thumbv6m-none-eabi target, and elf2uf2-rs version 2.2.0 with its packaged lockfile. Commands run from firmware/apps/servo-controller to respect the same rustup overrides as hardware builds. The converter explicitly targets the host architecture, not the Pico. Existing matching installations can be reused without forcing reinstallation. It does not install or update Rust itself or change the default toolchain.
 
 Python 3.10+, Rustup with a working Rust/Cargo toolchain, and host build prerequisites must already be installed and available on PATH. Windows requires the MSVC C++ build tools and Windows SDK; Ubuntu requires the documented build-essential setup. Run as your normal user; the task does not invoke sudo or an OS package manager, modify PATH, install editor extensions, or flash hardware. Downloads require network access. Cargo's bin directory must be on PATH for later UF2 commands.
 
@@ -172,7 +172,7 @@ On Ubuntu, for example:
 python tools/uart_test.py --port /dev/ttyUSB0 --suite uart_registers
 ```
 
-Bare suite names, with or without `.json`, resolve in `firmware/pico/hardware_tests/suites/`, independently of the working directory. Explicit relative paths resolve from the current working directory. Select a single scenario or supply a different suite path:
+Bare suite names, with or without `.json`, resolve in `firmware/apps/servo-controller/hardware_tests/suites/`, independently of the working directory. Explicit relative paths resolve from the current working directory. Select a single scenario or supply a different suite path:
 
 ```bash
 python tools/uart_test.py --port COM5 --suite uart_registers --case read_status

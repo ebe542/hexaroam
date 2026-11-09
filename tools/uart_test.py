@@ -12,7 +12,14 @@ from pathlib import Path
 from dev import color_status
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SUITE_DIR = PROJECT_ROOT / "firmware" / "pico" / "hardware_tests" / "suites"
+DEFAULT_SUITE_DIR = (
+    PROJECT_ROOT
+    / "firmware"
+    / "apps"
+    / "servo-controller"
+    / "hardware_tests"
+    / "suites"
+)
 
 # Detect trailing bytes briefly after a complete response without waiting
 # for the full response timeout on every successful step.
@@ -207,9 +214,7 @@ def load_suite(path: Path) -> tuple[dict, list[Step], list[Case]]:
     ):
         raise ValueError("This runner currently supports 8N1 without flow control")
 
-    baseline = [
-        load_step(item, framing) for item in data["before_each_case"]
-    ]
+    baseline = [load_step(item, framing) for item in data["before_each_case"]]
     cases = [
         Case(
             item["id"],
@@ -286,6 +291,8 @@ def execute_step(port, step: Step) -> None:
     for attempt in range(1, step.max_attempts + 1):
         if execute_attempt(port, step):
             return
+
+        assert step.retry_response is not None
 
         if attempt == step.max_attempts:
             raise failure(

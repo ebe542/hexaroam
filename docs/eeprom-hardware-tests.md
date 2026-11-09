@@ -39,14 +39,14 @@ python tools/dev.py hardware-build
 python tools/dev.py verify
 ```
 
-hardware-build creates ELF, UF2, map and disassembly files in firmware/pico/target/thumbv6m-none-eabi/debug/examples. It does not upload or execute firmware. Use only artifacts from a fully successful build.
+hardware-build creates ELF, UF2, map and disassembly files in firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples. It does not upload or execute firmware. Use only artifacts from a fully successful build.
 
 | Target | Firmware |
 | --- | --- |
 | eeprom_write_read | eeprom_write_read.uf2 |
 | eeprom_write_protect | eeprom_write_protect.uf2 |
 
-Both are Cargo examples behind hardware-tests. The shared Board initializer exposes I2C1; firmware/pico depends on hexaroam-eeprom. The normal Pico program remains unchanged. Cargo.lock records the added dependency.
+Both are Cargo examples behind hardware-tests. The shared Board initializer exposes I2C1; firmware/apps/servo-controller depends on hexaroam-eeprom. The normal Pico program remains unchanged. Cargo.lock records the added dependency.
 
 ## Write/read procedure
 

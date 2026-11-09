@@ -4,7 +4,7 @@ These are separately selected firmware programs, evaluated manually on a Raspber
 
 ## EEPROM tests
 
-The separate [EEPROM test guide](../../../docs/eeprom-hardware-tests.md) documents eeprom_write_read (WP low) and eeprom_write_protect (WP high), wiring, expected logs and the destructive 0x7F80..0x7FFF test region. The pure eeprom_read example was removed; no power-cycle retention test is included. The owner reported all 63 hardware-build checks and the full 837-test/21-check local verification passing on 2026-11-08. Neither example has been run on physical EEPROM hardware yet.
+The separate [EEPROM test guide](../../../../docs/eeprom-hardware-tests.md) documents eeprom_write_read (WP low) and eeprom_write_protect (WP high), wiring, expected logs and the destructive 0x7F80..0x7FFF test region. The pure eeprom_read example was removed; no power-cycle retention test is included. The owner reported all 63 hardware-build checks and the full 837-test/21-check local verification passing on 2026-11-08. Neither example has been run on physical EEPROM hardware yet.
 
 ## Setup
 
@@ -31,19 +31,19 @@ From the repository root:
 python tools/dev.py hardware-build
 ```
 
-This builds all registered hardware-test programs and generates ELF, UF2, linker map (.map) and disassembly (.disasm) for each. It requires the embedded Rust target, elf2uf2-rs and the Rust llvm-tools-preview component (install with `rustup component add llvm-tools-preview`). See the [report-generation procedure](../../../tools/README.md#linker-maps-and-disassembly). It does not flash the Pico or evaluate results. Files are generated under:
+This builds all registered hardware-test programs and generates ELF, UF2, linker map (.map) and disassembly (.disasm) for each. It requires the embedded Rust target, elf2uf2-rs and the Rust llvm-tools-preview component (install with `rustup component add llvm-tools-preview`). See the [report-generation procedure](../../../../tools/README.md#linker-maps-and-disassembly). It does not flash the Pico or evaluate results. Files are generated under:
 
 ```text
-firmware/pico/target/thumbv6m-none-eabi/debug/examples/
+firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/
 ```
 
-To build and convert just one program, run from firmware/pico:
+To build and convert just one program, run from firmware/apps/servo-controller:
 
 ```bash
 cargo run --locked --example underflow_missing_counter --features hardware-tests
 ```
 
-Transfer the selected UF2 using BOOTSEL and the RPI-RP2 drive as described in the [firmware guide](../../README.md). Each transfer replaces the currently installed firmware. Reboot or transfer a fresh image to begin another run. The normal demo remains available through python tools/dev.py uf2 from the repository root.
+Transfer the selected UF2 using BOOTSEL and the RPI-RP2 drive as described in the [firmware guide](../../../README.md). Each transfer replaces the currently installed firmware. Reboot or transfer a fresh image to begin another run. The normal demo remains available through python tools/dev.py uf2 from the repository root.
 
 ## Programs and manual checks
 
@@ -93,7 +93,7 @@ The original underflow, switching, and persistent-fault tests use panic_halt wit
 
 On 2026-10-17, the owner confirmed that uart_diagnostics delivered Info, Debug, and Error output to HTerm, including after the LF-only change. The owner then reported 145 passing tests in the full runner and confirmed that uart_panic emitted its message after approximately five seconds and left the LED permanently on.
 
-The logging library contributes 17 unit tests to that total. These manual UART tests do not add to the count. See the [logging guide](../../logging/README.md) for buffer and panic contracts. The owner subsequently confirmed UART output alongside servo pulses in the normal demo and reported green CI for the earlier logging revision. The normal firmware now selects the UART panic handler. Panic before UART initialization and a stalled UART have not been separately tested on hardware.
+The logging library contributes 17 unit tests to that total. These manual UART tests do not add to the count. See the [logging guide](../../../logging/README.md) for buffer and panic contracts. The owner subsequently confirmed UART output alongside servo pulses in the normal demo and reported green CI for the earlier logging revision. The normal firmware now selects the UART panic handler. Panic before UART initialization and a stalled UART have not been separately tested on hardware.
 
 ## Controlled restart tests
 
@@ -133,7 +133,7 @@ From the repository root:
 python tools/dev.py hardware-build
 ```
 
-After the build/conversion succeeds, hold BOOTSEL while connecting the Pico and copy `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_journal_read.uf2` to RPI-RP2. This programs the test firmware; the running test itself does not write the journal. Prepare HTerm before startup because the result is emitted once.
+After the build/conversion succeeds, hold BOOTSEL while connecting the Pico and copy `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_journal_read.uf2` to RPI-RP2. This programs the test firmware; the running test itself does not write the journal. Prepare HTerm before startup because the result is emitted once.
 
 Expected result: `INFO Journal read OK: no valid record` if no slot is valid, or `INFO Journal read OK: valid record found` if an existing record passes validation. Either successful read result sets the LED high. Invalid layout, failed bounds checking or load failure reports an error and leaves the LED low. A high LED indicates test completion, not configuration completeness or robot-operation permission. This test uses panic-halt; an unexpected panic may halt without a UART panic message.
 
@@ -141,11 +141,11 @@ On 2026-10-28 the owner reported `INFO Journal read OK: no valid record`, follow
 
 ## RAM routine probe
 
-`flash_ram_probe` verifies the placement and invocation of a small RAM-resident function before implementing flash writes. `pico/src/flash_ram.rs` places `hexaroam_ram_probe` in `.data.ram_func`, prevents inlining and exports a stable symbol name. The existing cortex-m-rt linker script includes `.data.*` in RAM with a flash load image; startup copies it before main. The routine XORs its runtime input with `0xA5A55A5A` and calls no other function.
+`flash_ram_probe` verifies the placement and invocation of a small RAM-resident function before implementing flash writes. `firmware/apps/servo-controller/src/flash_ram.rs` places `hexaroam_ram_probe` in `.data.ram_func`, prevents inlining and exports a stable symbol name. The existing cortex-m-rt linker script includes `.data.*` in RAM with a flash load image; startup copies it before main. The routine XORs its runtime input with `0xA5A55A5A` and calls no other function.
 
 The standalone test checks the function address against configured RAM, clears the Thumb-state bit for that address check, calls the routine with interrupts temporarily masked, and checks its return value. XIP remains enabled throughout. The interrupt wrapper, UART and other test infrastructure can still execute from flash. No second core, DMA transfer or servo output is started; no flash programming or erase occurs.
 
-From the repository root, run `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_ram_probe.uf2` in BOOTSEL mode. Use the established GP20 UART1 connection and HTerm at 115200 baud/8N1/no flow control. Expected one-time output is `INFO RAM routine OK`, with the LED high on success. Address/result failure reports an error and leaves the LED low. The test uses panic-halt.
+From the repository root, run `python tools/dev.py hardware-build`, then upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_ram_probe.uf2` in BOOTSEL mode. Use the established GP20 UART1 connection and HTerm at 115200 baud/8N1/no flow control. Expected one-time output is `INFO RAM routine OK`, with the LED high on success. Address/result failure reports an error and leaves the LED low. The test uses panic-halt.
 
 Read-only inspection of the built debug ELF found execution address `0x20000000`, flash load address `0x1000BC1C`, and inclusion in the startup-copy range `__sdata..__edata`. The symbol occupied 20 bytes: 16 bytes of instructions and a four-byte local literal; no additional function calls were present in the probe. Addresses and instruction size are specific to that build and must be rechecked after changes.
 
@@ -159,7 +159,7 @@ The `.data.ram_func` routine `hexaroam_xip_cycle` receives four function pointer
 
 After returning, it reads the first mapped flash word with a volatile load and compares it with the copied word. It then reports through UART1. Expected one-time output: `INFO XIP cycle OK`, LED high on success. A preparation-address or flash-word mismatch reports an error and leaves the LED low. Unexpected panic uses panic-halt; watchdog recovery was not implemented or tested.
 
-Build from the repository root with `python tools/dev.py hardware-build`. After ELF review, upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_xip_cycle.uf2` in BOOTSEL mode. Use GP20 UART1/TTL RXD, common ground, 3.3-V logic and HTerm at 115200 baud/8N1/no flow control.
+Build from the repository root with `python tools/dev.py hardware-build`. After ELF review, upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_xip_cycle.uf2` in BOOTSEL mode. Use GP20 UART1/TTL RXD, common ground, 3.3-V logic and HTerm at 115200 baud/8N1/no flow control.
 
 Debug ELF inspection found the 38-byte transition routine at `0x20000000`, backed by flash load address `0x1000C104` within the startup `.data` copy. Its instructions contain four indirect calls through the supplied pointers and no extra helper calls or flash literals. These are build-specific observations and must be rechecked when changing the critical path.
 
@@ -173,7 +173,7 @@ After the Pico reader was changed to use JournalLayout for bounded flash-relativ
 
 `flash_program_slot` programs a 512-byte test pattern into journal slot 0 only if every target byte is 0xFF. It never erases flash. The pattern is deliberately not a valid calibration record and occupies the slot until a separate erase operation. Repeating the test must refuse to overwrite it.
 
-Build with `python tools/dev.py hardware-build`, then manually upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_program_slot.uf2`. Use the UART1 wiring and terminal settings above. Expected first result: `INFO Journal slot program OK`, with the LED high. Restart without uploading again: expect `ERROR Journal slot 0 is not erased`, with the LED low.
+Build with `python tools/dev.py hardware-build`, then manually upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_program_slot.uf2`. Use the UART1 wiring and terminal settings above. Expected first result: `INFO Journal slot program OK`, with the LED high. Restart without uploading again: expect `ERROR Journal slot 0 is not erased`, with the LED low.
 
 Before disabling XIP, the test validates the linker-reserved region through JournalLayout, checks that slot 0 is erased, resolves the ROM function pointers, and prepares the source buffer and aligned Boot2 copy in RAM. With interrupts masked, the RAM routine connects flash, exits XIP, programs the slot, flushes the cache and restores XIP through Boot2. All 512 bytes are compared after XIP is restored. The standalone test starts no second core, DMA or servo output and creates no FlashJournalReader. It assumes the standard Pico flash/pad configuration; it is not a general runtime exclusion mechanism or watchdog recovery test. Panic uses panic_halt.
 
@@ -187,7 +187,7 @@ The owner observed `INFO Journal slot program OK`, then `ERROR Journal slot 0 is
 
 With interrupts masked, hexaroam_erase_sector executes from RAM and calls connect, exit, ROM erase, flush and the RAM Boot2 copy. Erase count and block size are fixed at SECTOR_SIZE (4096); the command is the standard 0x20 sector erase. After XIP restoration the test checks all 4096 target bytes against 0xFF and compares all 4096 retained-sector bytes against the snapshot. It creates no FlashJournalReader and starts no core1, DMA or servo output. Standard Pico flash/pad configuration is assumed. This standalone test does not select sectors using journal records and does not establish runtime exclusion, watchdog recovery or interrupted-erase safety.
 
-Build using `python tools/dev.py hardware-build`. Review the generated map and disassembly before uploading `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_erase_sector.uf2`. Use the UART setup above. Expected result for occupied sector 0: `INFO Journal sector erase OK`, LED high. Restart without uploading again: `ERROR Journal sector 0 is already erased`, LED low, no further erase. If already erased on the first run, use flash_program_slot to prepare the test pattern before repeating this erase test. Never use this test with calibration data that must be retained in sector 0.
+Build using `python tools/dev.py hardware-build`. Review the generated map and disassembly before uploading `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_erase_sector.uf2`. Use the UART setup above. Expected result for occupied sector 0: `INFO Journal sector erase OK`, LED high. Restart without uploading again: `ERROR Journal sector 0 is already erased`, LED low, no further erase. If already erased on the first run, use flash_program_slot to prepare the test pattern before repeating this erase test. Never use this test with calibration data that must be retained in sector 0.
 
 On 2026-10-29 the owner reported all 33 hardware-build checks passing. Map/disassembly review placed the complete 58-byte routine at 0x20000000 inside the startup-copied RAM data section. Its five indirect calls and remaining register/stack instructions contained no extra helper calls or flash literals; erase arguments were 4096/4096/0x20. These observations are build-specific.
 
@@ -219,7 +219,7 @@ On startup, load scans and validates the journal. If no valid record exists, app
 
 Restart without another upload. If the latest valid record exactly matches sequence 1 and all eighteen expected calibrations, the test reports `INFO Journal persistence OK: existing record` without appending or erasing. A valid but different record produces `ERROR Unexpected valid record; journal unchanged`. Read/scan errors abort; they do not trigger a write. Equality identifies the expected fixture, not physical servo identity or record provenance. The test neither starts core1/DMA/servo output nor enables robot operation; panic uses panic_halt.
 
-Build with `python tools/dev.py hardware-build`, review map/disassembly, then transfer `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_journal_persistence.uf2` in BOOTSEL mode. Use the UART wiring/settings above. Success sets the LED high. Do not run the earlier sector-0 erase tests if this record must be retained.
+Build with `python tools/dev.py hardware-build`, review map/disassembly, then transfer `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_journal_persistence.uf2` in BOOTSEL mode. Use the UART wiring/settings above. Success sets the LED high. Do not run the earlier sector-0 erase tests if this record must be retained.
 
 On 2026-10-30 the owner reported all 39 hardware-build checks passing. Map/disassembly review found both critical routines wholly inside the startup-copied RAM region: erase at 0x20000000, 58 bytes; program at 0x2000003A, 62 bytes. Each contains the five prepared indirect calls without extra helper calls or flash literals. The existing-record branch returns before append. These are build-specific static observations.
 
@@ -231,7 +231,7 @@ The owner received `INFO Journal persistence OK: record written`, then `INFO Jou
 
 Sequence 1 uses the preceding persistence fixture; later records increment each lower pulse endpoint by sequence - 1 microseconds, so record contents differ. After every append, the test checks sequence, values and expected slot (sequence - 1) modulo 16, then reloads and compares the record and slot. Sequences 1-8 occupy sector 0; 9-16 occupy sector 1; 17-24 reuse sector 0; sequence 25 reuses sector 1. At each switch (9/17/25), a full snapshot verifies that the previous sector remains byte-for-byte unchanged. All seven trailing target slots must be 0xFF; at 17 and 25 this confirms removal of stale records when reclaiming the sector.
 
-Build with `python tools/dev.py hardware-build`, inspect map/disassembly, and transfer `firmware/pico/target/thumbv6m-none-eabi/debug/examples/flash_journal_rotation.uf2` in BOOTSEL mode. Use the established UART settings and no attached servos. The preparation intentionally destroys both journal sectors. Expected first result: `INFO Journal rotation OK: sequence 25 written`. Restart without another upload: sequence 25 is verified and marker 26 is appended; expect `INFO Journal rotation OK: completion sequence 26 written`. Restart again: marker 26 is verified, both sectors are prepared, and rotation 1..25 repeats. Success sets the LED high. Before marker append, slots 9..15 must all be erased; otherwise the test aborts before writing. This ensures append uses free slot 9 without reclaiming a sector. The initial sequence-25 branch no longer returns without writing. Intermediate valid sequences 2-24 are deliberately rejected after an interrupted run; this test does not implement automatic continuation. An interrupted run at sequence 1 can match the preparation fixture and restart the test. Fixture equality is not proof of provenance or physical servo identity.
+Build with `python tools/dev.py hardware-build`, inspect map/disassembly, and transfer `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/flash_journal_rotation.uf2` in BOOTSEL mode. Use the established UART settings and no attached servos. The preparation intentionally destroys both journal sectors. Expected first result: `INFO Journal rotation OK: sequence 25 written`. Restart without another upload: sequence 25 is verified and marker 26 is appended; expect `INFO Journal rotation OK: completion sequence 26 written`. Restart again: marker 26 is verified, both sectors are prepared, and rotation 1..25 repeats. Success sets the LED high. Before marker append, slots 9..15 must all be erased; otherwise the test aborts before writing. This ensures append uses free slot 9 without reclaiming a sector. The initial sequence-25 branch no longer returns without writing. Intermediate valid sequences 2-24 are deliberately rejected after an interrupted run; this test does not implement automatic continuation. An interrupted run at sequence 1 can match the preparation fixture and restart the test. Fixture equality is not proof of provenance or physical servo identity.
 
 On 2026-10-30 the owner reported all 41 hardware-build checks passing. Map/disassembly review found the erase wrapper at 0x20000000 (58 bytes) and program wrapper at 0x2000003A (62 bytes), both entirely in the startup-copied RAM section with five indirect calls and no extra helper calls or flash literals. The owner received the expected sequence-25-written message followed by the existing-sequence-25 message after restart. LED levels were not separately reported. The owner subsequently reported 275 passing tests and all 13 verification checks passing. These manual programs do not add unit-test counts.
 
@@ -249,7 +249,7 @@ On 2026-10-30 the owner confirmed that progress output and the automatic 25 -> 2
 
 [stop_output.rs](stop_output.rs) is a manual, hardware-tests-only example. Use unloaded GP0/GP1 against Pico GND and UART1 TX on GP20 to a 3.3 V TTL receiver, common GND, 115200 baud, 8N1. No servo is needed.
 
-Build with `python tools/dev.py hardware-build` and copy `firmware/pico/target/thumbv6m-none-eabi/debug/examples/stop_output.uf2` to the Pico in BOOTSEL mode. Initially GP0 has a 1 ms High pulse and GP1 a 2 ms High pulse in a 20 ms period; the LED blinks. After five seconds the test submits a replacement without servicing it, then stops output. It checks Inactive, absence of an owned DMA transfer, no fault, successful repeated stop and Stopped rejection of subsequent plan submission. Continued servicing must not resume output. Both pins stay Low and the LED stays on.
+Build with `python tools/dev.py hardware-build` and copy `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/stop_output.uf2` to the Pico in BOOTSEL mode. Initially GP0 has a 1 ms High pulse and GP1 a 2 ms High pulse in a 20 ms period; the LED blinks. After five seconds the test submits a replacement without servicing it, then stops output. It checks Inactive, absence of an owned DMA transfer, no fault, successful repeated stop and Stopped rejection of subsequent plan submission. Continued servicing must not resume output. Both pins stay Low and the LED stays on.
 
 Expected UART messages:
 
@@ -262,7 +262,7 @@ The owner confirmed the expected signals, LED and messages on 2026-11-01, then r
 
 ## Regular start after stop test
 
-[start_after_stop.rs](start_after_stop.rs) is a manual hardware-tests-only example using unloaded GP0/GP1 and UART1 TX on GP20, common GND, a 3.3 V TTL receiver and 115200 baud, 8N1. Build with `python tools/dev.py hardware-build` and upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/start_after_stop.uf2` in BOOTSEL mode.
+[start_after_stop.rs](start_after_stop.rs) is a manual hardware-tests-only example using unloaded GP0/GP1 and UART1 TX on GP20, common GND, a 3.3 V TTL receiver and 115200 baud, 8N1. Build with `python tools/dev.py hardware-build` and upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/start_after_stop.uf2` in BOOTSEL mode.
 
 For five seconds GP0 has a 1 ms High pulse and GP1 a 2 ms High pulse, with a blinking LED. The test queues a 1.5 ms/1.5 ms replacement without servicing it, then stops. Both pins stay Low for two seconds and the LED stays on. Period-mismatched and GPIO-mismatched starts must be rejected while state stays Inactive and no DMA transfer is owned. Ordinary submission while stopped is rejected. A valid start then runs GP0 at 2 ms and GP1 at 1 ms with the LED blinking again. A second start on active output must fail without replacing this plan. The discarded 1.5 ms/1.5 ms plan must not reappear during observation.
 
@@ -291,7 +291,7 @@ After setup, expected phases are:
 | Stopped, only servo 0 changed | 2 s | Low | Low | On |
 | Started again | Continuous | 1.5 ms | 2 ms | Blinking |
 
-Stop is invoked twice to check idempotency. The second target must remain at +45 degrees when only the first is changed to zero. All lifecycle operations after setup use the bank; servicing must not restart stopped output. Build with `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/servo_bank_lifecycle.uf2` in BOOTSEL mode. The final expected message is `INFO Bank lifecycle OK: updated angles running`.
+Stop is invoked twice to check idempotency. The second target must remain at +45 degrees when only the first is changed to zero. All lifecycle operations after setup use the bank; servicing must not restart stopped output. Build with `python tools/dev.py hardware-build`, then upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/servo_bank_lifecycle.uf2` in BOOTSEL mode. The final expected message is `INFO Bank lifecycle OK: updated angles running`.
 
 On 2026-11-01 the owner reported all 47 hardware-build checks passing, confirmed the principal signal sequence and accepted the hardware test as successful after further starts. The test is finite; repeated-cycle endurance testing remains future work. The preceding bank-lifecycle implementation passed CI. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware-example revision. CI is pending.
 
@@ -299,7 +299,7 @@ On 2026-11-01 the owner reported all 47 hardware-build checks passing, confirmed
 
 [uart_loopback.rs](uart_loopback.rs) exercises [UartTransport](../src/uart_transport.rs), the real nonblocking ByteTransport implementation. Before starting, connect GP16 (UART0 TX) directly to GP17 (UART0 RX). Debug output remains on UART1 TX/GP20 to a 3.3 V TTL receiver with common GND, 115200 baud, 8N1. UART0 also uses 115200 baud, 8N1. No PC protocol adapter or servo is needed for this loopback.
 
-Build with `python tools/dev.py hardware-build`, then upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_loopback.uf2` in BOOTSEL mode. The test sends 1024 bytes, covering byte values 0..255 four times, and verifies every received byte in order. It attempts at most one send and one receive per loop iteration and services debug logging without waiting. A two-second overall test deadline catches a missing jumper or stalled transfer; it is not the protocol receive/response timeout. Success sets the LED high and logs:
+Build with `python tools/dev.py hardware-build`, then upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/uart_loopback.uf2` in BOOTSEL mode. The test sends 1024 bytes, covering byte values 0..255 four times, and verifies every received byte in order. It attempts at most one send and one receive per loop iteration and services debug logging without waiting. A two-second overall test deadline catches a missing jumper or stalled transfer; it is not the protocol receive/response timeout. Success sets the LED high and logs:
 
 ```text
 INFO UART loopback started
@@ -316,9 +316,9 @@ Current development update: Status now transfers four little-endian bytes. Rebui
 
 [uart_registers.rs](uart_registers.rs) connects the real UartTransport, FrameProcessor and RegisterService with the test-only [NoServoOutput](support/no_servo_output.rs) backend. It has no calibration or physical servo outputs and reports ProtocolVersion=2, Status=0 and ServoCount=0. Normal Pico firmware is unchanged.
 
-Build with `python tools/dev.py hardware-build` and upload `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_registers.uf2` in BOOTSEL mode. Remove the GP16-GP17 loopback jumper. Connect GP16/TX to the USB adapter RXD, GP17/RX to adapter TXD, and common GND. Use 3.3 V TTL, 115200 baud, 8N1 and no flow control. In HTerm, use HEX input/display without automatic CR/LF, send each request as one byte sequence and await its reply before sending another. Protocol UART0 carries binary replies only; debug text stays on UART1/GP20. The LED is expected to blink while the loop runs.
+Build with `python tools/dev.py hardware-build` and upload `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/uart_registers.uf2` in BOOTSEL mode. Remove the GP16-GP17 loopback jumper. Connect GP16/TX to the USB adapter RXD, GP17/RX to adapter TXD, and common GND. Use 3.3 V TTL, 115200 baud, 8N1 and no flow control. In HTerm, use HEX input/display without automatic CR/LF, send each request as one byte sequence and await its reply before sending another. Protocol UART0 carries binary replies only; debug text stays on UART1/GP20. The LED is expected to blink while the loop runs.
 
-The canonical [UART test vectors](../../../docs/uart-register-test-vectors.md) contain the current protocol-version-2 wire layout, complete requests and ACK/NACK responses, CRC details and the 21-scenario JSON suite. Expected fixture values are Version=2, Status=0, Control=0 and ServoCount=0. Unknown indices and implausible lengths receive no reply; plausible prohibited operations receive NACK. LastError no longer exists.
+The canonical [UART test vectors](../../../../docs/uart-register-test-vectors.md) contain the current protocol-version-2 wire layout, complete requests and ACK/NACK responses, CRC details and the 21-scenario JSON suite. Expected fixture values are Version=2, Status=0, Control=0 and ServoCount=0. Unknown indices and implausible lengths receive no reply; plausible prohibited operations receive NACK. LastError no longer exists.
 
 The receive loop uses 32-byte receive/transmit budgets and a provisional 100-ms receive-idle timeout. The suite uses 200-ms no-reply observations and a 1000-ms timeout for complete responses. The runner now finishes successful response steps after an additional 20-ms settling window; a hardware run with this shorter policy is pending. Run the suite with HTerm closed:
 
@@ -332,14 +332,14 @@ On 2026-11-02 the owner reported 21 passing scenarios and green CI for the previ
 
 [uart_calibration_persistence.rs](uart_calibration_persistence.rs) adds the real FlashJournalStorage backend and test-only write/erase counters to the no-servo UART path. It checks every accepted persistence result against a journal reload and verifies that identical data changes neither counters nor slot/sequence. Diagnostic UART1 reports the boot record and each checked result. The reserved journal is updated with synthetic data; no servo output, DMA or core1 is started.
 
-The owner reported all 53 hardware-build checks passing on 2026-11-04. On 2026-11-04 the owner confirmed all three UART cases passing after restart with the five-second response timeout; the subsequent boot confirmed fixture B at sequence 28, slot 11. See the [complete hardware procedure](../../../docs/uart-calibration-persistence.md) for firmware upload, suite invocation, status polling, expected logs and evidence limits.
+The owner reported all 53 hardware-build checks passing on 2026-11-04. On 2026-11-04 the owner confirmed all three UART cases passing after restart with the five-second response timeout; the subsequent boot confirmed fixture B at sequence 28, slot 11. See the [complete hardware procedure](../../../../docs/uart-calibration-persistence.md) for firmware upload, suite invocation, status polling, expected logs and evidence limits.
 
 For the completed UART calibration persistence revision, the owner reported all three hardware scenarios passing, B surviving restart at sequence 28/slot 11, and full local verification with 520 tests and all 17 checks passing on 2026-11-04. The parser's retained-candidate optimization passed all 87 protocol tests and eliminated the observed RX overrun in the successful hardware runs; no arbitrary sustained-throughput guarantee is implied. CI for this combined revision has not yet been reported.
 
 ## UART throughput benchmark
 
-`uart_benchmark` exercises COBS/CRC32 commands with synthetic calibration for 18 logical servos and a simulated active pulse sink, without physical output or flash/EEPROM access. The PC tool enables it and supplies a complete initial pose before measuring partial or full updates. The owner completed the documented sink18 measurements at all three baud rates. An explicit PC-tool `--fixture pio2` mode instead reuses uart_commands at 115200 baud for paced and overload output tests; the owner confirmed the 60-second paced and overload runs, including correct pulse behavior; the overload run accepted 50.0 updates/s with expected Busy backpressure and no other errors. Detailed results and limits are in the benchmark guide. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../docs/uart-benchmark.md).
+`uart_benchmark` exercises COBS/CRC32 commands with synthetic calibration for 18 logical servos and a simulated active pulse sink, without physical output or flash/EEPROM access. The PC tool enables it and supplies a complete initial pose before measuring partial or full updates. The owner completed the documented sink18 measurements at all three baud rates. An explicit PC-tool `--fixture pio2` mode instead reuses uart_commands at 115200 baud for paced and overload output tests; the owner confirmed the 60-second paced and overload runs, including correct pulse behavior; the overload run accepted 50.0 updates/s with expected Busy backpressure and no other errors. Detailed results and limits are in the benchmark guide. Build it with `python tools/dev.py hardware-build`. See [setup, jumper selection, measurements and current findings](../../../../docs/uart-benchmark.md).
 
 ## Inactive initialization and COBS commands
 
-`inactive_output` checks Low startup without bootstrap pulses, then explicit start/stop/start; the owner confirmed the specified hardware behavior. `uart_commands` adds UART0 COBS/CRC32 command processing with two real PIO/DMA channels and synthetic calibration. See [build, wiring, response suites and scope verification](../../../docs/uart-command-tests.md). On 2026-11-06 the owner reported all 23 command-suite cases passing, followed by the separate scope case passing and correct signal observations. No sustained-throughput result is claimed.
+`inactive_output` checks Low startup without bootstrap pulses, then explicit start/stop/start; the owner confirmed the specified hardware behavior. `uart_commands` adds UART0 COBS/CRC32 command processing with two real PIO/DMA channels and synthetic calibration. See [build, wiring, response suites and scope verification](../../../../docs/uart-command-tests.md). On 2026-11-06 the owner reported all 23 command-suite cases passing, followed by the separate scope case passing and correct signal observations. No sustained-throughput result is claimed.

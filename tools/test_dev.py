@@ -13,8 +13,11 @@ class RunnerTestCase(unittest.TestCase):
     def setUp(self):
         environment = dev.os.environ.copy()
         for name in (
-            "GITHUB_ACTIONS", "NO_COLOR", "FORCE_COLOR",
-            "PYTHON_COLORS", "CARGO_TERM_COLOR",
+            "GITHUB_ACTIONS",
+            "NO_COLOR",
+            "FORCE_COLOR",
+            "PYTHON_COLORS",
+            "CARGO_TERM_COLOR",
         ):
             environment.pop(name, None)
         self.enterContext(patch.dict(dev.os.environ, environment, clear=True))
@@ -114,8 +117,6 @@ class TaskSummaryTests(RunnerTestCase):
         self.assertIn("1 of 2 checks failed", summary)
 
 
-
-
 class CommandExecutionTests(RunnerTestCase):
     def execute(self, text, return_code):
         with (
@@ -211,7 +212,7 @@ class TestTotalTests(RunnerTestCase):
                 (Path("tools"), ["python", "-m", "unittest"]),
                 (Path("signal"), ["cargo", "test", "--lib"]),
                 (Path("control"), ["cargo", "test", "--lib"]),
-                (Path("pico"), ["cargo", "build"]),
+                (Path("apps/servo-controller"), ["cargo", "build"]),
             ],
             [
                 dev.CommandResult(0, "Ran 3 tests in 0.01s\n\nOK\n"),
@@ -230,9 +231,7 @@ class TestTotalTests(RunnerTestCase):
             [dev.CommandResult(1, self.rust_output(4, 1, 2, 3))],
         )
         self.assertNotEqual(code, 0)
-        self.assertIn(
-            "Total: 4 passed, 1 failed, 2 skipped, 3 filtered out", output
-        )
+        self.assertIn("Total: 4 passed, 1 failed, 2 skipped, 3 filtered out", output)
 
     def test_missing_summary_produces_only_a_known_subtotal(self):
         code, output = self.summarize(
@@ -280,7 +279,7 @@ class TestTotalTests(RunnerTestCase):
 
     def test_no_test_commands_have_no_test_total(self):
         code, output = self.summarize(
-            [(Path("pico"), ["cargo", "build"])],
+            [(Path("apps/servo-controller"), ["cargo", "build"])],
             [dev.CommandResult(0, "")],
         )
         self.assertEqual(code, 0)
@@ -288,12 +287,8 @@ class TestTotalTests(RunnerTestCase):
         self.assertNotIn("Known subtotal", output)
 
     def test_python_discovery_includes_parser_tests(self):
-        pattern = dev.RUNNER_TEST_COMMAND[
-            dev.RUNNER_TEST_COMMAND.index("-p") + 1
-        ]
+        pattern = dev.RUNNER_TEST_COMMAND[dev.RUNNER_TEST_COMMAND.index("-p") + 1]
         self.assertEqual(pattern, "test_*.py")
-
-
 
     def test_colored_rust_summary_is_counted(self):
         text = self.rust_output(6).replace(
@@ -339,9 +334,7 @@ class ColorOutputTests(RunnerTestCase):
             popen.call_args.args[0],
             ["cargo", "test", "--lib", "--", "--color", "always"],
         )
-        written = "".join(
-            call.args[0] for call in terminal.write.call_args_list
-        )
+        written = "".join(call.args[0] for call in terminal.write.call_args_list)
         self.assertIn("\x1b[32mok\x1b[0m\n", written)
 
     def test_no_color_opt_out_is_respected(self):
@@ -352,19 +345,14 @@ class ColorOutputTests(RunnerTestCase):
         self.assertNotIn("FORCE_COLOR", environment)
         self.assertEqual(popen.call_args.args[0], ["cargo", "test", "--lib"])
 
-
     def test_summary_status_uses_green_and_red(self):
         with (
             patch.dict(dev.os.environ, {}, clear=True),
             patch.object(dev.sys, "stdout") as terminal,
         ):
             terminal.isatty.return_value = True
-            self.assertEqual(
-                dev.color_status("PASS", True), "\x1b[32mPASS\x1b[0m"
-            )
-            self.assertEqual(
-                dev.color_status("FAIL", False), "\x1b[31mFAIL\x1b[0m"
-            )
+            self.assertEqual(dev.color_status("PASS", True), "\x1b[32mPASS\x1b[0m")
+            self.assertEqual(dev.color_status("FAIL", False), "\x1b[31mFAIL\x1b[0m")
 
     def test_summary_respects_no_color(self):
         with (
@@ -384,9 +372,7 @@ class ColorOutputTests(RunnerTestCase):
             process.stdout = io.StringIO("")
             process.wait.return_value = 0
             dev.run_command(["cargo", "test", "--lib"], Path("."))
-            self.assertEqual(
-                dev.color_status("PASS", True), "\x1b[32mPASS\x1b[0m"
-            )
+            self.assertEqual(dev.color_status("PASS", True), "\x1b[32mPASS\x1b[0m")
 
         environment = popen.call_args.kwargs["env"]
         self.assertEqual(environment["CARGO_TERM_COLOR"], "always")
@@ -403,7 +389,6 @@ class ColorOutputTests(RunnerTestCase):
         ):
             self.assertEqual(dev.color_status("FAIL", False), "FAIL")
 
-
     def test_summary_colors_only_status_words(self):
         captured = []
 
@@ -413,11 +398,10 @@ class ColorOutputTests(RunnerTestCase):
         with (
             patch.dict(dev.os.environ, {}, clear=True),
             patch.object(dev.sys, "stdout") as terminal,
-            patch.object(dev, "TASKS", {
-                "test": [(Path("signal"), ["cargo", "test"])]
-            }),
+            patch.object(dev, "TASKS", {"test": [(Path("signal"), ["cargo", "test"])]}),
             patch.object(
-                dev, "run_command",
+                dev,
+                "run_command",
                 return_value=dev.CommandResult(1, "compilation failed"),
             ),
             patch("builtins.print", side_effect=record),
@@ -430,15 +414,21 @@ class ColorOutputTests(RunnerTestCase):
         self.assertIn("Overall: \x1b[31mFAILED\x1b[0m -", output)
         self.assertNotIn("\x1b[31m[FAIL]", output)
 
+
 class HardwareBuildTests(RunnerTestCase):
     @staticmethod
     def artifact(path, kind="example", fresh=False):
-        return dev.json.dumps({
-            "reason": "compiler-artifact",
-            "target": {"kind": [kind]},
-            "executable": path,
-            "fresh": fresh,
-        }) + "\n"
+        return (
+            dev.json.dumps(
+                {
+                    "reason": "compiler-artifact",
+                    "target": {"kind": [kind]},
+                    "executable": path,
+                    "fresh": fresh,
+                }
+            )
+            + "\n"
+        )
 
     def test_artifacts_include_fresh_examples_and_ignore_libraries(self):
         output = (
@@ -460,70 +450,95 @@ class HardwareBuildTests(RunnerTestCase):
 
     def run_hardware(self, results):
         with (
-            patch.object(dev, "TASKS", {
-                "hardware-build": [(Path("pico"), ["cargo", "build"])],
-            }),
+            patch.object(
+                dev,
+                "TASKS",
+                {
+                    "hardware-build": [
+                        (Path("apps/servo-controller"), ["cargo", "build"])
+                    ],
+                },
+            ),
             patch.object(dev, "run_command", side_effect=results) as command,
-            patch.object(dev, "hardware_reports", return_value=dev.CommandResult(0, "")),
+            patch.object(
+                dev, "hardware_reports", return_value=dev.CommandResult(0, "")
+            ),
             redirect_stdout(io.StringIO()) as output,
         ):
             code = dev.run_task("hardware-build")
         return code, command, output.getvalue()
 
     def test_failed_build_does_not_convert_old_artifacts(self):
-        code, command, _ = self.run_hardware([
-            dev.CommandResult(1, self.artifact("out/old")),
-        ])
+        code, command, _ = self.run_hardware(
+            [
+                dev.CommandResult(1, self.artifact("out/old")),
+            ]
+        )
         self.assertNotEqual(code, 0)
         self.assertEqual(command.call_count, 1)
 
     def test_successful_build_converts_every_reported_example(self):
-        code, command, _ = self.run_hardware([
-            dev.CommandResult(0, self.artifact("out/first")
-                              + self.artifact("out/second")),
-            dev.CommandResult(0, "converted"),
-            dev.CommandResult(0, "converted"),
-        ])
+        code, command, _ = self.run_hardware(
+            [
+                dev.CommandResult(
+                    0, self.artifact("out/first") + self.artifact("out/second")
+                ),
+                dev.CommandResult(0, "converted"),
+                dev.CommandResult(0, "converted"),
+            ]
+        )
         self.assertEqual(code, 0)
         self.assertEqual(command.call_count, 3)
-        self.assertEqual(command.call_args_list[1].args, (
-            ["elf2uf2-rs", str(Path("out/first")),
-             str(Path("out/first.uf2"))], Path("pico"),
-        ))
-        self.assertEqual(command.call_args_list[2].args, (
-            ["elf2uf2-rs", str(Path("out/second")),
-             str(Path("out/second.uf2"))], Path("pico"),
-        ))
+        self.assertEqual(
+            command.call_args_list[1].args,
+            (
+                ["elf2uf2-rs", str(Path("out/first")), str(Path("out/first.uf2"))],
+                Path("apps/servo-controller"),
+            ),
+        )
+        self.assertEqual(
+            command.call_args_list[2].args,
+            (
+                ["elf2uf2-rs", str(Path("out/second")), str(Path("out/second.uf2"))],
+                Path("apps/servo-controller"),
+            ),
+        )
 
     def test_conversion_failure_is_preserved_after_later_success(self):
-        code, command, output = self.run_hardware([
-            dev.CommandResult(0, self.artifact("out/first")
-                              + self.artifact("out/second")),
-            dev.CommandResult(1, "conversion failed"),
-            dev.CommandResult(0, "converted"),
-        ])
+        code, command, output = self.run_hardware(
+            [
+                dev.CommandResult(
+                    0, self.artifact("out/first") + self.artifact("out/second")
+                ),
+                dev.CommandResult(1, "conversion failed"),
+                dev.CommandResult(0, "converted"),
+            ]
+        )
         self.assertNotEqual(code, 0)
         self.assertEqual(command.call_count, 3)
         self.assertIn("1 of 5 checks failed", output)
 
     def test_success_without_artifacts_is_rejected(self):
-        code, command, _ = self.run_hardware([
-            dev.CommandResult(0, "Finished build\n"),
-        ])
+        code, command, _ = self.run_hardware(
+            [
+                dev.CommandResult(0, "Finished build\n"),
+            ]
+        )
         self.assertNotEqual(code, 0)
         self.assertEqual(command.call_count, 1)
 
     def test_cargo_json_displays_diagnostics_and_plain_output(self):
-        diagnostic = dev.json.dumps({
-            "reason": "compiler-message",
-            "message": {"rendered": "warning: example\n"},
-        })
+        diagnostic = dev.json.dumps(
+            {
+                "reason": "compiler-message",
+                "message": {"rendered": "warning: example\n"},
+            }
+        )
         with redirect_stdout(io.StringIO()) as output:
             dev.print_cargo_message(diagnostic)
             dev.print_cargo_message(self.artifact("out/first"))
             dev.print_cargo_message("Finished build\n")
-        self.assertEqual(output.getvalue(),
-                         "warning: example\nFinished build\n")
+        self.assertEqual(output.getvalue(), "warning: example\nFinished build\n")
 
 
 if __name__ == "__main__":

@@ -15,8 +15,10 @@ from typing import Optional
 from result_parser import TestCounts, parse_python_summary, parse_rust_summary
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+APP_SERVO_CONTROLLER_DIR = PROJECT_ROOT / "firmware" / "apps" / "servo-controller"
+
 SIGNAL_DIR = PROJECT_ROOT / "firmware" / "servo-signal"
-PICO_DIR = PROJECT_ROOT / "firmware" / "pico"
 CONTROL_DIR = PROJECT_ROOT / "firmware" / "servo-control"
 SERVO_PIO_DIR = PROJECT_ROOT / "firmware" / "servo-pio"
 LOGGING_DIR = PROJECT_ROOT / "firmware" / "logging"
@@ -37,7 +39,7 @@ DOC_PACKAGES = (
     (STORAGE_DIR, "hexaroam-servo-storage"),
     (PROTOCOL_DIR, "hexaroam-servo-protocol"),
     (REGISTERS_DIR, "hexaroam-servo-registers"),
-    (PICO_DIR, "hexaroam-pico"),
+    (APP_SERVO_CONTROLLER_DIR, "servo-controller"),
     (EEPROM_DIR, "hexaroam-eeprom"),
     (SERVO_EEPROM_DIR, "hexaroam-servo-eeprom"),
 )
@@ -68,19 +70,23 @@ TASKS = {
                 DOC_TARGET,
                 "--target-dir",
                 str(DOC_TARGET_DIR),
-                *(["--bin", name] if directory == PICO_DIR else ["--lib"]),
+                *(
+                    ["--bin", name]
+                    if directory == APP_SERVO_CONTROLLER_DIR
+                    else ["--lib"]
+                ),
             ],
         )
         for directory, name in DOC_PACKAGES
     ],
     "install": [
         (
-            PICO_DIR,
+            APP_SERVO_CONTROLLER_DIR,
             ["rustup", "component", "add", "rustfmt", "clippy", "llvm-tools-preview"],
         ),
-        (PICO_DIR, ["rustup", "target", "add", "thumbv6m-none-eabi"]),
+        (APP_SERVO_CONTROLLER_DIR, ["rustup", "target", "add", "thumbv6m-none-eabi"]),
         (
-            PICO_DIR,
+            APP_SERVO_CONTROLLER_DIR,
             [
                 "cargo",
                 "install",
@@ -108,7 +114,7 @@ TASKS = {
     "fmt": [
         (SIGNAL_DIR, ["cargo", "fmt"]),
         (CONTROL_DIR, ["cargo", "fmt"]),
-        (PICO_DIR, ["cargo", "fmt"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt"]),
         (SERVO_PIO_DIR, ["cargo", "fmt"]),
         (LOGGING_DIR, ["cargo", "fmt"]),
         (STORAGE_DIR, ["cargo", "fmt"]),
@@ -121,11 +127,11 @@ TASKS = {
         (PROJECT_ROOT, RUNNER_TEST_COMMAND),
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
-        (PICO_DIR, ["cargo", "fmt", "--check"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
         (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "test", "--lib", "--locked"]),
         (CONTROL_DIR, ["cargo", "test", "--lib", "--locked"]),
-        (PICO_DIR, ["cargo", "build", "--locked"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "build", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "test", "--lib", "--locked"]),
         (LOGGING_DIR, ["cargo", "fmt", "--check"]),
         (LOGGING_DIR, ["cargo", "test", "--lib", "--locked"]),
@@ -143,11 +149,11 @@ TASKS = {
     "check": [
         (SIGNAL_DIR, ["cargo", "fmt", "--check"]),
         (CONTROL_DIR, ["cargo", "fmt", "--check"]),
-        (PICO_DIR, ["cargo", "fmt", "--check"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),
         (SERVO_PIO_DIR, ["cargo", "fmt", "--check"]),
         (SIGNAL_DIR, ["cargo", "check", "--locked"]),
         (CONTROL_DIR, ["cargo", "check", "--locked"]),
-        (PICO_DIR, ["cargo", "check", "--locked"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "check", "--locked"]),
         (SERVO_PIO_DIR, ["cargo", "check", "--locked"]),
         (LOGGING_DIR, ["cargo", "fmt", "--check"]),
         (LOGGING_DIR, ["cargo", "check", "--locked"]),
@@ -163,11 +169,11 @@ TASKS = {
         (SERVO_EEPROM_DIR, ["cargo", "check", "--locked"]),
     ],
     "build": [
-        (PICO_DIR, ["cargo", "build", "--locked"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "build", "--locked"]),
     ],
     "hardware-build": [
         (
-            PICO_DIR,
+            APP_SERVO_CONTROLLER_DIR,
             [
                 "cargo",
                 "build",
@@ -180,7 +186,7 @@ TASKS = {
         ),
     ],
     "uf2": [
-        (PICO_DIR, ["cargo", "run", "--locked"]),
+        (APP_SERVO_CONTROLLER_DIR, ["cargo", "run", "--locked"]),
     ],
 }
 

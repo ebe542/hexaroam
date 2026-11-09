@@ -1,6 +1,6 @@
 # UART register test vectors
 
-These vectors target protocol version **2** in [uart_registers.rs](../firmware/pico/hardware_tests/uart_registers.rs). The [JSON suite](../firmware/pico/hardware_tests/suites/uart_registers.json) is the machine-readable source of the tables below.
+These vectors target protocol version **2** in [uart_registers.rs](../firmware/apps/servo-controller/hardware_tests/uart_registers.rs). The [JSON suite](../firmware/apps/servo-controller/hardware_tests/suites/uart_registers.json) is the machine-readable source of the tables below.
 
 ## Fixture and execution
 
@@ -15,7 +15,7 @@ python tools/dev.py hardware-build
 python tools/uart_test.py --port COM5 --suite uart_registers
 ```
 
-Replace COM5 with your device, for example /dev/ttyUSB0 on Ubuntu. See [tool setup and invocation](../tools/README.md#uart-hardware-suites) and the [hardware procedure](../firmware/pico/hardware_tests/README.md#uart-register-requestresponse-test). Use `--case read_status` to select one scenario.
+Replace COM5 with your device, for example /dev/ttyUSB0 on Ubuntu. See [tool setup and invocation](../tools/README.md#uart-hardware-suites) and the [hardware procedure](../firmware/apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test). Use `--case read_status` to select one scenario.
 
 ## Wire layout and response rules
 

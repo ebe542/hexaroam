@@ -135,16 +135,16 @@ The surrounding braces illustrate a settings object. When merging, keep only one
 
 The existing TOML formatter may be retained for future Cargo.toml files. Workspace settings are currently ignored by Git and must be configured locally on each machine.
 
-The firmware Cargo package is nested under `firmware/pico`. When opening the repository root in VS Code, merge these top-level settings into the local workspace settings:
+The firmware Cargo package is nested under `firmware/apps/servo-controller`. When opening the repository root in VS Code, merge these top-level settings into the local workspace settings:
 
 ```json
 {
-  "rust-analyzer.linkedProjects": ["firmware/pico/Cargo.toml"],
+  "rust-analyzer.linkedProjects": ["firmware/apps/servo-controller/Cargo.toml"],
   "rust-analyzer.cargo.allTargets": false
 }
 ```
 
-The explicit manifest path resolves workspace discovery. Disabling all-target checks avoids checking test targets for this bare-metal binary. After saving, run "rust-analyzer: Restart server" from the Command Palette. Alternatively, open `firmware/pico` directly; the linkedProjects path above is intended for opening the repository root.
+The explicit manifest path resolves workspace discovery. Disabling all-target checks avoids checking test targets for this bare-metal binary. After saving, run "rust-analyzer: Restart server" from the Command Palette. Alternatively, open `firmware/apps/servo-controller` directly; the linkedProjects path above is intended for opening the repository root.
 
 The repository `rustfmt.toml` sets `max_width = 80`, `fn_call_width = 40`, and `chain_width = 40`. These settings also apply to formatting on save.
 
@@ -161,7 +161,7 @@ Expect `thumbv6m-none-eabi` plus the host target. The host target remains instal
 
 The embedded target supplies the Rust target libraries; it does not create firmware, install a board support package, or configure flashing. Bare-metal firmware will use `no_std`, with the runtime, memory layout, and hardware access discussed before implementation. See [rustup cross-compilation](https://rust-lang.github.io/rustup/cross-compilation.html).
 
-No C/C++ Pico SDK is required for the Rust HAL approach. See the [firmware guide](../firmware/README.md) and `firmware/pico/Cargo.lock` for the implemented workflow and resolved dependency versions.
+No C/C++ Pico SDK is required for the Rust HAL approach. See the [firmware guide](../firmware/README.md) and `firmware/apps/servo-controller/Cargo.lock` for the implemented workflow and resolved dependency versions.
 
 ## Shared signal library tests
 

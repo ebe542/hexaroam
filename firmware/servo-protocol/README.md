@@ -25,7 +25,7 @@ ByteTransport defines try_read returning a byte or None and try_write returning 
 
 ResponseBuffer<CAPACITY> copies one complete encoded response and tracks its unsent suffix. queue rejects pending work with Busy before Empty/TooLarge; rejected operations preserve data and progress. service uses a byte budget, stops on backpressure and retains the failed byte on transport errors. Retrying is an explicit caller decision. Empty service and zero budgets do not access the transport.
 
-[FrameProcessor](../servo-registers/README.md#frame-processing-over-a-byte-transport) coordinates this buffer, the parser and register service. The concrete [UartTransport](../pico/src/uart_transport.rs) uses the HAL UART; its loopback and no-servo protocol test are separate hardware examples. Normal Pico firmware is not yet the protocol-driven servo application.
+[FrameProcessor](../servo-registers/README.md#frame-processing-over-a-byte-transport) coordinates this buffer, the parser and register service. The concrete [UartTransport](../apps/servo-controller/src/uart_transport.rs) uses the HAL UART; its loopback and no-servo protocol test are separate hardware examples. Normal Pico firmware is not yet the protocol-driven servo application.
 
 ## Verification
 

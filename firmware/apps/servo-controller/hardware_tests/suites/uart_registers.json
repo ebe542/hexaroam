@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "firmware": "firmware/pico/hardware_tests/uart_registers.rs",
+  "firmware": "firmware/apps/servo-controller/hardware_tests/uart_registers.rs",
   "fixture": {
     "protocol_version": 2,
     "status": 0,

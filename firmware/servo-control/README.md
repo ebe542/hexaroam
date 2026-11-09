@@ -118,7 +118,7 @@ The main loop calls `bank.service()`, which delegates through PulseBankOutput, S
 
 On 2026-10-26 the owner reported all 14 adapter tests passing and full verification with 169 passed, 0 failed, 0 skipped, and 0 filtered out. The tests cover configuration rejection, complete pulse counts, ServoId-to-GPIO mapping, merging equal pulse endings, invalid pulses and period boundaries, backend error forwarding without replacement or retry, servicing, and preservation of bank commands after adapter-level validation failure. The control package now contains 53 host tests.
 
-SwitchingOutput implements SignalPlanOutput by forwarding submission and servicing to its existing methods. The owner reported the full verification task successful; the owner subsequently confirmed a successful servo_bank_angles signal check and green CI for the angle-test revision on 2026-10-27. See the [hardware procedure](../pico/hardware_tests/README.md#servo-bank-angle-test).
+SwitchingOutput implements SignalPlanOutput by forwarding submission and servicing to its existing methods. The owner reported the full verification task successful; the owner subsequently confirmed a successful servo_bank_angles signal check and green CI for the angle-test revision on 2026-10-27. See the [hardware procedure](../apps/servo-controller/hardware_tests/README.md#servo-bank-angle-test).
 
 ## Preparing targets without signal output
 
@@ -150,4 +150,4 @@ On 2026-11-01 the owner observed the intended red phase (74 passed, 8 failed), t
 
 ### Full lifecycle hardware path
 
-The owner accepted [servo_bank_lifecycle](../pico/hardware_tests/README.md#servobank-lifecycle-hardware-test) on 2026-11-01 after confirming the expected principal signal sequence and repeating startup. The test covers incremental preparation, rejected incomplete startup/invalid preparation, bank startup, repeated stop, retaining the second target while changing the first, and startup with the updated set. All 47 hardware-build checks passed. These are unloaded GPIO observations, not servo position measurements or an endurance test. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware example. CI is pending.
+The owner accepted [servo_bank_lifecycle](../apps/servo-controller/hardware_tests/README.md#servobank-lifecycle-hardware-test) on 2026-11-01 after confirming the expected principal signal sequence and repeating startup. The test covers incremental preparation, rejected incomplete startup/invalid preparation, bank startup, repeated stop, retaining the second target while changing the first, and startup with the updated set. All 47 hardware-build checks passed. These are unloaded GPIO observations, not servo position measurements or an endurance test. The owner subsequently reported 415 tests and all 17 verification checks passing for this hardware example. CI is pending.

@@ -15,7 +15,7 @@ python -m pip install -e ".[hardware]"
 python tools/dev.py hardware-build
 ```
 
-Copy `firmware/pico/target/thumbv6m-none-eabi/debug/examples/uart_benchmark.uf2` to the Pico in BOOTSEL mode. Use this firmware for the default `sink18` fixture. The explicit `--fixture pio2` mode below instead uses the existing two-channel `uart_commands` firmware. The same UF2 supports all three rates.
+Copy `firmware/apps/servo-controller/target/thumbv6m-none-eabi/debug/examples/uart_benchmark.uf2` to the Pico in BOOTSEL mode. Use this firmware for the default `sink18` fixture. The explicit `--fixture pio2` mode below instead uses the existing two-channel `uart_commands` firmware. The same UF2 supports all three rates.
 
 Use 3.3 V TTL: adapter TX to GP17, adapter RX to GP16, common GND. Remove any UART loopback jumper. Close other programs using the protocol port. The benchmark does not require any physical servo connection.
 

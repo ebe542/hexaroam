@@ -63,8 +63,8 @@ classDiagram
 
 | Contract | Implementation and use | Source |
 | --- | --- | --- |
-| JournalRead | FlashJournalReader and FlashJournalStorage implement reading; load consumes a JournalRead backend | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal.rs](../../firmware/pico/src/flash_journal.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
-| JournalStorage extends JournalRead | FlashJournalStorage implements the Pico backend; append consumes this contract | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal_storage.rs](../../firmware/pico/src/flash_journal_storage.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
+| JournalRead | FlashJournalReader and FlashJournalStorage implement reading; load consumes a JournalRead backend | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal.rs](../../firmware/apps/servo-controller/src/flash_journal.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
+| JournalStorage extends JournalRead | FlashJournalStorage implements the Pico backend; append consumes this contract | [storage.rs](../../firmware/servo-storage/src/storage.rs), [flash_journal_storage.rs](../../firmware/apps/servo-controller/src/flash_journal_storage.rs), [journal.rs](../../firmware/servo-storage/src/journal.rs) |
 | Checksum | SoftwareCrc32 implements independent CRC-32/ISO-HDLC calculations; format, slots and journal operations accept the abstraction | [crc32.rs](../../firmware/servo-storage/src/crc32.rs), [format.rs](../../firmware/servo-storage/src/format.rs), [journal_slot.rs](../../firmware/servo-storage/src/journal_slot.rs) |
 
 The RAM programming/erase functions are unsafe free functions. They do not implement JournalStorage themselves; FlashJournalStorage implements the trait and invokes them after validation. JournalLayout is a concrete geometry helper, not a storage trait. A Pico hardware CRC implementation is not present.
@@ -90,8 +90,8 @@ classDiagram
 | Contract or type | Role | Source |
 | --- | --- | --- |
 | ByteOutput | Immediately returns accepted/full/error for a byte | [logging/lib.rs](../../firmware/logging/src/lib.rs) |
-| UartLogOutput implements ByteOutput | Pico UART backend for the normal buffered Logger path | [uart_logging.rs](../../firmware/pico/src/uart_logging.rs) |
-| PanicUartOutput implements ByteOutput | Private direct UART backend used by the panic handler | [panic_uart.rs](../../firmware/pico/src/panic_uart.rs) |
+| UartLogOutput implements ByteOutput | Pico UART backend for the normal buffered Logger path | [uart_logging.rs](../../firmware/apps/servo-controller/src/uart_logging.rs) |
+| PanicUartOutput implements ByteOutput | Private direct UART backend used by the panic handler | [panic_uart.rs](../../firmware/apps/servo-controller/src/panic_uart.rs) |
 | BoundedWriter implements core::fmt::Write | Formats diagnostic text with a bounded byte-output attempt budget | [bounded_writer.rs](../../firmware/logging/src/bounded_writer.rs) |
 
 Logger queues whole messages and drains them through `service(byte_budget)`. Panic formatting uses a separate bounded direct-output path rather than relying on the application loop. The ByteOutput contract itself is nonblocking in both cases. Several isolated flash tests deliberately use panic_halt instead of the UART panic handler.
@@ -119,7 +119,7 @@ classDiagram
     ServoPio --> PioTransport : owns
 ```
 
-[Servo and its traits](../../firmware/servo-control/src/servo.rs) remain in servo-control. The earlier [ServoPio/PioTransport driver](../../firmware/pico/src/drivers/servo_pio.rs) implements PulseOutput and PulseTransport respectively, using [submit_pulse](../../firmware/servo-signal/src/lib.rs). That driver file is retained in the repository but is not included by the current Pico main module tree. This is a historical single-output path, not the current multi-servo DMA backend. ServoBank does not contain a collection of Servo objects; it owns its own calibrations and a PulseBankOutput backend.
+[Servo and its traits](../../firmware/servo-control/src/servo.rs) remain in servo-control. The earlier [ServoPio/PioTransport driver](../../firmware/apps/servo-controller/src/drivers/servo_pio.rs) implements PulseOutput and PulseTransport respectively, using [submit_pulse](../../firmware/servo-signal/src/lib.rs). That driver file is retained in the repository but is not included by the current Pico main module tree. This is a historical single-output path, not the current multi-servo DMA backend. ServoBank does not contain a collection of Servo objects; it owns its own calibrations and a PulseBankOutput backend.
 
 ## HAL boundary
 
@@ -232,7 +232,7 @@ classDiagram
     ByteTransport <|.. UartTransport
 ```
 
-[ByteTransport](../../firmware/servo-protocol/src/transport.rs) defines nonblocking byte operations. [ResponseBuffer](../../firmware/servo-protocol/src/response_buffer.rs) owns one copied encoded response and uses try_write to service its unsent suffix with a byte budget. It does not read, parse frames or access the register service. [UartTransport](../../firmware/pico/src/uart_transport.rs) now implements it over an exclusively owned, enabled HAL UART; UART0 loopback was confirmed on hardware. FrameProcessor integration with that UART is verified by the no-servo UART register hardware suite; normal-application integration remains pending. This is independent of the logging ByteOutput contract, whose message-drop policy is not used for protocol responses.
+[ByteTransport](../../firmware/servo-protocol/src/transport.rs) defines nonblocking byte operations. [ResponseBuffer](../../firmware/servo-protocol/src/response_buffer.rs) owns one copied encoded response and uses try_write to service its unsent suffix with a byte budget. It does not read, parse frames or access the register service. [UartTransport](../../firmware/apps/servo-controller/src/uart_transport.rs) now implements it over an exclusively owned, enabled HAL UART; UART0 loopback was confirmed on hardware. FrameProcessor integration with that UART is verified by the no-servo UART register hardware suite; normal-application integration remains pending. This is independent of the logging ByteOutput contract, whose message-drop policy is not used for protocol responses.
 
 ## Frame-processing ownership
 

@@ -1,6 +1,6 @@
 # Shared servo signal logic
 
-`hexaroam-servo-signal` is a `no_std` Rust library without external dependencies. It validates pulse requests and enforces a single pending transfer. PIO instructions, timing corrections, and FIFO access remain in the [Pico driver](../pico/src/drivers/servo_pio.rs).
+`hexaroam-servo-signal` is a `no_std` Rust library without external dependencies. It validates pulse requests and enforces a single pending transfer. PIO instructions, timing corrections, and FIFO access remain in the [Pico driver](../apps/servo-controller/src/drivers/servo_pio.rs).
 
 ## API
 
