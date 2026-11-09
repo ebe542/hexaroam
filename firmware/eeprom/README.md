@@ -45,3 +45,9 @@ python tools/dev.py verify
 The owner reported all 32 EEPROM tests passing, followed by 697 tests and all 19 full-verification checks passing. The 13 constructor/read tests and 19 write-related tests use scripted I2C operations and delays on the PC. They cover address byte order, bounds, empty operations, page splitting, readiness retries, timeout boundaries and error propagation. They do not emulate EEPROM memory or verify electrical behavior.
 
 The driver is registered in the development runner's test, fmt, check, verify and doc tasks; existing CI invokes those shared tasks. The owner subsequently reported CI green for the driver revision. No real EEPROM read/write, WP behavior or Pico I2C integration has been hardware-verified for this driver.
+
+## Pico hardware-test firmware
+
+The [manual EEPROM guide](../../docs/eeprom-hardware-tests.md) covers the separate eeprom_write_read and eeprom_write_protect examples. They use I2C1 on GP18/GP19 at 400kHz, address 0x50, external 2k pull-ups and debug UART1 on GP20. The write/read example overwrites the final 128 bytes and checks a cross-page patch; the WP example checks that inverse-data writes leave the snapshot unchanged. They exercise byte access, not the calibration journal.
+
+The owner reported all 63 hardware-build checks and full verification of 837 tests with all 21 checks passing. Physical execution remains pending; the former standalone read example was removed. The test area's addresses are not reserved in the production calibration layout.

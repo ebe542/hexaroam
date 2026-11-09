@@ -12,6 +12,10 @@ The [24xx256 EEPROM driver](eeprom/README.md) provides byte reads and page write
 
 The owner reported 186 storage tests, 46 adapter tests and full local verification of 837 tests with all 21 checks passing. CI was green for the preceding reader revision; CI for this writer revision is pending. Physical EEPROM tests, boot/protocol integration and the station application remain pending. The normal Pico firmware has not been connected to this storage path.
 
+## EEPROM hardware-test firmware
+
+Separate [write/read and write-protection examples](../docs/eeprom-hardware-tests.md) are built for I2C1 GP18/GP19 at 400kHz and debug UART1 GP20. They use a configurable WP test setup and the final 128 EEPROM bytes. The owner reported all 63 hardware-build checks and full local verification of 837 tests with all 21 checks passing on 2026-11-08. Actual EEPROM execution remains pending; the normal Pico application is not connected to this storage path.
+
 ## Pico LED blink firmware
 
 The onboard LED on GPIO25 alternates between on and off approximately every 500 ms. GPIO and clocks are initialized through the Pico board support package. The hardware timer supplies timestamps for nonblocking LED updates, allowing the main loop to service DMA continuously. The normal firmware now initializes UART1 logging and selects the bounded UART panic handler; see [logging](logging/README.md). Its main loop services servo DMA before the logger. The periodic alive message belongs to this demo, not a general runtime logging policy.

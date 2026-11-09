@@ -2,6 +2,10 @@
 
 These are separately selected firmware programs, evaluated manually on a Raspberry Pi Pico with RP2040, using an oscilloscope for servo signals or a TTL adapter and terminal for UART output. They are not host unit tests and are not executed by cargo test or the normal development check or verify task. Cargo registers them as example targets with explicit paths in Cargo.toml.
 
+## EEPROM tests
+
+The separate [EEPROM test guide](../../../docs/eeprom-hardware-tests.md) documents eeprom_write_read (WP low) and eeprom_write_protect (WP high), wiring, expected logs and the destructive 0x7F80..0x7FFF test region. The pure eeprom_read example was removed; no power-cycle retention test is included. The owner reported all 63 hardware-build checks and the full 837-test/21-check local verification passing on 2026-11-08. Neither example has been run on physical EEPROM hardware yet.
+
 ## Setup
 
 For the PIO tests, use unloaded GP0 and GP1 with no servos connected. Connect oscilloscope probes to these outputs and reference both channels to Pico GND. Use DC coupling to distinguish a persistent Low level from missing trigger activity. The current instrument is a Leader 1041 two-channel analog oscilloscope; a single startup pulse sequence may not be visible.

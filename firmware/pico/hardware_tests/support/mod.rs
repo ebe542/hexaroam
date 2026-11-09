@@ -20,6 +20,7 @@ pub struct Board {
     pub uart: pac::UART1,
     pub peripheral_clock: rp_pico::hal::clocks::PeripheralClock,
     pub protocol_uart: pac::UART0,
+    pub i2c1: pac::I2C1,
 }
 
 pub fn initialize() -> Board {
@@ -65,5 +66,6 @@ pub fn initialize() -> Board {
         uart: peripherals.UART1,
         peripheral_clock: clocks.peripheral_clock,
         protocol_uart: peripherals.UART0,
+        i2c1: peripherals.I2C1,
     }
 }
