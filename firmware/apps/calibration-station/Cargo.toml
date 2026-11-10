@@ -12,12 +12,15 @@ required-features = ["hardware-tests"]
 test = false
 
 [dependencies]
+hexaroam-servo-protocol = { path = "../../servo-protocol" }
+hexaroam-servo-signal = { path = "../../servo-signal" }
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))'.dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1.0"
 hexaroam-logging = { path = "../../logging" }
 hexaroam-servo-pio = { path = "../../servo-pio" }
-hexaroam-servo-signal = { path = "../../servo-signal" }
 rp-pico = "0.9"
 
 [features]

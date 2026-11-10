@@ -21,6 +21,7 @@ class ApplicationSelectionTests(unittest.TestCase):
             "verify": [
                 ["cargo", "fmt", "--check"],
                 ["cargo", "build", "--locked"],
+                ["cargo", "test", "--lib", "--locked", "--target", "host-tuple"],
             ],
         }
 
@@ -33,7 +34,7 @@ class ApplicationSelectionTests(unittest.TestCase):
                 ]
                 self.assertEqual(actual, commands)
 
-    def test_documentation_includes_calibration_station_binary(self):
+    def test_documentation_includes_calibration_station_library(self):
         self.assertIn(
             (dev.APP_CALIBRATION_STATION_DIR, "calibration-station"),
             dev.DOC_PACKAGES,
@@ -47,11 +48,30 @@ class ApplicationSelectionTests(unittest.TestCase):
 
         self.assertEqual(len(commands), 1)
         self.assertEqual(
-            commands[0][-2:],
-            ["--bin", "calibration-station"],
+            commands[0][-1:],
+            ["--lib"],
         )
         self.assertIn("--locked", commands[0])
         self.assertIn("--no-deps", commands[0])
+
+    def test_station_library_tests_use_host_target_in_both_tasks(self):
+        expected = [
+            "cargo",
+            "test",
+            "--lib",
+            "--locked",
+            "--target",
+            "host-tuple",
+        ]
+        for task in ("test", "verify"):
+            with self.subTest(task=task):
+                tests = [
+                    command
+                    for directory, command in dev.TASKS[task]
+                    if directory == dev.APP_CALIBRATION_STATION_DIR
+                    and command[:2] == ["cargo", "test"]
+                ]
+                self.assertEqual(tests, [expected])
 
     def test_build_defaults_to_servo_controller(self):
         self.assertEqual(

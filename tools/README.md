@@ -31,7 +31,7 @@ python tools/dev.py hardware-build --app servo-controller
 
 `build` and `uf2` default to `servo-controller`. `hardware-build` defaults to both applications and skips those without hardware-test sources. The calibration station provides the [single-channel output test](../firmware/apps/calibration-station/hardware_tests/README.md). A detected source must also be registered as an example in the application's Cargo.toml, with the `hardware-tests` feature available; source detection does not validate Cargo registration.
 
-`fmt`, `check`, `verify` and `doc` cover both applications and reject `--app`. Library tests remain shared and run once per registered library. `test` and `install` also reject `--app`; tool installation remains shared.
+`fmt`, `check`, `verify` and `doc` cover both applications and reject `--app`. Shared library tests run once per registered library. The calibration station also has an application-owned library: `test` and `verify` run its tests with `cargo test --lib --locked --target host-tuple`, so its local Pico target does not select the embedded architecture for PC tests. Board/runtime dependencies are target-specific. Station documentation is generated from its library, while the controller still documents its binary. `test` and `install` also reject `--app`; tool installation remains shared.
 
 UF2 output for the station is `firmware/apps/calibration-station/target/thumbv6m-none-eabi/debug/calibration-station.uf2`. The runner converts firmware without uploading it.
 

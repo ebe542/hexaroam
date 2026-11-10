@@ -74,11 +74,7 @@ TASKS = {
                 str(DOC_TARGET_DIR),
                 *(
                     ["--bin", name]
-                    if directory
-                    in (
-                        APP_SERVO_CONTROLLER_DIR,
-                        APP_CALIBRATION_STATION_DIR,
-                    )
+                    if directory == APP_SERVO_CONTROLLER_DIR
                     else ["--lib"]
                 ),
             ],
@@ -116,6 +112,10 @@ TASKS = {
         (REGISTERS_DIR, ["cargo", "test", "--lib", "--locked"]),
         (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
         (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (
+            APP_CALIBRATION_STATION_DIR,
+            ["cargo", "test", "--lib", "--locked", "--target", "host-tuple"],
+        ),
     ],
     "fmt": [
         (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt"]),
@@ -154,6 +154,10 @@ TASKS = {
         (EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
         (SERVO_EEPROM_DIR, ["cargo", "fmt", "--check"]),
         (SERVO_EEPROM_DIR, ["cargo", "test", "--lib", "--locked"]),
+        (
+            APP_CALIBRATION_STATION_DIR,
+            ["cargo", "test", "--lib", "--locked", "--target", "host-tuple"],
+        ),
     ],
     "check": [
         (APP_SERVO_CONTROLLER_DIR, ["cargo", "fmt", "--check"]),

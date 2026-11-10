@@ -13,11 +13,15 @@ Applications are independent Cargo packages under `apps/`; reusable libraries re
 | Application | Current scope |
 | --- | --- |
 | `apps/servo-controller` | Existing Pico servo-output application and manual hardware-test examples |
-| [apps/calibration-station](apps/calibration-station/README.md) | Separate calibration-station startup firmware and a manual single-channel PIO/DMA test |
+| [apps/calibration-station](apps/calibration-station/README.md) | Startup firmware, application-owned command/control library and a manual single-channel PIO/DMA test |
+
+Station-specific request decoding and pulse-control policy live in `apps/calibration-station/src/command.rs` and `control.rs`. Its `src/lib.rs` exposes these modules for host tests, while `main.rs` owns Pico initialization. Shared protocol framing remains in `servo-protocol`. The station library tests run with an explicit host target through the shared tooling.
 
 Use `python tools/dev.py build --app calibration-station` or `python tools/dev.py uf2 --app calibration-station` from the repository root. Without `--app`, these commands select `servo-controller`. Shared checks and documentation include both applications; see [development tools](../tools/README.md#application-selection).
 
 The owner confirmed the station's UF2 upload, blinking LED and UART1 output. Local verification passed 854 tests and all 23 checks; hardware builds passed all 63 checks. The station now also has a [manual single-channel output test](apps/calibration-station/hardware_tests/README.md), confirmed on unloaded GP0 with UART1 phase messages; the main application still only performs startup logging and LED heartbeat. PC command handling and EEPROM access remain pending.
+
+The calibration-station command/control library now includes a [request handler and protocol contract](apps/calibration-station/protocol.md), with 40 station host tests. The owner reported full local verification of 895 tests and all 24 checks passing. UART/PIO integration of this handler and CI for this revision remain pending.
 
 ## EEPROM calibration storage
 

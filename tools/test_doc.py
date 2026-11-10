@@ -42,7 +42,6 @@ class DocumentationTests(unittest.TestCase):
             self.assertNotIn("--open", command)
             applications = {
                 dev.APP_SERVO_CONTROLLER_DIR: "servo-controller",
-                dev.APP_CALIBRATION_STATION_DIR: "calibration-station",
             }
 
             if directory in applications:
