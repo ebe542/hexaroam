@@ -24,7 +24,7 @@ pub enum ControlError {
 /// Rejected pulse updates must preserve the previously accepted plan.
 pub trait PulseBackend {
     fn state(&self) -> SignalOutputState;
-    fn is_faulted(&self) -> bool;
+    fn is_faulted(&mut self) -> bool;
     fn start(&mut self, pulse_width_us: u32) -> Result<(), BackendError>;
     fn set_pulse(&mut self, pulse_width_us: u32) -> Result<(), BackendError>;
     fn stop(&mut self) -> Result<(), BackendError>;
@@ -39,7 +39,7 @@ pub struct CalibrationControl<B: PulseBackend> {
 }
 
 impl<B: PulseBackend> CalibrationControl<B> {
-    pub fn new(backend: B, limits: PulseLimits) -> Self {
+    pub fn new(mut backend: B, limits: PulseLimits) -> Self {
         let flags = if backend.is_faulted() {
             OUTPUT_ERROR
         } else {

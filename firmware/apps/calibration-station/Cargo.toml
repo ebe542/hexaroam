@@ -11,6 +11,13 @@ path = "hardware_tests/single_servo_output.rs"
 required-features = ["hardware-tests"]
 test = false
 
+[[example]]
+bench = false
+name = "controlled_servo_output"
+path = "hardware_tests/controlled_servo_output.rs"
+required-features = ["hardware-tests"]
+test = false
+
 [dependencies]
 hexaroam-servo-protocol = { path = "../../servo-protocol" }
 hexaroam-servo-signal = { path = "../../servo-signal" }

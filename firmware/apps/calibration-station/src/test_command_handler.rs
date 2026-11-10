@@ -32,7 +32,7 @@ impl PulseBackend for FakeBackend<'_> {
         }
     }
 
-    fn is_faulted(&self) -> bool {
+    fn is_faulted(&mut self) -> bool {
         false
     }
 

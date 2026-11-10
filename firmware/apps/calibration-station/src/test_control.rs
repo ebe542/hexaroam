@@ -21,7 +21,7 @@ impl PulseBackend for FakeBackend {
         }
     }
 
-    fn is_faulted(&self) -> bool {
+    fn is_faulted(&mut self) -> bool {
         self.faulted
     }
 

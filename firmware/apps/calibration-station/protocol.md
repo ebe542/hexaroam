@@ -1,6 +1,6 @@
 # Calibration-station protocol
 
-This is the station-specific command contract. Decoding, raw-pulse control and ACK/NACK content generation are implemented in the application's library and covered by host tests. UART framing integration and the production PIO backend are pending; the normal station firmware still performs only startup logging and LED heartbeat.
+This is the station-specific command contract. Decoding, raw-pulse control and ACK/NACK content generation are implemented in the application's library and covered by host tests. UART framing integration and normal-loop PIO integration are pending; the normal station firmware still performs only startup logging and LED heartbeat.
 
 ## Layers and content
 
@@ -22,7 +22,7 @@ All multibyte parameters and result fields below are little endian. Example byte
 | OUTPUT_ENABLE | 02 followed by one byte, 00 or 01 | Stop output or start the prepared pulse |
 | SET_PULSE | 03 followed by one u32 pulse width in microseconds | Prepare or update a pulse |
 
-Extra or missing parameters are rejected. OUTPUT_ENABLE accepts only 00 and 01. Pulse-range validation belongs to the control service; the initial configured limits are 1000 through 2000 microseconds inclusive. The existing hardware example uses a 20000-microsecond period; the future hardware adapter must preserve this configured period.
+Extra or missing parameters are rejected. OUTPUT_ENABLE accepts only 00 and 01. Pulse-range validation belongs to the control service; the initial configured limits are 1000 through 2000 microseconds inclusive. The existing hardware example uses a 20000-microsecond period; the PioPulseBackend adapter uses this configured period.
 
 The service starts without a prepared pulse. SET_PULSE while inactive prepares a value without touching the hardware. Enabling without a prepared value is rejected. Repeated enable while active succeeds without restarting the output. Disabling stops output and retains the prepared value for a later enable.
 
@@ -83,4 +83,4 @@ These examples are request/response semantics verified through host tests, not s
 
 ## Verification
 
-The owner reported 12 decoder tests, 14 control tests and 14 command-handler tests passing. Full local verification passed 895 tests with zero failures and all 24 checks. Existing single-channel PIO hardware testing and its CI were confirmed earlier; live UART command processing and PC-to-servo operation have not yet been validated. CI for this command/control revision is pending.
+The owner reported 12 decoder tests, 14 control tests and 14 command-handler tests passing. Full local verification passed 895 tests with zero failures and all 24 checks. Existing single-channel PIO hardware testing and its CI were confirmed earlier; live UART command processing and PC-to-servo operation have not yet been validated. CI was subsequently reported green for the command/control revision. The later controlled-output example connected the service to PioPulseBackend and PIO/DMA on hardware: the owner confirmed its UART phase messages and pulses, all five station hardware-build checks and 895 tests with all 24 verify checks passing. This does not validate live UART command processing. CI for the adapter/test revision is pending.

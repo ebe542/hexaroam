@@ -21,7 +21,7 @@ Use `python tools/dev.py build --app calibration-station` or `python tools/dev.p
 
 The owner confirmed the station's UF2 upload, blinking LED and UART1 output. Local verification passed 854 tests and all 23 checks; hardware builds passed all 63 checks. The station now also has a [manual single-channel output test](apps/calibration-station/hardware_tests/README.md), confirmed on unloaded GP0 with UART1 phase messages; the main application still only performs startup logging and LED heartbeat. PC command handling and EEPROM access remain pending.
 
-The calibration-station command/control library now includes a [request handler and protocol contract](apps/calibration-station/protocol.md), with 40 station host tests. The owner reported full local verification of 895 tests and all 24 checks passing. UART/PIO integration of this handler and CI for this revision remain pending.
+The calibration-station command/control library now includes a [request handler and protocol contract](apps/calibration-station/protocol.md), with 40 station host tests. The owner reported full local verification of 895 tests and all 24 checks passing. CI was subsequently reported green for this command/control revision. The application-owned PioPulseBackend adapter was then verified through the [controlled single-channel example](apps/calibration-station/hardware_tests/README.md#controlled-single-channel-output): the owner confirmed 1500/1700 us pulses, stop behavior, all five station hardware-build checks and 895 tests with all 24 verify checks passing. Normal-loop UART/PIO integration and CI for the adapter/test addition remain pending.
 
 ## EEPROM calibration storage
 
