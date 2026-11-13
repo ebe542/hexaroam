@@ -339,3 +339,8 @@ The [UART byte transport](apps/servo-controller/src/uart_transport.rs) implement
 ## UART register hardware verification
 
 On 2026-11-03 the owner confirmed all 21 protocol-version-2 [UART register scenarios](apps/servo-controller/hardware_tests/README.md#uart-register-requestresponse-test) on real hardware. The no-servo example uses UART0 GP16/GP17 for binary ACK/NACK, with diagnostics on UART1 GP20. Full local verification passed 462 tests and all 17 checks. CI for the current revision has not yet been reported. Real protocol-driven servo output, calibration transfer and watchdog/restart integration remain future work.
+## Calibration-station UART runtime
+
+The normal station application now connects UART0 on GP16/GP17 at 115200 baud to COBS/CRC32 framing, the station handler and CalibrationControl/PioPulseBackend on GP0. UART1 GP20 remains debug-only. main.rs initializes board resources; app.rs assembles hardware and continuously services the bounded frame processor, logging and LED heartbeat. Startup leaves output inactive without a prepared pulse. Receive-idle timeout is initially 100 ms and is applied only after observing empty reception.
+
+The owner confirmed all 13 [station UART scenarios](apps/calibration-station/hardware_tests/suites/README.md), then reported 909 tests with zero failures and all 24 verification checks passing. The 54 station host tests include 14 frame-processor tests. Earlier adapter examples confirmed pulses separately. The owner subsequently confirmed the slow full-chain UART scope suite: one scenario passed with correct observed pulses, including stop and restart. Physical servo operation and EEPROM integration remain pending. CI for this revision is pending.

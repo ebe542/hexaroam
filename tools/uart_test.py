@@ -236,6 +236,15 @@ def load_suite(path: Path) -> tuple[dict, list[Step], list[Case]]:
 
 def fixture_checks(data: dict) -> list[Step]:
     """Check the expected firmware state before sending modifying commands."""
+    if "fixture_checks" in data:
+        checks = data["fixture_checks"]
+
+        if not isinstance(checks, list) or not checks:
+            raise ValueError("fixture_checks must be a nonempty list")
+
+        framing = data.get("framing", "register_crc32")
+        return [load_step(step, framing) for step in checks]
+
     timeout = data["timing"]["read_response_timeout_ms"] / 1000
     if timeout <= 0:
         raise ValueError("Fixture response timeout must be positive")

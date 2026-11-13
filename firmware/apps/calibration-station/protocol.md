@@ -1,10 +1,10 @@
 # Calibration-station protocol
 
-This is the station-specific command contract. Decoding, raw-pulse control and ACK/NACK content generation are implemented in the application's library and covered by host tests. UART framing integration and normal-loop PIO integration are pending; the normal station firmware still performs only startup logging and LED heartbeat.
+This is the station-specific command contract. The normal application now connects UART0, shared COBS/CRC32 framing, command handling, raw-pulse control and the PIO/DMA adapter. The owner confirmed all 13 UART suite scenarios on hardware. The owner also confirmed the separate full-chain scope suite and correct unloaded GP0 pulses. Response acceptance does not confirm a physical servo position.
 
 ## Layers and content
 
-The shared protocol crate supplies COBS/CRC32 framing and transport interfaces. Station command semantics live under `src/command.rs`, `src/control.rs` and `src/command_handler.rs`. The handler accepts CRC-validated content and returns response content; it does not perform framing, UART I/O or background output servicing.
+The shared protocol crate supplies COBS/CRC32 framing and transport interfaces. Station command semantics live under `src/command.rs`, `src/control.rs` and `src/command_handler.rs`. The handler accepts CRC-validated content and returns response content; it does not perform framing, UART I/O or background output servicing. The application-owned FrameProcessor performs framing and services output before each bounded transport poll; app.rs supplies UARTs, PIO and receive-idle timing.
 
 The planned UART link uses the existing wire format:
 
@@ -83,4 +83,6 @@ These examples are request/response semantics verified through host tests, not s
 
 ## Verification
 
-The owner reported 12 decoder tests, 14 control tests and 14 command-handler tests passing. Full local verification passed 895 tests with zero failures and all 24 checks. Existing single-channel PIO hardware testing and its CI were confirmed earlier; live UART command processing and PC-to-servo operation have not yet been validated. CI was subsequently reported green for the command/control revision. The later controlled-output example connected the service to PioPulseBackend and PIO/DMA on hardware: the owner confirmed its UART phase messages and pulses, all five station hardware-build checks and 895 tests with all 24 verify checks passing. This does not validate live UART command processing. CI for the adapter/test revision is pending.
+The station library has 54 host tests: 12 decoder, 14 control, 14 handler and 14 frame-processor tests. The framing tests cover budgets, fragmented reception, ordered replies, invalid CRC/COBS recovery, ignored ACK/NACK, Busy NACK, backpressure, receive/transmit errors and timeout preservation of pending replies.
+
+The owner reported all 13 UART hardware scenarios passing and full local verification of 909 tests with zero failures and all 24 checks. See the [suite procedure](hardware_tests/suites/README.md). The normal application has therefore been exercised over UART0 with its PIO backend present. The response suite does not measure GPIO pulse widths; the separate slow full-chain scope suite was subsequently reported passing with correct observed pulses. Earlier dedicated examples confirmed direct and service-controlled PIO pulses on an unloaded GPIO. No physical servo or EEPROM result is claimed. CI for the framing/runtime/UART-suite revision is pending.

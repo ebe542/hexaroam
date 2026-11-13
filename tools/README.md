@@ -237,3 +237,15 @@ The owner reported 697 passing tests and all 19 verification checks passing afte
 `firmware/servo-eeprom` is included in test, fmt, check, verify and doc with a committed Cargo.lock. The documentation inventory and its test include eleven Rust packages. Existing CI uses the shared test/verify tasks without a workflow change.
 
 The owner reported CI green for the original reader revision. The current writer revision passed 837 tests and all 21 local verification checks, including 186 storage tests and 46 adapter tests. The [storage adapter guide](../firmware/servo-eeprom/README.md) explains the end-to-end PC coverage, retry behavior and remaining hardware checks. CI for this writer revision is pending.
+
+## Calibration-station UART suite
+
+The [station suite procedure](../firmware/apps/calibration-station/hardware_tests/suites/README.md) targets the normal calibration-station application. Use an explicit suite path from the repository root:
+
+```bash
+python tools/uart_test.py --port COM8 --suite firmware/apps/calibration-station/hardware_tests/suites/uart_calibration_station.json
+```
+
+A suite may define a nonempty fixture_checks list using the same step objects as its scenarios. This replaces the default fixed-layout fixture preflight and supports the station's ten-byte status response without adding an application-specific branch. Existing suites without that field retain their previous fixture checks. Bare suite-name lookup still defaults to servo-controller.
+
+The owner confirmed all 13 station UART scenarios and full verification of 909 tests with all 24 checks. The separate scope suite was subsequently confirmed: one scenario passed and the owner observed correct pulses on unloaded GP0. Use the same suite path with filename uart_calibration_station_scope.json after restarting the Pico. The current Windows setup uses COM8 for UART0 protocol and COM7 for UART1 debug. No physical servo test is claimed. CI for this framing/runtime/suite revision is pending.

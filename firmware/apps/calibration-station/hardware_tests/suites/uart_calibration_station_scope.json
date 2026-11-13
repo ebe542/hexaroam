@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "framing": "cobs_crc32",
+  "firmware": "firmware/apps/calibration-station/src/main.rs",
+  "fixture": {
+    "status": 0,
+    "pulse_width_us": 0
+  },
+  "serial": {
+    "baud": 115200,
+    "data_bits": 8,
+    "parity": "none",
+    "stop_bits": 1,
+    "flow_control": "none"
+  },
+  "timing": {
+    "firmware_receive_idle_ms": 100,
+    "no_reply_observation_ms": 200,
+    "read_response_timeout_ms": 1000
+  },
+  "verification": "The owner reported 1 passed, 0 failed, 0 not completed and explicitly confirmed correct scope pulses for Low, 1500 us, 1700 us, rejected-update preservation, stop, restart and final Low. The command suite previously passed all 13 scenarios; full local verification before this scope-only addition passed 909 tests and all 24 checks. Physical servo operation, EEPROM integration and CI for this combined revision remain pending.",
+  "instructions": "Use the normal calibration-station firmware. Restart before invocation. Observe unloaded GP0 against Pico GND; do not connect a servo. Protocol UART0: GP16 TX, GP17 RX, common GND, 3.3 V TTL, 115200 8N1. Baseline disables output and prepares 1500 us. Observe Low, 1500 us, 1700 us, unchanged 1700 us after rejection, Low, restarted 1700 us and final Low. Period remains 20 ms. A Python PASS confirms responses only; record scope observations separately. Reset after failure or interruption; automatic cleanup is not guaranteed.",
+  "fixture_checks": [
+    {
+      "action": "Check status=0, pulse=0 us",
+      "request_body_hex": "01",
+      "encoding": "crc",
+      "tx_hex": "00 06 01 1B DF 05 A5 00",
+      "response_body_hex": "80 01 00 00 00 00 00 00 00 00",
+      "expected_rx_hex": "00 03 80 01 01 01 01 01 01 01 01 05 34 75 F4 12 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Reject enable without prepared pulse",
+      "request_body_hex": "02 01",
+      "encoding": "crc",
+      "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+      "response_body_hex": "81 02 04",
+      "expected_rx_hex": "00 08 81 02 04 3E 0E ED 2A 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Check status=0, pulse=0 us",
+      "request_body_hex": "01",
+      "encoding": "crc",
+      "tx_hex": "00 06 01 1B DF 05 A5 00",
+      "response_body_hex": "80 01 00 00 00 00 00 00 00 00",
+      "expected_rx_hex": "00 03 80 01 01 01 01 01 01 01 01 05 34 75 F4 12 00",
+      "observe_ms": 1000
+    }
+  ],
+  "before_each_case": [
+    {
+      "action": "Disable and stop output",
+      "request_body_hex": "02 00",
+      "encoding": "crc",
+      "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+      "response_body_hex": "80 02",
+      "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Set pulse to 1500 us",
+      "request_body_hex": "03 DC 05 00 00",
+      "encoding": "crc",
+      "tx_hex": "00 04 03 DC 05 01 05 07 49 CB EB 00",
+      "response_body_hex": "80 03",
+      "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+      "observe_ms": 1000
+    }
+  ],
+  "cases": [
+    {
+      "id": "scope_motion",
+      "title": "Observe preparation, start, update, rejection, stop and restart",
+      "steps": [
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe prepared output remaining Low",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 2000
+        },
+        {
+          "action": "Start prepared 1500 us pulse",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 DC 05 01 05 1D B6 32 F6 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe 1500 us High, 20 ms period",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 3000
+        },
+        {
+          "action": "Update to 1700 us",
+          "request_body_hex": "03 A4 06 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 A4 06 01 05 2D 7F 06 47 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 A4 06 01 05 37 80 FF 5A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe 1700 us High, 20 ms period",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 3000
+        },
+        {
+          "action": "Reject 2001 us",
+          "request_body_hex": "03 D1 07 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 D1 07 01 05 B4 45 25 1A 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 A4 06 01 05 37 80 FF 5A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe unchanged 1700 us pulse",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 3000
+        },
+        {
+          "action": "Stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 A4 06 01 05 4A 87 DA 18 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe stopped output remaining Low",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 3000
+        },
+        {
+          "action": "Restart retained 1700 us pulse",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 A4 06 01 05 37 80 FF 5A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe restarted 1700 us pulse",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 3000
+        },
+        {
+          "action": "Stop output again",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 A4 06 01 05 4A 87 DA 18 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Observe final Low",
+          "request_body_hex": "00",
+          "encoding": "raw",
+          "tx_hex": "00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 2000
+        }
+      ]
+    }
+  ]
+}

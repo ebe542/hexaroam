@@ -10,7 +10,6 @@ import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from result_parser import TestCounts, parse_python_summary, parse_rust_summary
 
@@ -321,6 +320,7 @@ def find_objdump(directory: Path) -> Path:
         encoding="utf-8",
         errors="replace",
         shell=False,
+        check=False,
     )
     if result.returncode != 0:
         raise ValueError(result.stderr.strip() or "Could not locate Rust sysroot")
@@ -409,6 +409,7 @@ def hardware_reports(executable: Path, directory: Path) -> CommandResult:
                     encoding="utf-8",
                     errors="replace",
                     shell=False,
+                    check=False,
                 )
             if result.stderr:
                 print(result.stderr, end="", flush=True)
@@ -425,7 +426,7 @@ def hardware_reports(executable: Path, directory: Path) -> CommandResult:
         return CommandResult(1, message + "\n")
 
 
-def test_kind(arguments: list[str]) -> Optional[str]:
+def test_kind(arguments: list[str]) -> str | None:
     if arguments[:2] == ["cargo", "test"]:
         return "rust"
     if arguments[1:3] == ["-m", "unittest"]:

@@ -85,6 +85,8 @@ dependencies = [
  "hexaroam-servo-pio",
  "hexaroam-servo-protocol",
  "hexaroam-servo-signal",
+ "hexaroam-servo-storage",
+ "nb 1.1.0",
  "rp-pico",
 ]
 
@@ -388,6 +390,13 @@ name = "hexaroam-logging"
 version = "0.1.0"
 
 [[package]]
+name = "hexaroam-servo-control"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-signal",
+]
+
+[[package]]
 name = "hexaroam-servo-pio"
 version = "0.1.0"
 dependencies = [
@@ -404,6 +413,13 @@ version = "0.1.0"
 [[package]]
 name = "hexaroam-servo-signal"
 version = "0.1.0"
+
+[[package]]
+name = "hexaroam-servo-storage"
+version = "0.1.0"
+dependencies = [
+ "hexaroam-servo-control",
+]
 
 [[package]]
 name = "indexmap"

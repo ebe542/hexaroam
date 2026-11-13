@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 
+[features]
+hardware-tests = ["hexaroam-servo-pio/hardware-tests"]
+
 [[example]]
 bench = false
 name = "single_servo_output"
@@ -21,6 +24,7 @@ test = false
 [dependencies]
 hexaroam-servo-protocol = { path = "../../servo-protocol" }
 hexaroam-servo-signal = { path = "../../servo-signal" }
+hexaroam-servo-storage = { path = "../../servo-storage" }
 
 [target.'cfg(all(target_arch = "arm", target_os = "none"))'.dependencies]
 cortex-m = "0.7"
@@ -28,7 +32,5 @@ cortex-m-rt = "0.7"
 embedded-hal = "1.0"
 hexaroam-logging = { path = "../../logging" }
 hexaroam-servo-pio = { path = "../../servo-pio" }
+nb = "1"
 rp-pico = "0.9"
-
-[features]
-hardware-tests = ["hexaroam-servo-pio/hardware-tests"]

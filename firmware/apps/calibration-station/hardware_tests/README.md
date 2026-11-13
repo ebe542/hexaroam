@@ -38,7 +38,7 @@ The firmware asserts inactive state and stopped DMA before startup and after sto
 
 The owner confirmed the expected GP0 behavior and UART1 phase output, then reported 854 tests with zero failures and all 23 verify checks passing. No additional precision measurement, physical servo operation or EEPROM operation is claimed. CI was subsequently reported green for this direct-output test.
 
-The [normal station application](../README.md) remains a separate startup/logging binary. Hardware-test builds do not change its behavior.
+The [normal station application](../README.md) is separate from these examples and now accepts UART0 commands. Hardware-test builds do not upload firmware or replace the normal application.
 
 ## Controlled single-channel output
 
@@ -64,3 +64,7 @@ Use the same unloaded GP0 and UART1 connections described above. Open the termin
 The prepared state must not start output. Enabling without a prepared pulse is rejected before the test prepares 1500 us. During the update phase a 2001 us request is rejected and the last accepted value remains 1700 us. The acceptance message does not mean that the replacement pulse is already visible on GP0. Disabling is called twice; the prepared value remains available after stop. Service runs continuously and the test asserts that OUTPUT_ERROR is clear.
 
 On 2026-11-10 the owner reported all five station hardware-build checks passing, confirmed the expected UART messages and pulse behavior, and subsequently reported 895 tests with zero failures and all 24 verify checks passing. This confirms the exercised service/adapter/PIO path on an unloaded GPIO. It does not establish physical servo behavior, UART command processing, forced Busy/error-path behavior on hardware or a long-duration timing result. CI for the adapter/test revision is pending.
+
+## Normal-application UART suite
+
+The [UART command suite](suites/README.md) targets normal calibration-station.uf2, not either manual example. The owner confirmed all 13 scenarios and subsequent full verification of 909 tests and all 24 checks. This tests wire framing and responses with the PIO adapter present; the owner subsequently confirmed the [full-chain scope suite](suites/README.md#full-chain-scope-suite), reporting one passed scenario and correct pulses. The normal firmware now has wire-level and separate physical-signal evidence on an unloaded GPIO.

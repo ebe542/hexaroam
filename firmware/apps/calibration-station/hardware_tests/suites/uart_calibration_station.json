@@ -1,0 +1,674 @@
+{
+  "schema_version": 1,
+  "framing": "cobs_crc32",
+  "firmware": "firmware/apps/calibration-station/src/main.rs",
+  "fixture": {
+    "status": 0,
+    "pulse_width_us": 0
+  },
+  "serial": {
+    "baud": 115200,
+    "data_bits": 8,
+    "parity": "none",
+    "stop_bits": 1,
+    "flow_control": "none"
+  },
+  "timing": {
+    "firmware_receive_idle_ms": 100,
+    "no_reply_observation_ms": 200,
+    "read_response_timeout_ms": 1000
+  },
+  "verification": "The owner reported the fixture and all 13 scenarios passing: 13 passed, 0 failed, 0 not completed. Subsequent full local verification passed 909 tests and all 24 checks. The separate scope suite was then confirmed with 1 passed scenario and correct observed pulses on unloaded GP0. Physical servo operation, EEPROM integration and CI for this combined revision remain pending.",
+  "instructions": "Flash calibration-station.uf2 and restart before each invocation. Keep GP0 unloaded; no servo connected. Protocol UART0: GP16 TX, GP17 RX, common GND, 3.3 V TTL. Close other clients of the selected COM port. Baseline disables output and prepares 1500 us before each case. Successful cases finish disabled. Reset after failure; fail-fast abort does not guarantee cleanup. Response checks do not replace oscilloscope measurements.",
+  "fixture_checks": [
+    {
+      "action": "Check status=0, pulse=0 us",
+      "request_body_hex": "01",
+      "encoding": "crc",
+      "tx_hex": "00 06 01 1B DF 05 A5 00",
+      "response_body_hex": "80 01 00 00 00 00 00 00 00 00",
+      "expected_rx_hex": "00 03 80 01 01 01 01 01 01 01 01 05 34 75 F4 12 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Reject enable without prepared pulse",
+      "request_body_hex": "02 01",
+      "encoding": "crc",
+      "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+      "response_body_hex": "81 02 04",
+      "expected_rx_hex": "00 08 81 02 04 3E 0E ED 2A 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Check status=0, pulse=0 us",
+      "request_body_hex": "01",
+      "encoding": "crc",
+      "tx_hex": "00 06 01 1B DF 05 A5 00",
+      "response_body_hex": "80 01 00 00 00 00 00 00 00 00",
+      "expected_rx_hex": "00 03 80 01 01 01 01 01 01 01 01 05 34 75 F4 12 00",
+      "observe_ms": 1000
+    }
+  ],
+  "before_each_case": [
+    {
+      "action": "Disable and stop output",
+      "request_body_hex": "02 00",
+      "encoding": "crc",
+      "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+      "response_body_hex": "80 02",
+      "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+      "observe_ms": 1000
+    },
+    {
+      "action": "Set pulse to 1500 us",
+      "request_body_hex": "03 DC 05 00 00",
+      "encoding": "crc",
+      "tx_hex": "00 04 03 DC 05 01 05 07 49 CB EB 00",
+      "response_body_hex": "80 03",
+      "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+      "observe_ms": 1000
+    }
+  ],
+  "cases": [
+    {
+      "id": "prepared_status",
+      "title": "Prepared pulse remains inactive",
+      "steps": [
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "enable",
+      "title": "Enable starts the prepared pulse",
+      "steps": [
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 DC 05 01 05 1D B6 32 F6 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "active_update",
+      "title": "Update an active output",
+      "steps": [
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set pulse to 1700 us",
+          "request_body_hex": "03 A4 06 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 A4 06 01 05 2D 7F 06 47 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1700 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 A4 06 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 A4 06 01 05 37 80 FF 5A 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "disable_reenable",
+      "title": "Stop preserves the pulse and permits another start",
+      "steps": [
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 DC 05 01 05 1D B6 32 F6 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "inclusive_limits",
+      "title": "Both pulse boundaries are accepted",
+      "steps": [
+        {
+          "action": "Set pulse to 1000 us",
+          "request_body_hex": "03 E8 03 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 E8 03 01 05 43 5A 0F 90 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1000 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 E8 03 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 E8 03 01 05 24 A2 D3 CF 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1000 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 E8 03 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 E8 03 01 05 59 A5 F6 8D 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set pulse to 2000 us",
+          "request_body_hex": "03 D0 07 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 D0 07 01 05 D1 22 99 A2 00",
+          "response_body_hex": "80 03",
+          "expected_rx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=2000 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 D0 07 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 D0 07 01 05 B6 DA 45 FD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=2000 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 D0 07 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 D0 07 01 05 CB DD 60 BF 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "out_of_range",
+      "title": "Invalid inactive and active updates preserve the accepted pulse",
+      "steps": [
+        {
+          "action": "Set pulse to 999 us",
+          "request_body_hex": "03 E7 03 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 E7 03 01 05 15 4A 6C C8 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set pulse to 2001 us",
+          "request_body_hex": "03 D1 07 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 D1 07 01 05 B4 45 25 1A 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Enable prepared output",
+          "request_body_hex": "02 01",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 01 EB 40 E8 04 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Set pulse to 2001 us",
+          "request_body_hex": "03 D1 07 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 D1 07 01 05 B4 45 25 1A 00",
+          "response_body_hex": "81 03 03",
+          "expected_rx_hex": "00 08 81 03 03 DC AA 92 AD 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=3, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 03 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 03 01 01 03 DC 05 01 05 1D B6 32 F6 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_enable",
+      "title": "Enable accepts only zero and one",
+      "steps": [
+        {
+          "action": "Reject enable value 2",
+          "request_body_hex": "02 02",
+          "encoding": "crc",
+          "tx_hex": "00 07 02 02 51 11 E1 9D 00",
+          "response_body_hex": "81 02 03",
+          "expected_rx_hex": "00 08 81 02 03 9D 9B 89 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "invalid_lengths",
+      "title": "Malformed command lengths are rejected",
+      "steps": [
+        {
+          "action": "Reject status parameter",
+          "request_body_hex": "01 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 01 05 BE 23 C2 58 00",
+          "response_body_hex": "81 01 02",
+          "expected_rx_hex": "00 08 81 01 02 C8 F8 A3 E8 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Reject missing enable parameter",
+          "request_body_hex": "02",
+          "encoding": "crc",
+          "tx_hex": "00 06 02 A1 8E 0C 3C 00",
+          "response_body_hex": "81 02 02",
+          "expected_rx_hex": "00 08 81 02 02 0B AB 8E C3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Reject extra enable parameter",
+          "request_body_hex": "02 01 00",
+          "encoding": "crc",
+          "tx_hex": "00 03 02 01 05 3D 3C DE E5 00",
+          "response_body_hex": "81 02 02",
+          "expected_rx_hex": "00 08 81 02 02 0B AB 8E C3 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Reject truncated pulse",
+          "request_body_hex": "03 DC 05 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 DC 05 05 E3 48 15 CA 00",
+          "response_body_hex": "81 03 02",
+          "expected_rx_hex": "00 08 81 03 02 4A 9A 95 DA 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Reject oversized pulse",
+          "request_body_hex": "03 DC 05 00 00 00",
+          "encoding": "crc",
+          "tx_hex": "00 04 03 DC 05 01 01 05 67 B1 8D 4C 00",
+          "response_body_hex": "81 03 02",
+          "expected_rx_hex": "00 08 81 03 02 4A 9A 95 DA 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "unknown_command",
+      "title": "Unknown command returns its original byte in NACK",
+      "steps": [
+        {
+          "action": "Reject command 7F",
+          "request_body_hex": "7F",
+          "encoding": "crc",
+          "tx_hex": "00 06 7F 20 83 B8 12 00",
+          "response_body_hex": "81 7F 01",
+          "expected_rx_hex": "00 08 81 7F 01 0A FD 16 C0 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "bad_crc",
+      "title": "Corrupted frame is ignored and reception recovers",
+      "steps": [
+        {
+          "action": "Ignore corrupted SET_PULSE",
+          "request_body_hex": "03 A4 06 00 00",
+          "encoding": "bad_crc",
+          "tx_hex": "00 04 03 A4 06 01 05 2D 7F 06 C7 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "malformed_cobs",
+      "title": "Malformed COBS is ignored and reception recovers",
+      "steps": [
+        {
+          "action": "Send truncated COBS block",
+          "request_body_hex": "00 03 01 00",
+          "encoding": "raw",
+          "tx_hex": "00 03 01 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "receive_timeout",
+      "title": "Incomplete request expires without modifying the pulse",
+      "steps": [
+        {
+          "action": "Send incomplete frame and wait beyond timeout",
+          "request_body_hex": "00 02 03",
+          "encoding": "raw",
+          "tx_hex": "00 02 03",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    },
+    {
+      "id": "ignore_responses",
+      "title": "Incoming ACK and NACK cause no response loop",
+      "steps": [
+        {
+          "action": "Ignore incoming ACK",
+          "request_body_hex": "80 03",
+          "encoding": "crc",
+          "tx_hex": "00 07 80 03 0E DB 53 E3 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Ignore incoming NACK",
+          "request_body_hex": "81 03 05",
+          "encoding": "crc",
+          "tx_hex": "00 08 81 03 05 E9 0F F1 44 00",
+          "response_body_hex": null,
+          "expected_rx_hex": null,
+          "observe_ms": 200
+        },
+        {
+          "action": "Check status=1, pulse=1500 us",
+          "request_body_hex": "01",
+          "encoding": "crc",
+          "tx_hex": "00 06 01 1B DF 05 A5 00",
+          "response_body_hex": "80 01 01 00 00 00 DC 05 00 00",
+          "expected_rx_hex": "00 04 80 01 01 01 01 03 DC 05 01 05 60 B1 17 B4 00",
+          "observe_ms": 1000
+        },
+        {
+          "action": "Disable and stop output",
+          "request_body_hex": "02 00",
+          "encoding": "crc",
+          "tx_hex": "00 02 02 05 7D 70 EF 73 00",
+          "response_body_hex": "80 02",
+          "expected_rx_hex": "00 07 80 02 98 EB 54 94 00",
+          "observe_ms": 1000
+        }
+      ]
+    }
+  ]
+}
