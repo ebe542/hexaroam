@@ -344,3 +344,11 @@ On 2026-11-03 the owner confirmed all 21 protocol-version-2 [UART register scena
 The normal station application now connects UART0 on GP16/GP17 at 115200 baud to COBS/CRC32 framing, the station handler and CalibrationControl/PioPulseBackend on GP0. UART1 GP20 remains debug-only. main.rs initializes board resources; app.rs assembles hardware and continuously services the bounded frame processor, logging and LED heartbeat. Startup leaves output inactive without a prepared pulse. Receive-idle timeout is initially 100 ms and is applied only after observing empty reception.
 
 The owner confirmed all 13 [station UART scenarios](apps/calibration-station/hardware_tests/suites/README.md), then reported 909 tests with zero failures and all 24 verification checks passing. The 54 station host tests include 14 frame-processor tests. Earlier adapter examples confirmed pulses separately. The owner subsequently confirmed the slow full-chain UART scope suite: one scenario passed with correct observed pulses, including stop and restart. Physical servo operation and EEPROM integration remain pending. CI for this revision is pending.
+
+## PC calibration-document model
+
+The [JSON document guide](../docs/calibration-data.md) describes the PC-side model in tools/hexaroam_tools/calibration_data.py. It preserves the existing two-point angle/pulse representation, supports incomplete drafts and requires complete channel coverage before future export. This introduces no firmware or EEPROM write operation. The owner reported 933 passing tests and all 24 local verification checks; CI for the data-model addition is pending.
+
+## PC calibration console
+
+The [interactive console](../docs/calibration-console.md) now combines validated calibration documents, fresh two-point sessions and the synchronous station UART client in the installable hexaroam_tools package. The owner confirmed the six-operation hardware client check and the synthetic interactive capture/save procedure. Actual servo measurement and EEPROM export/programming remain pending. CI for this combined PC-tool revision is pending.

@@ -37,6 +37,16 @@ UF2 output for the station is `firmware/apps/calibration-station/target/thumbv6m
 
 The owner reported 854 tests with zero failures and all 23 verify checks passing, plus all 63 hardware-build checks passing. The station's upload, blinking LED and UART1 startup message were confirmed on the Pico. CI was subsequently reported green for this application/tooling revision. The later single-channel station hardware test has separate verification notes in its guide.
 
+## Python package setup
+
+Reusable PC modules live in the regular [hexaroam_tools package](hexaroam_tools/__init__.py). Install it in the selected environment before running project tests or tools:
+
+```bash
+python -m pip install -e .
+```
+
+For serial hardware tools and the calibration console use `python -m pip install -e ".[hardware]"`. The editor and terminal should use the same interpreter. Imports use the package name rather than runtime sys.path changes or editor-only path configuration. CI installs the local package before tests and includes pyproject.toml in its workflow path filters.
+
 ## Output and totals
 
 The runner resolves directories from its own path and launches commands without a shell. It displays merged stdout/stderr line by line and captures the same text for summary parsing. Child Python output uses UTF-8 and unbuffered mode; child colors are enabled for interactive terminals and GitHub Actions. NO_COLOR explicitly disables colors; redirected non-CI output stays plain. Rust test-harness colors are explicitly enabled when appropriate. Captured text retains ANSI colors; only the parser input is stripped of ANSI control sequences.
@@ -249,3 +259,19 @@ python tools/uart_test.py --port COM8 --suite firmware/apps/calibration-station/
 A suite may define a nonempty fixture_checks list using the same step objects as its scenarios. This replaces the default fixed-layout fixture preflight and supports the station's ten-byte status response without adding an application-specific branch. Existing suites without that field retain their previous fixture checks. Bare suite-name lookup still defaults to servo-controller.
 
 The owner confirmed all 13 station UART scenarios and full verification of 909 tests with all 24 checks. The separate scope suite was subsequently confirmed: one scenario passed and the owner observed correct pulses on unloaded GP0. Use the same suite path with filename uart_calibration_station_scope.json after restarting the Pico. The current Windows setup uses COM8 for UART0 protocol and COM7 for UART1 debug. No physical servo test is claimed. CI for this framing/runtime/suite revision is pending.
+
+## Calibration data model
+
+[calibration_data.py](hexaroam_tools/calibration_data.py) provides frozen ServoCalibration and CalibrationData models plus JSON/file loading and saving. It uses only the Python standard library and has no UART or hardware dependency. See the [format and bench workflow](../docs/calibration-data.md) for schema version 1, units, validation, drafts and completeness checks.
+
+The data model's 24 tests are discovered automatically by the existing test/verify tasks. The owner reported 933 tests with zero failures and all 24 verification checks passing. These results cover the original data-model step. The subsequently implemented [interactive console](../docs/calibration-console.md) also includes measurement sessions and the UART client; binary export and EEPROM programming remain pending. CI for this data-model addition is pending.
+
+## Interactive calibration console
+
+The installed command `hexaroam-calibrate` connects the PC data model, two-point session and UART client. See the [complete console guide](../docs/calibration-console.md) for installation, arguments, commands, error handling and the synthetic hardware smoke check.
+
+```bash
+hexaroam-calibrate --port COM8 --file local-data/calibration/servos.json --servo-count 18 --servo-id 0
+```
+
+The owner confirmed the six-operation client hardware check and a successful interactive capture/save using fictional angles on an unloaded GPIO. Pure Python coverage comprises 24 document tests, 16 session tests and ten angle-conversion tests. The most recent separately quantified full verification was 949 tests and all 24 checks before the angle-conversion additions; the subsequent console procedure was reported successful. CI for the combined PC-tool revision is pending.

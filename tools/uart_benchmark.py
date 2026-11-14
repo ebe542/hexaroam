@@ -4,157 +4,19 @@ import argparse
 import math
 import struct
 import time
-import zlib
 
 import serial
-
-from uart_test import encode_wire
+from hexaroam_tools.wire_protocol import (
+    NackError,
+    exchange,
+    frame,
+)
+from hexaroam_tools.wire_protocol import (
+    ProtocolError as BenchmarkError,
+)
 
 FIXTURE_COUNTS = {"sink18": 18, "pio2": 2}
 FIXTURE_BATCHES = {"sink18": (1, 6, 18), "pio2": (1, 2)}
-MAX_ENCODED_SIZE = 256
-MAX_DECODED_SIZE = 254
-
-
-class BenchmarkError(RuntimeError):
-    pass
-
-
-class NackError(BenchmarkError):
-    def __init__(self, command: int, code: int):
-        self.command = command
-        self.code = code
-        super().__init__(f"Command {command:#04x} rejected: error {code}")
-
-
-def frame(content: bytes) -> bytes:
-    return encode_wire(content, "cobs_crc32")
-
-
-def cobs_decode(encoded: bytes) -> bytes:
-    """Decode one response body without its zero delimiters."""
-    if not encoded:
-        raise BenchmarkError("Empty COBS content")
-
-    decoded = bytearray()
-    offset = 0
-
-    while offset < len(encoded):
-        code = encoded[offset]
-        if code == 0:
-            raise BenchmarkError("Zero inside COBS content")
-
-        offset += 1
-        end = offset + code - 1
-        if end > len(encoded):
-            raise BenchmarkError("Truncated COBS block")
-
-        block = encoded[offset:end]
-        if 0 in block:
-            raise BenchmarkError("Zero inside COBS block")
-
-        decoded.extend(block)
-        offset = end
-
-        if code != 255 and offset < len(encoded):
-            decoded.append(0)
-
-        if len(decoded) > MAX_DECODED_SIZE:
-            raise BenchmarkError("Decoded response too large")
-
-    return bytes(decoded)
-
-
-def receive_frame(port, deadline: float) -> tuple[bytes, float]:
-    started = False
-    encoded = bytearray()
-    original_timeout = port.timeout
-
-    try:
-        while True:
-            remaining = deadline - time.perf_counter()
-            if remaining <= 0:
-                raise TimeoutError(
-                    f"Incomplete COBS response: {len(encoded)} encoded bytes"
-                )
-
-            # Normally leave the driver's short read timeout unchanged.
-            # Only shorten it when the overall deadline is closer.
-            if port.timeout > remaining:
-                port.timeout = remaining
-
-            chunk = port.read(min(4096, max(1, port.in_waiting)))
-            received_at = time.perf_counter()
-            if received_at > deadline:
-                raise TimeoutError("Response deadline exceeded")
-
-            for index, byte in enumerate(chunk):
-                if not started:
-                    if byte != 0:
-                        raise BenchmarkError("Response lacks start delimiter")
-                    started = True
-                    continue
-
-                if byte != 0:
-                    if len(encoded) == MAX_ENCODED_SIZE:
-                        raise BenchmarkError("Encoded response too large")
-                    encoded.append(byte)
-                    continue
-
-                if not encoded:
-                    continue
-
-                if index + 1 != len(chunk) or port.in_waiting:
-                    raise BenchmarkError("Unexpected trailing response bytes")
-
-                return cobs_decode(bytes(encoded)), received_at
-    finally:
-        if port.timeout != original_timeout:
-            port.timeout = original_timeout
-
-
-def exchange(
-    port,
-    request: bytes,
-    command: int,
-    result_length: int,
-    timeout: float,
-) -> tuple[bytes, float]:
-    if port.in_waiting:
-        raise BenchmarkError("Unexpected bytes before request")
-
-    started = time.perf_counter()
-    deadline = started + timeout
-
-    if port.write(request) != len(request):
-        raise BenchmarkError("Incomplete request transmission")
-
-    decoded, finished = receive_frame(port, deadline)
-
-    # ACK/NACK, original command and CRC32 need at least six bytes.
-    if len(decoded) < 6:
-        raise BenchmarkError("Response too short")
-
-    content = decoded[:-4]
-    received_crc = struct.unpack("<I", decoded[-4:])[0]
-    if received_crc != zlib.crc32(content):
-        raise BenchmarkError("Response CRC mismatch")
-
-    if content[1] != command:
-        raise BenchmarkError("Unexpected response command")
-
-    if content[0] == 0x81:
-        if len(content) != 3:
-            raise BenchmarkError("Unexpected NACK length")
-        raise NackError(command, content[2])
-
-    if content[0] != 0x80:
-        raise BenchmarkError("Unexpected response opcode")
-
-    if len(content) != 2 + result_length:
-        raise BenchmarkError("Unexpected ACK length")
-
-    return content[2:], finished - started
 
 
 def check_status(port, expected: int, timeout: float) -> None:
@@ -246,9 +108,7 @@ def run_batch(
             last_send = now
             attempts += 1
             try:
-                _, latency = exchange(
-                    port, requests[sequence % 2], 0x03, 0, timeout
-                )
+                _, latency = exchange(port, requests[sequence % 2], 0x03, 0, timeout)
             except NackError as error:
                 if physical_output and error.command == 0x03 and error.code == 0x05:
                     # This request was rejected. Advance to a fresh pattern
@@ -304,8 +164,7 @@ def run_batch(
         f"{requests_per_second * size:.1f} targets/s"
     )
     print(
-        f"ACK round trip: mean {mean_ms:.3f} ms, "
-        f"max {maximum_latency * 1_000:.3f} ms"
+        f"ACK round trip: mean {mean_ms:.3f} ms, max {maximum_latency * 1_000:.3f} ms"
     )
     print(
         f"Errors during measurement: {timeouts} timeout, "
@@ -332,7 +191,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", required=True)
     parser.add_argument(
-        "--fixture", choices=tuple(FIXTURE_COUNTS), default="sink18",
+        "--fixture",
+        choices=tuple(FIXTURE_COUNTS),
+        default="sink18",
         help="sink18: uart_benchmark; pio2: uart_commands with unloaded GP0/GP1",
     )
     parser.add_argument(
@@ -342,12 +203,16 @@ def main() -> int:
     parser.add_argument("--timeout", type=positive_seconds, default=1.0)
     parser.add_argument("--batch-size", type=int, choices=(1, 2, 6, 18))
     parser.add_argument(
-        "--rate", type=positive_seconds,
+        "--rate",
+        type=positive_seconds,
         help="Maximum requests/s for pio2; omit for an unlimited overload run",
     )
     args = parser.parse_args()
 
-    if args.batch_size is not None and args.batch_size not in FIXTURE_BATCHES[args.fixture]:
+    if (
+        args.batch_size is not None
+        and args.batch_size not in FIXTURE_BATCHES[args.fixture]
+    ):
         parser.error("Batch size is not supported by the selected fixture")
     if args.fixture == "pio2" and args.baud != 115200:
         parser.error("The uart_commands firmware uses a fixed 115200 baud")

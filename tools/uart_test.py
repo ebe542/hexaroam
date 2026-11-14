@@ -5,11 +5,11 @@ import json
 import struct
 import sys
 import time
-import zlib
 from dataclasses import dataclass
 from pathlib import Path
 
 from dev import color_status
+from hexaroam_tools.wire_protocol import encode_wire, with_crc
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SUITE_DIR = (
@@ -61,59 +61,6 @@ class Case:
 
 class StepFailure(RuntimeError):
     pass
-
-
-def with_crc(body: bytes) -> bytes:
-    return body + struct.pack("<I", zlib.crc32(body))
-
-
-def cobs_encode(data: bytes) -> bytes:
-    """Encode without delimiters, matching the Rust encoder."""
-    output = bytearray([0])
-    code_index = 0
-    code = 1
-
-    for byte in data:
-        if byte == 0:
-            output[code_index] = code
-            code_index = len(output)
-            output.append(0)
-            code = 1
-        else:
-            output.append(byte)
-            code += 1
-
-            if code == 255:
-                output[code_index] = code
-                code_index = len(output)
-                output.append(0)
-                code = 1
-
-    output[code_index] = code
-    return bytes(output)
-
-
-def encode_wire(
-    body: bytes,
-    framing: str,
-    bad_crc: bool = False,
-) -> bytes:
-    """Add CRC and optionally COBS with both frame delimiters."""
-    if framing not in ("register_crc32", "cobs_crc32"):
-        raise ValueError(f"Unknown framing: {framing!r}")
-
-    if framing == "cobs_crc32" and not 1 <= len(body) <= 250:
-        raise ValueError("COBS content must contain 1..250 bytes")
-
-    encoded = with_crc(body)
-
-    if bad_crc:
-        encoded = encoded[:-1] + bytes([encoded[-1] ^ 0x80])
-
-    if framing == "cobs_crc32":
-        encoded = b"\x00" + cobs_encode(encoded) + b"\x00"
-
-    return encoded
 
 
 def hex_bytes(data: bytes) -> str:

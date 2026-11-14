@@ -5,6 +5,9 @@ description = "Development and hardware test tools for HexaRoam"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.scripts]
+hexaroam-calibrate = "hexaroam_tools.calibration_cli:main"
+
 [project.optional-dependencies]
 hardware = [
   "pyserial==3.5",
@@ -14,5 +17,7 @@ hardware = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = []
+[tool.setuptools.packages.find]
+where = ["tools"]
+include = ["hexaroam_tools*"]
+namespaces = false
